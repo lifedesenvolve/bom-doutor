@@ -7,11 +7,19 @@ function page_agendamento_shortcode()
   }
   if (get_field('user_id', 'user_' . get_current_user_id()) == "") {
 
+
 ?>
     <script>
       window.location.assign("/minha-conta");
     </script>
-  <?php } ?>
+  <?php } 
+
+
+      
+      if (isset($_GET['filtro__data'])) {
+        $filtro_data =$_GET['filtro__data'];
+    }
+  ?>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -76,7 +84,9 @@ function page_agendamento_shortcode()
       width: 20px;
       height: 20px;
     }
-
+    .div-quadro-horarios {
+        padding-top: 37px;
+    }
     .quadro-horarios {
       display: grid;
       gap: 8px;
@@ -113,9 +123,19 @@ function page_agendamento_shortcode()
       max-width: 400px;
       margin: auto;
     }
+    .info-data{
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 19px;
+
+      color: #383838;
+    }
   </style>
 
   <h1 class="titulo-especialidade" id="tituloEspecialidade"></h1>
+  <h3 class="info-data">Segunda-feira, 06 de Março de 2023</h3>
 
   <div class="lista-profissionais" id="listaProfissionais"></div>
 
@@ -254,6 +274,10 @@ function page_agendamento_shortcode()
         });
         listaProfissionais.innerHTML = html.join().replaceAll(`,`, ``);
         const botoes = document.querySelectorAll('.btn-horario');
+        
+        
+        const select = document.querySelector('#filtro__especialidades');
+        document.querySelector(`#tituloEspecialidade`).innerText = select.options[select.selectedIndex].text;
 
         botoes.forEach(botao => {
           botao.addEventListener('click', function() {
@@ -263,7 +287,10 @@ function page_agendamento_shortcode()
         });
 
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error(err)
+        document.querySelector(`#tituloEspecialidade`).innerText = "Nenhum horário disponível";
+      });
 
       window.onload = function() {
       document.querySelector(`#step1`).onclick = function() {

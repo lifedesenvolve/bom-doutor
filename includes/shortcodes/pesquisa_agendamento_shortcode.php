@@ -8,12 +8,37 @@ function pesquisa_agendamento_shortcode()
     $lista_especialidades = $api->listEspecialidades();
 
 ?>
+<style>
+    .group-modalidade {
+        background: green;
+        padding: 0% 33.5% 1% 22.7%;
+    }
+    .btn-modalidade{
+        font-family: "Open Sans", Sans-serif;
+        font-size: 0.9vw;
+        font-weight: 500;
+        fill: #737373;
+        color: #737373;
+        background-color: #FFFFFF;
+        padding: 1em 1.5em 1em 1.5em;
+        border-radius: 3px;
+    }
+    #unidade{
+        font-family: "Open Sans", Sans-serif;
+        font-size: 1vw;
+        font-weight: 400;
+    }
+</style>
     <form id="form-agendamento">
-        <input type="radio" name="modalidade" value="consulta" checked> Consulta
-        <input type="radio" name="modalidade" value="retorno"> Retorno
-
+        <div class="group-modalidade">
+            <button class="btn-modalidade">
+                Consulta
+            </button>
+            <button class="btn-modalidade">
+                Retorno
+            </button>
+        </div>
         <br><br>
-        <label for="unidade">Selecione a unidade:</label><br>
         <select id="unidade" name="unidade">
             <option value="">Selecione a Unidade</option>
             <?php foreach ($lista_unidades as $unidade) { ?>

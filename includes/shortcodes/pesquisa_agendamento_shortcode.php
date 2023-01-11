@@ -1,6 +1,5 @@
 <?php
 
-
 function pesquisa_agendamento_shortcode()
 {
     $api = new Api();
@@ -8,27 +7,29 @@ function pesquisa_agendamento_shortcode()
     $lista_especialidades = $api->listEspecialidades();
 
 ?>
-<style>
-    .group-modalidade {
-        background: green;
-        padding: 0% 33.5% 1% 22.7%;
-    }
-    .btn-modalidade{
-        font-family: "Open Sans", Sans-serif;
-        font-size: 0.9vw;
-        font-weight: 500;
-        fill: #737373;
-        color: #737373;
-        background-color: #FFFFFF;
-        padding: 1em 1.5em 1em 1.5em;
-        border-radius: 3px;
-    }
-    #unidade{
-        font-family: "Open Sans", Sans-serif;
-        font-size: 1vw;
-        font-weight: 400;
-    }
-</style>
+    <style>
+        .group-modalidade {
+            background: green;
+            padding: 0% 33.5% 1% 22.7%;
+        }
+
+        .btn-modalidade {
+            font-family: "Open Sans", Sans-serif;
+            font-size: 0.9vw;
+            font-weight: 500;
+            fill: #737373;
+            color: #737373;
+            background-color: #FFFFFF;
+            padding: 1em 1.5em 1em 1.5em;
+            border-radius: 3px;
+        }
+
+        #unidade {
+            font-family: "Open Sans", Sans-serif;
+            font-size: 1vw;
+            font-weight: 400;
+        }
+    </style>
     <form id="form-agendamento">
         <div class="group-modalidade">
             <button class="btn-modalidade">
@@ -74,7 +75,7 @@ function pesquisa_agendamento_shortcode()
             if (unidade_id !== "" && especialidade !== "") {
                 <?php if (is_user_logged_in()) { ?>
                     // os campos foram selecionados, redireciona a página
-                    window.location.assign(`<?php echo home_url() ?>/agendar/?filtro__especialidades=${especialidade}&filtro__unidade=${unidade_id}`);
+                    window.location.assign(`<?php echo home_url() ?>/agendar/?filtro__data=<?php echo date('Y-m-d') ?>&filtro__especialidades=${especialidade}&filtro__unidade=${unidade_id}`);
                 <?php } else { ?>
                     elementorProFrontend.modules.popup.showPopup({
                         id: 1376

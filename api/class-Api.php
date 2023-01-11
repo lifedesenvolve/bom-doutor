@@ -16,6 +16,7 @@ class Api
         $this->paciente = get_option('bom_doutor_api_url') . 'patient/search';
         $this->paciente_create = get_option('bom_doutor_api_url') . 'patient/create';
         $this->dependentes = get_option('bom_doutor_api_url') . 'patient/list-dependents';
+        $this->agendamento = get_option('bom_doutor_api_url') . 'patient/appoints/new-appoint';
     }
 
     private function connectApi(string $url, string $type = 'GET', $body = ''): array
@@ -251,7 +252,7 @@ class Api
 
         $response = [];
 
-        foreach ($disponibilidade_horarios['content'] as $disponibilidade) {            
+        foreach ($disponibilidade_horarios['content'] as $disponibilidade) {
             $response = $disponibilidade[$profissional_id]['local_id'];
         }
 
@@ -314,8 +315,10 @@ class Api
             if ($paciente['error'] == 409) {
                 return;
             } else {
-                echo "Erro na consulta verifique os campos ( API Url e API Token )";
-                return;
+                return [
+                    "status" => "erro",
+                    "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+                ];
             }
         }
 
@@ -374,8 +377,10 @@ class Api
     {
 
         if (!empty(self::getPacienteByCPF($paciente_cpf)['paciente'])) {
-            echo "Paciente já existe";
-            return;
+            return [
+                "status" => "sucesso",
+                "mensagem" => "Paciente já existe"
+            ];
         } else {
 
             $paciente_create = $this->connectApi($this->paciente_create, 'POST', json_encode([
@@ -388,12 +393,46 @@ class Api
             ]));
 
             if (isset($paciente_create['error'])) {
-                echo "Erro na consulta verifique os campos ( API Url e API Token ) " . $paciente_create['error'];
-                return;
+                return [
+                    "status" => "erro",
+                    "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token ) " . $paciente_create['error']
+                ];
             } else {
-                echo "Paciente criado com sucesso";
-                return;
+                return [
+                    "status" => "sucesso",
+                    "mensagem" => "Paciente criado com sucesso",
+                    "content" => $paciente_create['content']
+                ];
             }
+        }
+    }
+
+    public function createAgendamento($local_id, $paciente_id, $profissional_id, $procedimento_id, $especialidade_id, $data, $horario, $valor = "0", $plano = "0")
+    {
+        $agendamento = $this->connectApi($this->agendamento, 'POST', json_encode([
+            "local_id" => $local_id,
+            "paciente_id" => $paciente_id,
+            'profissional_id' =>  $profissional_id,
+            'procedimento_id' =>  $procedimento_id,
+            'especialidade_id' =>  $especialidade_id,
+            'data' => date('d-m-Y', strtotime($data)),
+            'horario' =>  $horario . ':00',
+            'valor' => $valor,
+            'plano' => $plano,
+            'canal_id' => '',
+            'notas' => ''
+        ]));
+
+        if (isset($agendamento['error'])) {
+            return [
+                "status" => "erro",
+                "mensagem" => $agendamento
+            ];
+        } else {
+            return [
+                "status" => "sucesso",
+                "mensagem" => "Agendamento realizado com sucesso"
+            ];
         }
     }
 }

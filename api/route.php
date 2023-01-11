@@ -12,17 +12,17 @@ function rotas_bom_doutor()
     'callback' => 'lista_profissionais',
     'args' => array(
       'unidade' => array(
-        'validate_callback' => function($param, $request, $key) {
+        'validate_callback' => function ($param, $request, $key) {
           return is_numeric($param);
         }
       ),
       'especialidade' => array(
-        'validate_callback' => function($param, $request, $key) {
+        'validate_callback' => function ($param, $request, $key) {
           return is_numeric($param);
         }
       ),
       'data' => array(
-        'validate_callback' => function($param, $request, $key) {
+        'validate_callback' => function ($param, $request, $key) {
           return preg_match('/^\d{4}-\d{2}-\d{2}$/', $param);
         }
       ),
@@ -32,6 +32,11 @@ function rotas_bom_doutor()
   register_rest_route('api/v1', '/registrar-paciente/', array(
     'methods'  => 'POST',
     'callback' => 'registrar_paciente',
+  ));
+
+  register_rest_route('api/v1', '/registrar-agendamento/', array(
+    'methods'  => 'POST',
+    'callback' => 'registrar_agendamento',
   ));
 }
 add_action('rest_api_init', 'rotas_bom_doutor');
@@ -49,7 +54,7 @@ function lista_profissionais($request)
   $unidade = $request->get_param('unidade');
   $especialidade = $request->get_param('especialidade');
   $data = $request->get_param('data');
-  
+
   $api = new Api();
 
   $lista_profissionais = $api->listProfissionaisHorarios($unidade, $especialidade, $data, $data);
@@ -58,32 +63,66 @@ function lista_profissionais($request)
 
 function registrar_paciente($request)
 {
-  $dados = $request->get_params();
-  if (is_user_logged_in()) {
-    $dados = $request->get_json_params();
+  $dados = $request->get_json_params();
 
-    $api = new Api();
+  $api = new Api();
+  $resultado = $api->createPaciente(
+    $dados['nome_titular'],
+    $dados['cpf_titular'],
+    $dados['email_titular'],
+    $dados['data_nascimento_titular'],
+    $dados['genero_titular'],
+    $dados['telefone_titular']
+  );
 
-    $resultado = $api->createPaciente(
-      $dados['nome_titular'],
-      $dados['cpf_titular'],
-      $dados['email_titular'],
-      $dados['data_nascimento_titular'],
-      $dados['genero_titular'],
-      $dados['telefone_titular']
-    );
+  if ($resultado['status'] == "sucesso") {
+    $response = [
+      "status" => "sucesso",
+      "mensagem" => $resultado['mensagem'],
+      "content" => $resultado['content']
+    ];
 
-    if ($resultado) {
-      return wp_send_json(array(
-        'status' => 'sucesso',
-        'mensagem' => 'Paciente registrado com sucesso'
-      ));
-    } else {
-      return wp_send_json(array(
-        'status' => 'erro',
-        'mensagem' => 'Não foi possível registrar o paciente'
-      ));
+    if (get_field('user_id', 'user_' . $dados['user_id']) === "") {
+      update_field('user_id', $resultado['content']['paciente_id'], 'user_' . $dados['user_id']);
     }
+  } else {
+    $response = [
+      "status" => "erro",
+      "mensagem" => $resultado['mensagem']
+    ];
   }
+  echo json_encode($response);
 }
-//74275703081
+
+function registrar_agendamento($request)
+{
+  $dados = $request->get_json_params();
+
+  $api = new Api();
+  $resultado = $api->createAgendamento(
+    $dados['filtro__unidade'],
+    $dados['paciente_id'],
+    $dados['profissional_id'],
+    $dados['procedimento_id'],
+    $dados['filtro__especialidades'],
+    $dados['filtro__data'],
+    $dados['horario_escolhido']
+  );
+
+  if ($resultado['status'] == "sucesso") {
+    $response = [
+      "status" => "sucesso",
+      "mensagem" => $resultado['mensagem']
+    ];
+  } else {
+    $response = [
+      "status" => "erro",
+      "mensagem" => $resultado['mensagem']
+    ];
+  }
+  echo json_encode($response);
+  /*  echo json_encode([
+    "status" => "erro",
+    "mensagem" => 'teste'
+  ]); */
+}

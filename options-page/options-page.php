@@ -91,17 +91,21 @@ function bom_doutor_settings_page()
     <hr>
 <?php
 
-$api = new Api();
+    $api = new Api();
 
 
-/* testes api */
+    /* testes api */
 
-$api = new Api();
-/* echo '<pre>';
+    $api = new Api();
+
+    echo '<pre>';
+    print_r($api->listProcedimentos());
+    echo '</pre>';
+    /* echo '<pre>';
 print_r($api->getPacienteByID(1));
 echo '</pre>'; */
 
-/* $api->createPaciente(
+    /* $api->createPaciente(
     'teste',
     '74275703081',
     'teste@teste123.com',

@@ -87,15 +87,15 @@ function filtro_agendamento_shortcode()
     </form>
 
     <script>
-    const searchParams = new URLSearchParams(window.location.search);
+        const searchParams = new URLSearchParams(window.location.search);
 
-    const filtro_data = searchParams.get('filtro__data');
-    const filtro_especialidades = searchParams.get('filtro__especialidades');
-    const filtro_unidade = searchParams.get('filtro__unidade');
+        const filtro_data = searchParams.get('filtro__data');
+        const filtro_especialidades = searchParams.get('filtro__especialidades');
+        const filtro_unidade = searchParams.get('filtro__unidade');
 
-    document.getElementById('filtro__data').value = filtro_data;
-    document.getElementById('filtro__especialidades').value = filtro_especialidades;
-    document.getElementById('filtro__unidade').value = filtro_unidade;
+        document.getElementById('filtro__data').value = filtro_data;
+        document.getElementById('filtro__especialidades').value = filtro_especialidades;
+        document.getElementById('filtro__unidade').value = filtro_unidade;
     </script>
 
 <?php
@@ -118,6 +118,7 @@ function login_shortcode()
     }
 }
 add_shortcode('login', 'login_shortcode');
+
 
 function shortcode_atribuir_valores()
 {

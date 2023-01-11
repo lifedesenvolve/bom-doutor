@@ -1,9 +1,10 @@
 <?php
 function page_agendamento_shortcode()
-{ 
+{
   if (is_user_logged_in()) {
     $usuario = wp_get_current_user();
     $email = $usuario->user_email;
+    $user_id = $usuario->ID;
   }
   if (get_field('user_id', 'user_' . get_current_user_id()) == "") {
 
@@ -12,13 +13,13 @@ function page_agendamento_shortcode()
     <script>
       window.location.assign("/minha-conta");
     </script>
-  <?php } 
+  <?php }
 
 
-      
-      if (isset($_GET['filtro__data'])) {
-        $filtro_data =$_GET['filtro__data'];
-    }
+
+  if (isset($_GET['filtro__data'])) {
+    $filtro_data = $_GET['filtro__data'];
+  }
   ?>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -84,9 +85,11 @@ function page_agendamento_shortcode()
       width: 20px;
       height: 20px;
     }
+
     .div-quadro-horarios {
-        padding-top: 37px;
+      padding-top: 37px;
     }
+
     .quadro-horarios {
       display: grid;
       gap: 8px;
@@ -116,14 +119,15 @@ function page_agendamento_shortcode()
       background: #2A2860;
       color: #fff;
     }
-    
+
     .steps {
       display: flex;
       justify-content: space-around;
       max-width: 400px;
       margin: auto;
     }
-    .info-data{
+
+    .info-data {
       font-family: 'Inter';
       font-style: normal;
       font-weight: 500;
@@ -150,26 +154,30 @@ function page_agendamento_shortcode()
         </div>
         <div class="modal-body">
           <div class="step-1">
-          <div class="steps"><img src="<?php echo PLUGIN_URL . "/assets/image/etapa-1.png" ?>"></div>
+            <div class="steps"><img src="<?php echo PLUGIN_URL . "/assets/image/etapa-1.png" ?>"></div>
+
             <input hidden class="form-control" id="horario_escolhido" name="horario_escolhido" type="text">
-            <h3>Nome do titular </h3>
-            <input class="form-control" name="nome_titular" type="text" placeholder="Nome completo" aria-label="Nome do titular">
-            <br>
+            <input hidden class="form-control" id="profissional_escolhido" name="profissional_escolhido" type="text">
 
             <h3>CPF do titular</h3>
             <input class="form-control" name="cpf_titular" type="text" placeholder="CPF do Titular" aria-label="CPF do Titular">
+            <br>
+
+            <h3>Nome do titular </h3>
+            <input class="form-control" name="nome_titular" type="text" placeholder="Nome completo" aria-label="Nome do titular">
             <br>
 
             <h3>Data de nascimento do titular</h3>
             <input class="form-control" name="data_nascimento_titular" type="date" aria-label="Data de nascimento do titular">
             <br>
 
-            <input hidden class="form-control" name="email_titular" value="<?php echo $email; ?>" type="date">
+            <input hidden class="form-control" name="email_titular" value="<?php echo $email; ?>" type="text">
 
             <h3>Gênero do titular</h3>
             <select required class="form-control" name="genero_titular" type="date" aria-label="Gênero do titular">
               <option value="M">Masculino</option>
               <option value="F">Feminino</option>
+              <option value="">Não desejo informar</option>
             </select>
             <br>
 
@@ -180,7 +188,7 @@ function page_agendamento_shortcode()
             <button type="button" class="btn btn-default cta" id="step1">Proxima Etapa</button>
           </div>
           <div class="step-2" style="display:none;">
-          <div class="steps"><img src="<?php echo PLUGIN_URL . "/assets/image/etapa-2.png" ?>"></div>
+            <div class="steps"><img src="<?php echo PLUGIN_URL . "/assets/image/etapa-2.png" ?>"></div>
             <div>Forma de pagamento</div>
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" role="switch" id="pagamentoLocal">
@@ -192,8 +200,8 @@ function page_agendamento_shortcode()
           <div class="step-3" style="display:none;">
             <div class="steps"><img src="<?php echo PLUGIN_URL . "/assets/image/etapa-3.png" ?>"></div>
             <div>Confirmação de agendamento</div>
-              Sua consulta foi agendada com sucesso.
-              <br>
+            Sua consulta foi agendada com sucesso.
+            <br>
             <button type="button" class="btn btn-default cta">Enviar</button>
           </div>
 
@@ -203,9 +211,30 @@ function page_agendamento_shortcode()
   </div>
 
   <script>
-    const urlPlugin = "<?php echo PLUGIN_URL ;?>"
+    const urlPlugin = "<?php echo PLUGIN_URL; ?>"
     const listaProfissionais = document.querySelector(`#listaProfissionais`);
     const tituloEspecialidade = document.querySelector(`#tituloEspecialidade`);
+
+    //testing start
+    function preencherDadosGenericos() {
+      const nomeTitular = document.querySelector('[name=nome_titular]');
+      const cpfTitular = document.querySelector('[name=cpf_titular]');
+      const dataNascimentoTitular = document.querySelector('[name=data_nascimento_titular]');
+      const emailTitular = document.querySelector('[name=email_titular]');
+      const generoTitular = document.querySelector('[name=genero_titular]');
+      const telefoneTitular = document.querySelector('[name=telefone_titular]');
+      const horarioEscolhido = document.querySelector('[name=horario_escolhido]');
+
+      nomeTitular.value = "teste user";
+      cpfTitular.value = "74275703081";
+      dataNascimentoTitular.value = "1992-06-20";
+      emailTitular.value = "teste_user@example.com";
+      generoTitular.value = "M";
+      telefoneTitular.value = "15999999999";
+      horarioEscolhido.value = "09:00";
+    }
+    preencherDadosGenericos();
+    //testing end
 
     function capturarDados() {
       const nomeTitular = document.querySelector('[name=nome_titular]').value;
@@ -226,6 +255,9 @@ function page_agendamento_shortcode()
         horario_escolhido: horarioEscolhido
       };
 
+      if (!nomeTitular || !cpfTitular || !dataNascimentoTitular || !emailTitular || !telefoneTitular || !horarioEscolhido) {
+        return false;
+      }
 
       return dados;
     }
@@ -236,15 +268,18 @@ function page_agendamento_shortcode()
       especialidade: searchURL.get('filtro__especialidades'),
       data: searchURL.get('filtro__data'),
     };
-    
-    const url =  origin +`/wp-json/api/v1/lista-profissionais/`;
+
+    const url = `<?php echo home_url('/wp-json/api/v1/lista-profissionais/') ?>`;
 
     const queryString = new URLSearchParams(params).toString();
-    const options = {method: 'GET'};
+    const options = {
+      method: 'GET'
+    };
 
     fetch(`${url}?${queryString}`, options)
       .then(response => response.json())
-      .then(response => {console.log(response)
+      .then(response => {
+        console.log(response)
         const {
           profissionais
         } = response;
@@ -252,10 +287,12 @@ function page_agendamento_shortcode()
 
         html = profissionais.map(profissional => {
 
-        const { horarios_disponiveis } = profissional;
-        const dias_disponiveis = Object.values(horarios_disponiveis);
-        const horarios = Object.values(dias_disponiveis[0]);
-        return `<div class="card-profissional" style="display:flex;">
+          const {
+            horarios_disponiveis
+          } = profissional;
+          const dias_disponiveis = Object.values(horarios_disponiveis);
+          const horarios = Object.values(dias_disponiveis[0]);
+          return `<div class="card-profissional" style="display:flex;">
                 <div class="card-imagem"><img src="${urlPlugin}assets/image/avatar-${profissional.sexo.toLowerCase()}.png" alt="" class="foto-especialista" width="100"></div>
                 <div class="card-informacoes">
                   <h3 class="nome-especialista">${profissional.tratamento === null ? `${profissional.nome}` : `${profissional.tratamento} ${profissional.nome}`} </h3>
@@ -268,14 +305,14 @@ function page_agendamento_shortcode()
                     </div>
                     <hr>
                   </div>
-                </div>  
+                </div>
               </div>
               `
         });
         listaProfissionais.innerHTML = html.join().replaceAll(`,`, ``);
         const botoes = document.querySelectorAll('.btn-horario');
-        
-        
+
+
         const select = document.querySelector('#filtro__especialidades');
         document.querySelector(`#tituloEspecialidade`).innerText = select.options[select.selectedIndex].text;
 
@@ -283,6 +320,8 @@ function page_agendamento_shortcode()
           botao.addEventListener('click', function() {
             console.log(this.innerText);
             document.querySelector('#horario_escolhido').value = this.innerHTML;
+            var professionalId = this.parentElement.getAttribute("data-id-profissional");
+            document.querySelector('#profissional_escolhido').value = professionalId;
           });
         });
 
@@ -292,32 +331,100 @@ function page_agendamento_shortcode()
         document.querySelector(`#tituloEspecialidade`).innerText = "Nenhum horário disponível";
       });
 
-      window.onload = function() {
+    window.onload = function() {
       document.querySelector(`#step1`).onclick = function() {
         if (capturarDados()) {
 
-          const dados = capturarDados();
+          cadastraPaciente();
 
-          fetch('<?php echo home_url('wp-json/api/v1/registrar-paciente'); ?>', {
-            method: 'POST',
-            body: JSON.stringify(dados)
-          }).then(function(response) {
-            return response.json();
-          }).then(function(resultado) {
-            console.log(resultado);
-          });
-
-          document.querySelector(`.step-1`).style.display = 'none';
-          document.querySelector(`.step-2`).style.display = 'block';
         } else {
           alert('preencha todos os campos');
         }
       }
       document.querySelector(`#step2`).onclick = function() {
-        document.querySelector(`.step-2`).style.display = 'none';
-        document.querySelector(`.step-3`).style.display = 'block';
+        cadastrarAgendamento();
       }
 
+      function cadastrarAgendamento() {
+
+        const searchURL = new URLSearchParams(window.location.search);
+
+        const filtro__unidade = searchURL.get('filtro__unidade');
+        const paciente_id = "<?php echo get_field('user_id', 'user_' . get_current_user_id()) ?>";
+        const profissional_id = document.querySelector('#profissional_escolhido').value;
+        const procedimento_id = "4";
+        const filtro__especialidades = searchURL.get('filtro__especialidades');
+        const filtro__data = searchURL.get('filtro__data');
+
+        const base_url = '<?php echo home_url(); ?>';
+        const options = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            "filtro__unidade": filtro__unidade,
+            "paciente_id": paciente_id,
+            "profissional_id": profissional_id,
+            "procedimento_id": procedimento_id,
+            "filtro__especialidades": filtro__especialidades,
+            "filtro__data": filtro__data,
+            "horario_escolhido": document.querySelector('#horario_escolhido').value
+          })
+        };
+
+        fetch(`${base_url}/wp-json/api/v1/registrar-agendamento`, options)
+          .then(response => response.json())
+          .then(response => {
+            if (response.status === 'sucesso') {
+              document.querySelector(`.step-2`).style.display = 'none';
+              document.querySelector(`.step-3`).style.display = 'block';
+              console.log(response.mensagem);
+            } else {
+              console.log(response.mensagem);
+            }
+          })
+          .catch(err => console.error(err));
+      }
+    }
+
+    function cadastraPaciente() {
+      const nomeTitular = document.querySelector('[name=nome_titular]').value;
+      const cpfTitular = document.querySelector('[name=cpf_titular]').value;
+      const dataNascimentoTitular = document.querySelector('[name=data_nascimento_titular]').value;
+      const emailTitular = document.querySelector('[name=email_titular]').value;
+      const generoTitular = document.querySelector('[name=genero_titular]').value;
+      const telefoneTitular = document.querySelector('[name=telefone_titular]').value;
+
+      const base_url = '<?php echo home_url(); ?>';
+      const options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          "nome_titular": nomeTitular,
+          "cpf_titular": cpfTitular,
+          "email_titular": emailTitular,
+          "data_nascimento_titular": dataNascimentoTitular,
+          "genero_titular": generoTitular,
+          "telefone_titular": telefoneTitular,
+          "user_id": "<?php echo $user_id ?>"
+        })
+      };
+
+      fetch(`${base_url}/wp-json/api/v1/registrar-paciente`, options)
+        .then(response => response.json())
+        .then(response => {
+          if (response.status === 'sucesso') {
+            document.querySelector(`.step-1`).style.display = 'none';
+            document.querySelector(`.step-2`).style.display = 'block';
+            console.log(response.mensagem);
+          } else {
+            console.log(response.mensagem);
+          }
+        })
+        .catch(err => console.error(err));
     }
   </script>
 
@@ -326,6 +433,6 @@ function page_agendamento_shortcode()
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
   </body>
-  <?php
+<?php
 }
 add_shortcode('page_agendamento', 'page_agendamento_shortcode');

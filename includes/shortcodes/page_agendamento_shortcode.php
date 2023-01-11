@@ -146,7 +146,198 @@ function page_agendamento_shortcode()
       color: #383838;
       padding-bottom: 32px;
     }
+
+    :root {
+      --hue: 223;
+      --bg: hsl(var(--hue), 90%, 90%);
+      --fg: hsl(var(--hue), 90%, 10%);
+      --trans-dur: 0.3s;
+      font-size: calc(16px + (20 - 16) * (100vw - 320px) / (1280 - 320));
+    }
+
+    .loader {
+      color: var(--fg);
+      font: 1em/1.5 sans-serif;
+      height: 100vh;
+      place-items: center;
+      transition: background-color var(--trans-dur), color var(--trans-dur);
+      margin-top: -15%;
+      display: none;
+    }
+
+    .loader.active {
+      display: grid;
+    }
+
+    .smiley {
+      width: 8em;
+      height: 8em;
+    }
+
+    .smiley__eye1,
+    .smiley__eye2,
+    .smiley__mouth1,
+    .smiley__mouth2 {
+      animation: eye1 3s ease-in-out infinite;
+    }
+
+    .smiley__eye1,
+    .smiley__eye2 {
+      transform-origin: 64px 64px;
+    }
+
+    .smiley__eye2 {
+      animation-name: eye2;
+    }
+
+    .smiley__mouth1 {
+      animation-name: mouth1;
+    }
+
+    .smiley__mouth2 {
+      animation-name: mouth2;
+      visibility: hidden;
+    }
+
+    /* Dark theme */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: hsl(var(--hue), 90%, 10%);
+        --fg: hsl(var(--hue), 90%, 90%);
+      }
+    }
+
+    /* Animations */
+    @keyframes eye1 {
+      from {
+        transform: rotate(-260deg) translate(0, -56px);
+      }
+
+      50%,
+      60% {
+        animation-timing-function: cubic-bezier(0.17, 0, 0.58, 1);
+        transform: rotate(-40deg) translate(0, -56px) scale(1);
+      }
+
+      to {
+        transform: rotate(225deg) translate(0, -56px) scale(0.35);
+      }
+    }
+
+    @keyframes eye2 {
+      from {
+        transform: rotate(-260deg) translate(0, -56px);
+      }
+
+      50% {
+        transform: rotate(40deg) translate(0, -56px) rotate(-40deg) scale(1);
+      }
+
+      52.5% {
+        transform: rotate(40deg) translate(0, -56px) rotate(-40deg) scale(1, 0);
+      }
+
+      55%,
+      70% {
+        animation-timing-function: cubic-bezier(0, 0, 0.28, 1);
+        transform: rotate(40deg) translate(0, -56px) rotate(-40deg) scale(1);
+      }
+
+      to {
+        transform: rotate(150deg) translate(0, -56px) scale(0.4);
+      }
+    }
+
+    @keyframes eyeBlink {
+
+      from,
+      25%,
+      75%,
+      to {
+        transform: scaleY(1);
+      }
+
+      50% {
+        transform: scaleY(0);
+      }
+    }
+
+    @keyframes mouth1 {
+      from {
+        animation-timing-function: ease-in;
+        stroke-dasharray: 0 351.86;
+        stroke-dashoffset: 0;
+      }
+
+      25% {
+        animation-timing-function: ease-out;
+        stroke-dasharray: 175.93 351.86;
+        stroke-dashoffset: 0;
+      }
+
+      50% {
+        animation-timing-function: steps(1, start);
+        stroke-dasharray: 175.93 351.86;
+        stroke-dashoffset: -175.93;
+        visibility: visible;
+      }
+
+      75%,
+      to {
+        visibility: hidden;
+      }
+    }
+
+    @keyframes mouth2 {
+      from {
+        animation-timing-function: steps(1, end);
+        visibility: hidden;
+      }
+
+      50% {
+        animation-timing-function: ease-in-out;
+        visibility: visible;
+        stroke-dashoffset: 0;
+      }
+
+      to {
+        stroke-dashoffset: -351.86;
+      }
+    }
   </style>
+  <div class="loader active" id="loader">
+    <svg role="img" aria-label="Mouth and eyes come from 9:00 and rotate clockwise into position, right eye blinks, then all parts rotate and merge into 3:00" class="smiley" viewBox="0 0 128 128" width="128px" height="128px">
+      <defs>
+        <clipPath id="smiley-eyes">
+          <circle class="smiley__eye1" cx="64" cy="64" r="8" transform="rotate(-40,64,64) translate(0,-56)"></circle>
+          <circle class="smiley__eye2" cx="64" cy="64" r="8" transform="rotate(40,64,64) translate(0,-56)"></circle>
+        </clipPath>
+        <linearGradient id="smiley-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#000"></stop>
+          <stop offset="100%" stop-color="#fff"></stop>
+        </linearGradient>
+        <mask id="smiley-mask">
+          <rect x="0" y="0" width="128" height="128" fill="url(#smiley-grad)"></rect>
+        </mask>
+      </defs>
+      <g stroke-linecap="round" stroke-width="12" stroke-dasharray="175.93 351.86">
+        <g>
+          <rect fill="#2A2860" width="128" height="64" clip-path="url(#smiley-eyes)"></rect>
+          <g fill="none" stroke="#62B5A8">
+            <circle class="smiley__mouth1" cx="64" cy="64" r="56" transform="rotate(180,64,64)"></circle>
+            <circle class="smiley__mouth2" cx="64" cy="64" r="56" transform="rotate(0,64,64)"></circle>
+          </g>
+        </g>
+        <g mask="url(#smiley-mask)">
+          <rect fill="#62B5A8" width="128" height="64" clip-path="url(#smiley-eyes)"></rect>
+          <g fill="none" stroke="#62B5A8">
+            <circle class="smiley__mouth1" cx="64" cy="64" r="56" transform="rotate(180,64,64)"></circle>
+            <circle class="smiley__mouth2" cx="64" cy="64" r="56" transform="rotate(0,64,64)"></circle>
+          </g>
+        </g>
+      </g>
+    </svg>
+  </div>
 
   <h1 class="titulo-especialidade" id="tituloEspecialidade"></h1>
   <h3 class="info-data"><?php echo $date; ?></h3>
@@ -186,7 +377,7 @@ function page_agendamento_shortcode()
             <div class="mb-3 px-5 row">
               <label for="dataNascimento" class="col-sm-3 col-form-label">Data de nascimento</label>
               <div class="col-sm-9">
-                <input type="text" name="data_nascimento_titular" class="form-control-plaintext"  type="date" id="dataNascimento">
+                <input type="text" name="data_nascimento_titular" class="form-control-plaintext" type="date" id="dataNascimento">
               </div>
             </div>
 
@@ -209,25 +400,33 @@ function page_agendamento_shortcode()
 
             <input hidden class="form-control" name="email_titular" value="<?php echo $email; ?>" type="text">
 
+            <div class="d-flex px-5 justify-content-end">
+              <button type="button" class="btn btn-default cta" id="step1">Proxima Etapa</button>
+            </div>
 
-            <button type="button" class="btn btn-default cta" id="step1">Proxima Etapa</button>
           </div>
           <div class="step-2" style="display:none;">
             <div class="steps mb-5"><img src="<?php echo PLUGIN_URL . "/assets/image/etapa-2.png" ?>"></div>
-            <div>Forma de pagamento</div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="pagamentoLocal">
-              <label class="form-check-label" for="pagamentoLocal">Pagamento na Clinica</label>
+            <div class="d-flex justify-content-center">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="pagamentoLocal">
+                <label class="form-check-label" for="pagamentoLocal">Pagamento na Clinica</label>
+              </div>
             </div>
-            <br>
-            <button type="button" class="btn btn-default cta" id="step2">Proxima Etapa</button>
+
+            <div class="d-flex px-5 justify-content-end">
+              <button type="button" class="btn btn-default cta" id="step2">Proxima Etapa</button>
+            </div>
           </div>
           <div class="step-3" style="display:none;">
             <div class="steps mb-5"><img src="<?php echo PLUGIN_URL . "/assets/image/etapa-3.png" ?>"></div>
             <div class="dados-agendamento px-5" id="dadosAgendamento"></div>
             <div id="mgsModal" class=" mb-5"></div>
 
-            <button type="button" class="btn btn-default cta" id="step3">Enviar</button>
+            <div class="d-flex px-5 justify-content-end">
+              <button type="button" class="btn btn-default cta" id="step3">Enviar</button>
+            </div>
+
           </div>
 
         </div>
@@ -289,7 +488,7 @@ function page_agendamento_shortcode()
       return dados;
     }
 
-    function confirmacaoConsulta(){
+    function confirmacaoConsulta() {
       /*
       Paciente: Nome do paciente
       Medico:
@@ -373,6 +572,9 @@ function page_agendamento_shortcode()
           });
         });
 
+        document.querySelector(`#loader`).removeAttribute(`class`, `active`)
+        document.querySelector(`#loader`).style.display = "none"
+
       })
       .catch(err => {
         console.error(err)
@@ -420,6 +622,7 @@ function page_agendamento_shortcode()
         })
         .catch(err => console.error(err));
     }
+
     function cadastraPaciente() {
       const nomeTitular = document.querySelector('[name=nome_titular]').value;
       const cpfTitular = document.querySelector('[name=cpf_titular]').value;
@@ -453,12 +656,13 @@ function page_agendamento_shortcode()
             document.querySelector(`.step-2`).style.display = 'block';
             console.log(response.mensagem);
           }
-          
-          if(response.mensagem === 'Paciente já existe'){
+
+          if (response.mensagem === 'Paciente já existe') {
             document.querySelector(`.step-1`).style.display = 'none';
             document.querySelector(`.step-2`).style.display = 'block';
             console.log(response.mensagem);
           }
+          document.querySelector(`#stepModal`).innerText = "Forma de Pagamento";
         })
         .catch(err => console.error(err));
     }
@@ -475,18 +679,16 @@ function page_agendamento_shortcode()
         }
       }
       document.querySelector(`#step2`).onclick = function() {
-          document.querySelector(`.step-2`).style.display = 'none';
-          document.querySelector(`.step-3`).style.display = 'block';
-          document.querySelector(`#stepModal`).innerText = "Confirmação de Consulta";
-          confirmacaoConsulta();
+        document.querySelector(`.step-2`).style.display = 'none';
+        document.querySelector(`.step-3`).style.display = 'block';
+        document.querySelector(`#stepModal`).innerText = "Confirmação de Consulta";
+        confirmacaoConsulta();
       }
       document.querySelector(`#step3`).onclick = function() {
         cadastrarAgendamento();
       }
 
     }
-
-
   </script>
 
 

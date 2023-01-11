@@ -6,11 +6,13 @@ function pesquisa_agendamento_shortcode()
     $lista_unidades = $api->listUnidades();
     $lista_especialidades = $api->listEspecialidades();
 
+
+
 ?>
     <style>
         .group-modalidade {
-            background: green;
-            padding: 0% 33.5% 1% 22.7%;
+            padding: 0% 0% 2% 0%;
+            display: flex;
         }
 
         .btn-modalidade {
@@ -22,12 +24,30 @@ function pesquisa_agendamento_shortcode()
             background-color: #FFFFFF;
             padding: 1em 1.5em 1em 1.5em;
             border-radius: 3px;
+            margin-right: 2%;
+            height: 100%;
+            max-height: 70px;
+            line-height: 1;
         }
-
-        #unidade {
+        .group-inputs {
+            display: flex;
+            gap: 20px;
+        }
+        .group-inputs select{
+            background-color: #ffffff;
+            border-width: 0px 0px 0px 0px;
             font-family: "Open Sans", Sans-serif;
             font-size: 1vw;
             font-weight: 400;
+        }
+        .btn-pesquisa{
+            background-color: #2A2860;
+            color: #ffffff;
+            font-family: "Open Sans", Sans-serif;
+            font-size: 0.9vw;
+            font-weight: 500;
+            padding: 18px;
+            line-height: 1;
         }
     </style>
     <form id="form-agendamento">
@@ -39,23 +59,24 @@ function pesquisa_agendamento_shortcode()
                 Retorno
             </button>
         </div>
-        <br><br>
+        <div class="group-inputs">
         <select id="unidade" name="unidade">
             <option value="">Selecione a Unidade</option>
             <?php foreach ($lista_unidades as $unidade) { ?>
                 <option value="<?php echo $unidade['id'] ?>"><?php echo $unidade['cidade'] ?></option>
             <?php } ?>
         </select>
-        <br><br>
-        <label for="especialidade" class="modalidade-item">Selecione a especialidade:</label><br>
         <select id="especialidade" name="especialidade" class="modalidade-item">
             <option value="">Selecione a especialidade</option>
             <?php foreach ($lista_especialidades as $especialidade) { ?>
                 <option value="<?php echo $especialidade['especialidade_id'] ?>"><?php echo $especialidade['nome'] ?></option>
             <?php } ?>
         </select>
-        <br><br>
-        <a class="elementor-button elementor-size-sm" onclick="pesquisaFeeGow()" style="cursor: pointer;">Pesquisar</a>
+        <input type="hidden" name="filtro__data" value='<? date("Y-m-d"); ?>'>
+        <a class="elementor-button elementor-size-sm btn-pesquisa" onclick="pesquisaFeeGow()" style="cursor: pointer;">Pesquisar</a>
+        </div>
+
+
     </form>
     <script>
         function pesquisaFeeGow() {

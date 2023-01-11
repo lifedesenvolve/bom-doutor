@@ -1,6 +1,9 @@
 <?php
 function page_agendamento_shortcode()
 {
+
+
+
   if (is_user_logged_in()) {
     $usuario = wp_get_current_user();
     $email = $usuario->user_email;
@@ -11,15 +14,21 @@ function page_agendamento_shortcode()
 
 ?>
     <script>
-      window.location.assign("/minha-conta");
+      //window.location.assign("/agendar");
     </script>
   <?php }
 
 
+  setlocale(LC_TIME, 'pt_BR', 'pt_BR.utf-8', 'pt_BR.utf-8', 'portuguese');
+  date_default_timezone_set('America/Sao_Paulo');
 
   if (isset($_GET['filtro__data'])) {
     $filtro_data = $_GET['filtro__data'];
+    $date = strftime('%A, %d de %B de %Y', strtotime($filtro_data));
+  } else {
+    $date = strftime('%A, %d de %B de %Y', strtotime('today'));
   }
+
   ?>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,11 +144,12 @@ function page_agendamento_shortcode()
       line-height: 19px;
 
       color: #383838;
+      padding-bottom: 32px;
     }
   </style>
 
   <h1 class="titulo-especialidade" id="tituloEspecialidade"></h1>
-  <h3 class="info-data">Segunda-feira, 06 de Março de 2023</h3>
+  <h3 class="info-data"><?php echo $date; ?></h3>
 
   <div class="lista-profissionais" id="listaProfissionais"></div>
 
@@ -149,46 +159,61 @@ function page_agendamento_shortcode()
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="stepModal">Formulário</h1>
+          <h1 class="modal-title fs-5" id="stepModal">Dados do Paciente</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div class="step-1">
-            <div class="steps"><img src="<?php echo PLUGIN_URL . "/assets/image/etapa-1.png" ?>"></div>
+            <div class="steps mb-5">
+              <img src="<?php echo PLUGIN_URL . "/assets/image/etapa-1.png" ?>">
+            </div>
 
             <input hidden class="form-control" id="horario_escolhido" name="horario_escolhido" type="text">
             <input hidden class="form-control" id="profissional_escolhido" name="profissional_escolhido" type="text">
 
-            <h3>CPF do titular</h3>
-            <input class="form-control" name="cpf_titular" type="text" placeholder="CPF do Titular" aria-label="CPF do Titular">
-            <br>
+            <div class="mb-3 px-5 row">
+              <label for="cpfTitular" class="col-sm-3 col-form-label">CPF</label>
+              <div class="col-sm-9">
+                <input type="text" class="form-control-plaintext" id="cpfTitular" name="cpf_titular" placeholder="123.456.789-00">
+              </div>
+            </div>
+            <div class="mb-3 px-5 row">
+              <label for="nomeTitular" class="col-sm-3 col-form-label">Nome completo</label>
+              <div class="col-sm-9">
+                <input type="text" name="nome_titular" class="form-control-plaintext" id="nomeTitular" placeholder="Nome Completo">
+              </div>
+            </div>
+            <div class="mb-3 px-5 row">
+              <label for="dataNascimento" class="col-sm-3 col-form-label">Data de nascimento</label>
+              <div class="col-sm-9">
+                <input type="text" name="data_nascimento_titular" class="form-control-plaintext"  type="date" id="dataNascimento">
+              </div>
+            </div>
 
-            <h3>Nome do titular </h3>
-            <input class="form-control" name="nome_titular" type="text" placeholder="Nome completo" aria-label="Nome do titular">
-            <br>
-
-            <h3>Data de nascimento do titular</h3>
-            <input class="form-control" name="data_nascimento_titular" type="date" aria-label="Data de nascimento do titular">
-            <br>
+            <div class="mb-3 px-5 row">
+              <label for="genero" class="col-sm-3 col-form-label">Gênero</label>
+              <div class="col-sm-9">
+                <select required class="form-control" name="genero_titular" type="date" id="genero">
+                  <option value="">Não desejo informar</option>
+                  <option value="M">Masculino</option>
+                  <option value="F">Feminino</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3 px-5 row">
+              <label for="telefone" class="col-sm-3 col-form-label">Telefone do titular</label>
+              <div class="col-sm-9">
+                <input class="form-control" name="telefone_titular" type="phone" id="telefone">
+              </div>
+            </div>
 
             <input hidden class="form-control" name="email_titular" value="<?php echo $email; ?>" type="text">
 
-            <h3>Gênero do titular</h3>
-            <select required class="form-control" name="genero_titular" type="date" aria-label="Gênero do titular">
-              <option value="M">Masculino</option>
-              <option value="F">Feminino</option>
-              <option value="">Não desejo informar</option>
-            </select>
-            <br>
-
-            <h3>Telefone do titular</h3>
-            <input class="form-control" name="telefone_titular" type="phone" aria-label="Telefone do titular">
-            <br>
 
             <button type="button" class="btn btn-default cta" id="step1">Proxima Etapa</button>
           </div>
           <div class="step-2" style="display:none;">
-            <div class="steps"><img src="<?php echo PLUGIN_URL . "/assets/image/etapa-2.png" ?>"></div>
+            <div class="steps mb-5"><img src="<?php echo PLUGIN_URL . "/assets/image/etapa-2.png" ?>"></div>
             <div>Forma de pagamento</div>
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" role="switch" id="pagamentoLocal">
@@ -198,17 +223,19 @@ function page_agendamento_shortcode()
             <button type="button" class="btn btn-default cta" id="step2">Proxima Etapa</button>
           </div>
           <div class="step-3" style="display:none;">
-            <div class="steps"><img src="<?php echo PLUGIN_URL . "/assets/image/etapa-3.png" ?>"></div>
-            <div>Confirmação de agendamento</div>
-            Sua consulta foi agendada com sucesso.
-            <br>
-            <button type="button" class="btn btn-default cta">Enviar</button>
+            <div class="steps mb-5"><img src="<?php echo PLUGIN_URL . "/assets/image/etapa-3.png" ?>"></div>
+            <div class="dados-agendamento px-5" id="dadosAgendamento"></div>
+            <div id="mgsModal" class=" mb-5"></div>
+
+            <button type="button" class="btn btn-default cta" id="step3">Enviar</button>
           </div>
 
         </div>
       </div>
     </div>
   </div>
+
+  <div class="row"><span class="col-sm-3"></span><span class="col-sm-9"></span></div>
 
   <script>
     const urlPlugin = "<?php echo PLUGIN_URL; ?>"
@@ -260,6 +287,27 @@ function page_agendamento_shortcode()
       }
 
       return dados;
+    }
+
+    function confirmacaoConsulta(){
+      /*
+      Paciente: Nome do paciente
+      Medico:
+      Especialidade:
+      Valor:
+      Local:
+
+      */
+      const nomeTitular = document.querySelector('[name=nome_titular]').value;
+      const especialidade = document.querySelector(`#tituloEspecialidade`).textContent;
+
+      document.querySelector(`#dadosAgendamento`).innerHTML = `
+      <div class="row"><b class="col-sm-3">Paciente: </b>${nomeTitular}<span class="col-sm-9"></span></div>
+      <div class="row"><b class="col-sm-3">Médico: </b><span class="col-sm-9"></span></div>
+      <div class="row"><b class="col-sm-3">Especialidade: </b><span class="col-sm-9">${especialidade}</span></div>
+      <div class="row"><b class="col-sm-3">Valor: </b><span class="col-sm-9"></span></div>
+      <div class="row"><b class="col-sm-3">Local: </b><span class="col-sm-9">Av. Afonso Pena, nº 955, Loja 03 - Centro, Belo Horizonte, MG.</span></div>
+      `;
     }
 
     const searchURL = new URLSearchParams(window.location.search);
@@ -331,63 +379,47 @@ function page_agendamento_shortcode()
         document.querySelector(`#tituloEspecialidade`).innerText = "Nenhum horário disponível";
       });
 
-    window.onload = function() {
-      document.querySelector(`#step1`).onclick = function() {
-        if (capturarDados()) {
+    function cadastrarAgendamento() {
 
-          cadastraPaciente();
+      const searchURL = new URLSearchParams(window.location.search);
 
-        } else {
-          alert('preencha todos os campos');
-        }
-      }
-      document.querySelector(`#step2`).onclick = function() {
-        cadastrarAgendamento();
-      }
+      const filtro__unidade = searchURL.get('filtro__unidade');
+      const paciente_id = "<?php echo get_field('user_id', 'user_' . get_current_user_id()) ?>";
+      const profissional_id = document.querySelector('#profissional_escolhido').value;
+      const procedimento_id = "4";
+      const filtro__especialidades = searchURL.get('filtro__especialidades');
+      const filtro__data = searchURL.get('filtro__data');
 
-      function cadastrarAgendamento() {
+      const base_url = '<?php echo home_url(); ?>';
+      const options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          "filtro__unidade": filtro__unidade,
+          "paciente_id": paciente_id,
+          "profissional_id": profissional_id,
+          "procedimento_id": procedimento_id,
+          "filtro__especialidades": filtro__especialidades,
+          "filtro__data": filtro__data,
+          "horario_escolhido": document.querySelector('#horario_escolhido').value
+        })
+      };
 
-        const searchURL = new URLSearchParams(window.location.search);
-
-        const filtro__unidade = searchURL.get('filtro__unidade');
-        const paciente_id = "<?php echo get_field('user_id', 'user_' . get_current_user_id()) ?>";
-        const profissional_id = document.querySelector('#profissional_escolhido').value;
-        const procedimento_id = "4";
-        const filtro__especialidades = searchURL.get('filtro__especialidades');
-        const filtro__data = searchURL.get('filtro__data');
-
-        const base_url = '<?php echo home_url(); ?>';
-        const options = {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            "filtro__unidade": filtro__unidade,
-            "paciente_id": paciente_id,
-            "profissional_id": profissional_id,
-            "procedimento_id": procedimento_id,
-            "filtro__especialidades": filtro__especialidades,
-            "filtro__data": filtro__data,
-            "horario_escolhido": document.querySelector('#horario_escolhido').value
-          })
-        };
-
-        fetch(`${base_url}/wp-json/api/v1/registrar-agendamento`, options)
-          .then(response => response.json())
-          .then(response => {
-            if (response.status === 'sucesso') {
-              document.querySelector(`.step-2`).style.display = 'none';
-              document.querySelector(`.step-3`).style.display = 'block';
-              console.log(response.mensagem);
-            } else {
-              console.log(response.mensagem);
-            }
-          })
-          .catch(err => console.error(err));
-      }
+      fetch(`${base_url}/wp-json/api/v1/registrar-agendamento`, options)
+        .then(response => response.json())
+        .then(response => {
+          if (response.status === 'sucesso') {
+            document.querySelector(`.step-2`).style.display = 'none';
+            document.querySelector(`.step-3`).style.display = 'block';
+            console.log(response.mensagem);
+          } else {
+            console.log(response.mensagem);
+          }
+        })
+        .catch(err => console.error(err));
     }
-
     function cadastraPaciente() {
       const nomeTitular = document.querySelector('[name=nome_titular]').value;
       const cpfTitular = document.querySelector('[name=cpf_titular]').value;
@@ -420,12 +452,41 @@ function page_agendamento_shortcode()
             document.querySelector(`.step-1`).style.display = 'none';
             document.querySelector(`.step-2`).style.display = 'block';
             console.log(response.mensagem);
-          } else {
+          }
+          
+          if(response.mensagem === 'Paciente já existe'){
+            document.querySelector(`.step-1`).style.display = 'none';
+            document.querySelector(`.step-2`).style.display = 'block';
             console.log(response.mensagem);
           }
         })
         .catch(err => console.error(err));
     }
+
+    window.onload = function() {
+
+      document.querySelector(`#step1`).onclick = function() {
+        if (capturarDados()) {
+
+          cadastraPaciente();
+
+        } else {
+          console.log('preencha todos os campos');
+        }
+      }
+      document.querySelector(`#step2`).onclick = function() {
+          document.querySelector(`.step-2`).style.display = 'none';
+          document.querySelector(`.step-3`).style.display = 'block';
+          document.querySelector(`#stepModal`).innerText = "Confirmação de Consulta";
+          confirmacaoConsulta();
+      }
+      document.querySelector(`#step3`).onclick = function() {
+        cadastrarAgendamento();
+      }
+
+    }
+
+
   </script>
 
 

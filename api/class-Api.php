@@ -16,7 +16,7 @@ class Api
         $this->paciente = get_option('bom_doutor_api_url') . 'patient/search';
         $this->paciente_create = get_option('bom_doutor_api_url') . 'patient/create';
         $this->dependentes = get_option('bom_doutor_api_url') . 'patient/list-dependents';
-        $this->agendamento = get_option('bom_doutor_api_url') . 'patient/appoints/new-appoint';
+        $this->agendamento = get_option('bom_doutor_api_url') . 'appoints/new-appoint';
     }
 
     private function connectApi(string $url, string $type = 'GET', $body = ''): array
@@ -431,8 +431,17 @@ class Api
         }
     }
 
-    public function createAgendamento($local_id, $paciente_id, $profissional_id, $procedimento_id, $especialidade_id, $data, $horario, $valor = "0", $plano = "0")
-    {
+    public function createAgendamento(
+        $local_id,
+        $paciente_id,
+        $profissional_id,
+        $procedimento_id,
+        $especialidade_id,
+        $data,
+        $horario,
+        $valor,
+        $plano = 0
+    ) {
         $agendamento = $this->connectApi($this->agendamento, 'POST', json_encode([
             "local_id" => $local_id,
             "paciente_id" => $paciente_id,
@@ -440,22 +449,21 @@ class Api
             'procedimento_id' =>  $procedimento_id,
             'especialidade_id' =>  $especialidade_id,
             'data' => date('d-m-Y', strtotime($data)),
-            'horario' =>  $horario . ':00',
+            'horario' =>  $horario,
             'valor' => $valor,
-            'plano' => $plano,
-            'canal_id' => '',
-            'notas' => ''
+            'plano' => $plano
         ]));
 
         if (isset($agendamento['error'])) {
             return [
                 "status" => "erro",
-                "mensagem" => $agendamento
+                "mensagem" => $agendamento,
             ];
         } else {
             return [
                 "status" => "sucesso",
-                "mensagem" => "Agendamento realizado com sucesso"
+                "mensagem" => "Agendamento realizado com sucesso",
+                "content" => $agendamento['content']
             ];
         }
     }

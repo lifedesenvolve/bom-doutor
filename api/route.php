@@ -100,13 +100,15 @@ function registrar_agendamento($request)
 
   $api = new Api();
   $resultado = $api->createAgendamento(
-    $dados['filtro__unidade'],
+    $dados['local_id'],
     $dados['paciente_id'],
     $dados['profissional_id'],
     $dados['procedimento_id'],
-    $dados['filtro__especialidades'],
-    $dados['filtro__data'],
-    $dados['horario_escolhido']
+    $dados['especialidade_id'],
+    $dados['data'],
+    $dados['horario'],
+    $dados['valor'],
+    $dados['plano'],
   );
 
   if ($resultado['status'] == "sucesso") {

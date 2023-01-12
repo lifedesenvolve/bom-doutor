@@ -51,8 +51,8 @@ function pesquisa_agendamento_shortcode()
         }
     </style>
     <form id="form-agendamento">
-        <div class="group-modalidade">
-            <button class="btn-modalidade">
+        <div class="group-modalidade" id="tipoProcedimento">
+            <button class="btn-modalidade active" value="5">
                 Consulta
             </button>
             <button class="btn-modalidade">
@@ -61,7 +61,6 @@ function pesquisa_agendamento_shortcode()
         </div>
         <div class="group-inputs">
         <select id="unidade" name="unidade">
-            <option value="">Selecione a Unidade</option>
             <?php foreach ($lista_unidades as $unidade) { ?>
                 <option value="<?php echo $unidade['id'] ?>"><?php echo $unidade['cidade'] ?></option>
             <?php } ?>
@@ -79,6 +78,35 @@ function pesquisa_agendamento_shortcode()
 
     </form>
     <script>
+        const tiposProcedimentos = [
+            {
+                "id": 1,
+                "tipo": "Cirurgia"
+            },
+            {
+                "id": 2,
+                "tipo": "Consulta"
+            },
+            {
+                "id": 3,
+                "tipo": "Exame"
+            },
+            {
+                "id": 4,
+                "tipo": "Procedimento"
+            },
+            {
+                "id": 9,
+                "tipo": "Retorno"
+            }
+        ]
+        
+        tiposProcedimentos.map((item) => {
+            return `<button class="btn-modalidade" value="${item.id}">
+                        ${item.tipo}
+                    </button>`
+        }).join().replaceAll(`,`,``)
+
         function pesquisaFeeGow() {
             let unidade_id = document.getElementById("unidade").value;
             let especialidade = document.getElementById("especialidade").value;

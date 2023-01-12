@@ -83,6 +83,7 @@ function page_agendamento_shortcode()
       cursor: pointer;
       justify-content: space-evenly;
       align-items: center;
+      font-size: 0.8em;
     }
 
     .btn-horario::after {
@@ -145,6 +146,17 @@ function page_agendamento_shortcode()
 
       color: #383838;
       padding-bottom: 32px;
+    }
+    #dataNascimento{
+      width: 100%;
+      background: #fff;
+      border: 1px solid var(--base-color);
+      padding: 13px 15px;
+      outline: none;
+      line-height: 1;
+    }
+    #modalAgendamento input {
+      border-radius: 0.375rem;
     }
 
     :root {
@@ -377,7 +389,7 @@ function page_agendamento_shortcode()
             <div class="mb-3 px-5 row">
               <label for="dataNascimento" class="col-sm-3 col-form-label">Data de nascimento</label>
               <div class="col-sm-9">
-                <input type="text" name="data_nascimento_titular" class="form-control-plaintext" type="date" id="dataNascimento">
+                <input name="data_nascimento_titular" class="form-control-plaintext" type="date" id="dataNascimento">
               </div>
             </div>
 
@@ -451,12 +463,12 @@ function page_agendamento_shortcode()
       const telefoneTitular = document.querySelector('[name=telefone_titular]');
       const horarioEscolhido = document.querySelector('[name=horario_escolhido]');
 
-      nomeTitular.value = "teste user";
-      cpfTitular.value = "74275703081";
+      nomeTitular.value = "Gabriel Moraes Anastacio";
+      cpfTitular.value = "69164789934";
       dataNascimentoTitular.value = "1992-06-20";
-      emailTitular.value = "teste_user@example.com";
+      emailTitular.value = "teste_user2@example.com";
       generoTitular.value = "M";
-      telefoneTitular.value = "15999999999";
+      telefoneTitular.value = "11999999999";
       horarioEscolhido.value = "09:00";
     }
     preencherDadosGenericos();
@@ -499,13 +511,15 @@ function page_agendamento_shortcode()
       */
       const nomeTitular = document.querySelector('[name=nome_titular]').value;
       const especialidade = document.querySelector(`#tituloEspecialidade`).textContent;
+      const data = `${document.querySelector(`.info-data`).textContent} às ${document.querySelector('[name=horario_escolhido]').value}`;
 
       document.querySelector(`#dadosAgendamento`).innerHTML = `
-      <div class="row"><b class="col-sm-3">Paciente: </b>${nomeTitular}<span class="col-sm-9"></span></div>
+      <div class="row"><b class="col-sm-3">Paciente: </b><span class="col-sm-9">${nomeTitular}</span></div>
       <div class="row"><b class="col-sm-3">Médico: </b><span class="col-sm-9"></span></div>
       <div class="row"><b class="col-sm-3">Especialidade: </b><span class="col-sm-9">${especialidade}</span></div>
-      <div class="row"><b class="col-sm-3">Valor: </b><span class="col-sm-9"></span></div>
+      <div class="row"><b class="col-sm-3">Valor: </b><span class="col-sm-9">R$ 120,00</span></div>
       <div class="row"><b class="col-sm-3">Local: </b><span class="col-sm-9">Av. Afonso Pena, nº 955, Loja 03 - Centro, Belo Horizonte, MG.</span></div>
+      <div class="row"><b class="col-sm-3">Data: </b><span class="col-sm-9">${data}</span></div>
       `;
     }
 
@@ -656,13 +670,10 @@ function page_agendamento_shortcode()
             document.querySelector(`.step-2`).style.display = 'block';
             console.log(response.mensagem);
           }
-
-          if (response.mensagem === 'Paciente já existe') {
             document.querySelector(`.step-1`).style.display = 'none';
             document.querySelector(`.step-2`).style.display = 'block';
             console.log(response.mensagem);
-          }
-          document.querySelector(`#stepModal`).innerText = "Forma de Pagamento";
+            document.querySelector(`#stepModal`).innerText = "Forma de Pagamento";
         })
         .catch(err => console.error(err));
     }

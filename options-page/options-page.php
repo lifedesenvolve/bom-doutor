@@ -99,18 +99,6 @@ function bom_doutor_settings_page()
     $api = new Api();
 
     echo '<pre>';
-    print_r($api->listProcedimentos());
+    print_r($api->listUnidades());
     echo '</pre>';
-    /* echo '<pre>';
-print_r($api->getPacienteByID(1));
-echo '</pre>'; */
-
-    /* $api->createPaciente(
-    'teste',
-    '74275703081',
-    'teste@teste123.com',
-    '03-09-1998',
-    'M',
-    '15999999999'
-); */
 }

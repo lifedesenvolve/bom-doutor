@@ -67,8 +67,10 @@ class Api
         $atendimentos = $this->connectApi($this->atendimentos);
 
         if (isset($atendimentos['error'])) {
-            echo "Erro na consulta verifique os campos ( API Url e API Token )";
-            return;
+            return [
+                "status" => "erro",
+                "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+            ];
         }
 
         $response = [];
@@ -89,8 +91,10 @@ class Api
         $especialidades = $this->connectApi($this->especialidades);
 
         if (isset($especialidades['error'])) {
-            echo "Erro na consulta verifique os campos ( API Url e API Token )";
-            return;
+            return [
+                "status" => "erro",
+                "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+            ];
         }
 
         $response = [];
@@ -105,26 +109,25 @@ class Api
         return $response;
     }
 
-    public function listLocais()
+    public function listLocais($unidade_id)
     {
         $locais = $this->connectApi($this->locais);
 
         if (isset($locais['error'])) {
-            echo "Erro na consulta verifique os campos ( API Url e API Token )";
-            return;
+            return [
+                "status" => "erro",
+                "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+            ];
         }
 
         $response = [];
         foreach ($locais['content'] as $local) {
+            if ($local['unidade_id'] == $unidade_id) {
 
-            $response[] = [
-                'id' => $local['id'],
-                'local' => $local['local'],
-                'unidade_id' => $local['unidade_id'],
-            ];
+                return $local['unidade_id'];
+            }
         }
-
-        return $response;
+        return $response ?: false;
     }
 
     public function listUnidades()
@@ -132,16 +135,27 @@ class Api
         $unidades = $this->connectApi($this->unidades);
 
         if (isset($unidades['error'])) {
-            echo "Erro na consulta verifique os campos ( API Url e API Token )";
-            return;
+            return [
+                "status" => "erro",
+                "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+            ];
         }
 
         $response = [];
+
         foreach ($unidades['content']['unidades'] as $unidade) {
+
+            $endereco = $unidade['endereco'];
+            $numero = $unidade['numero'];
+            $bairro = $unidade['bairro'];
+            $estado = $unidade['estado'];
+            $cep = $unidade['cep'];
 
             $response[] = [
                 'id' => $unidade['unidade_id'],
-                'cidade' => $unidade['cidade']
+                'local_id' => $this->listLocais($unidade['unidade_id']),
+                'cidade' => $unidade['cidade'],
+                'endereco' => "$endereco, $numero, $bairro - $estado | $cep"
             ];
         }
 
@@ -199,8 +213,10 @@ class Api
         $procedimentos = $this->connectApi($this->procedimentos);
 
         if (isset($procedimentos['error'])) {
-            echo "Erro na consulta verifique os campos ( API Url e API Token )";
-            return;
+            return [
+                "status" => "erro",
+                "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+            ];
         }
 
         $response = [];
@@ -224,8 +240,10 @@ class Api
         $especialidades = $this->connectApi($this->especialidades . '?UnitID=' . $unidade_id);
 
         if (isset($especialidades['error'])) {
-            echo "Erro na consulta verifique os campos ( API Url e API Token )";
-            return;
+            return [
+                "status" => "erro",
+                "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+            ];
         }
 
         $response = [];
@@ -246,8 +264,10 @@ class Api
 
 
         if (isset($disponibilidade_horarios['error'])) {
-            echo "Erro na consulta verifique os campos ( API Url e API Token )";
-            return;
+            return [
+                "status" => "erro",
+                "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+            ];
         }
 
         $response = [];
@@ -341,8 +361,10 @@ class Api
             if ($paciente['error'] == 409) {
                 return;
             } else {
-                echo "Erro na consulta verifique os campos ( API Url e API Token )";
-                return;
+                return [
+                    "status" => "erro",
+                    "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+                ];
             }
         }
 
@@ -365,8 +387,10 @@ class Api
             if ($paciente['error'] == 409) {
                 return;
             } else {
-                echo "Erro na consulta verifique os campos ( API Url e API Token )";
-                return;
+                return [
+                    "status" => "erro",
+                    "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+                ];
             }
         }
 

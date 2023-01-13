@@ -61,6 +61,7 @@ class Api
 
         return json_decode($data, true);
     }
+
     private function availableSchedule($profissional_id, $especialidade_id, $unidade_id, $data_start, $data_end)
     {
         $disponibilidade_horarios = $this->connectApi($this->disponibilidade_horarios . '?tipo=E&especialidade_id=' . $especialidade_id . '&unidade_id=' . $unidade_id . '&data_start=' . $data_start . '&data_end=' . $data_end);
@@ -245,8 +246,10 @@ class Api
         foreach ($procedimentos['content'] as $procedimento) {
 
             $response[] = [
+                'tipo_procedimento' => $procedimento['tipo_procedimento'],
                 'procedimento_id' => $procedimento['procedimento_id'],
                 'procedimento_nome' => $procedimento['nome'],
+                'valor' => $procedimento['valor'],
                 'especialidades' => $this->getEspecialidadesByIdArray($procedimento['especialidade_id'], $especialidades)
             ];
         }

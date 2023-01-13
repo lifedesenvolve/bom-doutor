@@ -99,6 +99,6 @@ function bom_doutor_settings_page()
     $api = new Api();
 
     echo '<pre>';
-    print_r($api->listUnidades());
+    print_r($api->listProcedimentos());
     echo '</pre>';
 }

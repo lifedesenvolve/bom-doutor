@@ -4,7 +4,7 @@
  * Plugin Name: Bom Doutor
  * Plugin URI: https://github.com/spalmeida
  * Description: Plugin dedicado ao site bom doutor.
- * Version: 1.0.8
+ * Version: 1.0.7
  * Author: Samuel Almeida
  * Author URI: https://github.com/spalmeida
  */
@@ -18,19 +18,22 @@ require_once 'options-page/options-page.php';
 require_once 'api/class-Api.php';
 require_once 'api/route.php';
 
-function block_dashboard_access()
+function remove_admin_access()
 {
-  if (!current_user_can('manage_options')) {
-    wp_redirect(home_url());
-    exit;
-  }
+    if (
+        !current_user_can('administrator') &&
+        !(defined('DOING_AJAX') && DOING_AJAX)
+    ) {
+        wp_redirect(home_url());
+        exit;
+    }
 }
-add_action('admin_init', 'block_dashboard_access');
+add_action('admin_init', 'remove_admin_access', 100);
 
 function remove_admin_bar()
 {
-  if (!current_user_can('manage_options')) {
-    show_admin_bar(false);
-  }
+    if (!current_user_can('manage_options')) {
+        show_admin_bar(false);
+    }
 }
 add_action('after_setup_theme', 'remove_admin_bar');

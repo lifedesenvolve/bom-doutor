@@ -29,18 +29,21 @@ function pesquisa_agendamento_shortcode()
             max-height: 70px;
             line-height: 1;
         }
+
         .group-inputs {
             display: flex;
             gap: 20px;
         }
-        .group-inputs select{
+
+        .group-inputs select {
             background-color: #ffffff;
             border-width: 0px 0px 0px 0px;
             font-family: "Open Sans", Sans-serif;
             font-size: 1vw;
             font-weight: 400;
         }
-        .btn-pesquisa{
+
+        .btn-pesquisa {
             background-color: #2A2860;
             color: #ffffff;
             font-family: "Open Sans", Sans-serif;
@@ -49,37 +52,41 @@ function pesquisa_agendamento_shortcode()
             padding: 18px;
             line-height: 1;
         }
+
+        [data-procedimento="Cirurgia"],
+        [data-procedimento="Exame"],
+        [data-procedimento="Procedimento"] {
+            display: none;
+        }
+
+        .btn-modalidade.ativo {
+            background-color: #2a2860;
+            color: white;
+        }
     </style>
-    <form id="form-agendamento">
-        <div class="group-modalidade" id="tipoProcedimento">
-            <button class="btn-modalidade active" value="5">
-                Consulta
-            </button>
-            <button class="btn-modalidade">
-                Retorno
-            </button>
-        </div>
+    <form id="form-agendamento" action="/agendar">
+        <div class="group-modalidade" id="tipoProcedimento"></div>
         <div class="group-inputs">
-        <select id="unidade" name="unidade">
-            <?php foreach ($lista_unidades as $unidade) { ?>
-                <option value="<?php echo $unidade['id'] ?>"><?php echo $unidade['cidade'] ?></option>
-            <?php } ?>
-        </select>
-        <select id="especialidade" name="especialidade" class="modalidade-item">
-            <option value="">Selecione a especialidade</option>
-            <?php foreach ($lista_especialidades as $especialidade) { ?>
-                <option value="<?php echo $especialidade['especialidade_id'] ?>"><?php echo $especialidade['nome'] ?></option>
-            <?php } ?>
-        </select>
-        <input type="hidden" name="filtro__data" value='<? date("Y-m-d"); ?>'>
-        <a class="elementor-button elementor-size-sm btn-pesquisa" onclick="pesquisaFeeGow()" style="cursor: pointer;">Pesquisar</a>
+            <select id="unidade" name="unidade">
+                <?php foreach ($lista_unidades as $unidade) { ?>
+                    <option value="<?php echo $unidade['id'] ?>"><?php echo $unidade['cidade'] ?></option>
+                <?php } ?>
+            </select>
+            <select id="especialidade" name="especialidade" class="modalidade-item">
+                <option value="">Selecione a especialidade</option>
+                <?php foreach ($lista_especialidades as $especialidade) { ?>
+                    <option value="<?php echo $especialidade['especialidade_id'] ?>"><?php echo $especialidade['nome'] ?></option>
+                <?php } ?>
+            </select>
+            <input type="hidden" name="filtro__data" value='<?php echo date("Y-m-d"); ?>'>
+            <input type="hidden" name="filtro__procedimento" value='2'>
+            <button class="elementor-button elementor-size-sm btn-pesquisa" onclick="pesquisaFeeGow()" style="cursor: pointer;">Pesquisar</button>
         </div>
 
 
     </form>
     <script>
-        const tiposProcedimentos = [
-            {
+        const tiposProcedimentos = [{
                 "id": 1,
                 "tipo": "Cirurgia"
             },
@@ -100,12 +107,6 @@ function pesquisa_agendamento_shortcode()
                 "tipo": "Retorno"
             }
         ]
-        
-        tiposProcedimentos.map((item) => {
-            return `<button class="btn-modalidade" value="${item.id}">
-                        ${item.tipo}
-                    </button>`
-        }).join().replaceAll(`,`,``)
 
         function pesquisaFeeGow() {
             let unidade_id = document.getElementById("unidade").value;
@@ -132,6 +133,42 @@ function pesquisa_agendamento_shortcode()
                 <?php } ?>
             }
         }
+
+        const htmlProcedimentos = tiposProcedimentos.map((item) => {
+            return `<button class="btn-modalidade" value="${item.id}" 
+            data-procedimento="${item.tipo}" 
+            >
+                        ${item.tipo}
+                    </button>`
+        }).join().replaceAll(`,`, ``)
+        document.querySelector(`#tipoProcedimento`).innerHTML = htmlProcedimentos;
+
+        function procedimentoAtivo() {
+            document.querySelectorAll(`#tipoProcedimento button`).forEach((item) => {
+                if (item.value == document.querySelector(`[name="filtro__procedimento"]`).value) {
+                    item.setAttribute(`class`, `btn-modalidade ativo`)
+                }
+            })
+        }
+        procedimentoAtivo()
+
+        const tipoProcedimento = document.getElementById("tipoProcedimento");
+        tipoProcedimento.addEventListener("click", function(event) {
+            event.preventDefault();
+            if (event.target.classList.contains("btn-modalidade")) {
+                const buttons = tipoProcedimento.querySelectorAll(".btn-modalidade");
+                buttons.forEach(function(button) {
+                    button.classList.remove("ativo");
+                });
+                event.target.classList.add("ativo");
+            }
+
+            document.querySelectorAll(`#tipoProcedimento .btn-modalidade`).forEach(function(button) {
+                if (button.classList.value === "btn-modalidade ativo") {
+                    document.querySelector(`[name="filtro__procedimento"]`).value = button.value
+                }
+            })
+        });
     </script>
 
 <?php

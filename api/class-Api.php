@@ -61,6 +61,71 @@ class Api
 
         return json_decode($data, true);
     }
+    private function availableSchedule($profissional_id, $especialidade_id, $unidade_id, $data_start, $data_end)
+    {
+        $disponibilidade_horarios = $this->connectApi($this->disponibilidade_horarios . '?tipo=E&especialidade_id=' . $especialidade_id . '&unidade_id=' . $unidade_id . '&data_start=' . $data_start . '&data_end=' . $data_end);
+
+
+        if (isset($disponibilidade_horarios['error'])) {
+            return [
+                "status" => "erro",
+                "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+            ];
+        }
+
+        $response = [];
+
+        foreach ($disponibilidade_horarios['content'] as $disponibilidade) {
+            $response = $disponibilidade[$profissional_id]['local_id'];
+        }
+
+        return array_shift($response);
+    }
+
+    private function getEspecialidadesByIdArray($procedimentos_especialidades_array, array $especialidades): array
+    {
+        $response = [];
+
+        if (empty($procedimentos_especialidades_array)) {
+            $response[] = [
+                'especialidade_id' => '',
+                'especialidade_nome' => 'Nenhuma especialidade atribuída',
+                'error' => true,
+                'message' => 'Nenhuma especialidade atribuída a este procedimento: https://app2.feegow.com/v8/?P=Procedimentos&Pers=Follow'
+            ];
+            return $response;
+        }
+
+        foreach ($procedimentos_especialidades_array as $procedimento_especialidade) {
+            $especialidade_id = $procedimento_especialidade;
+            $especialidade_nome = '';
+
+            foreach ($especialidades as $especialidade) {
+                if ($procedimento_especialidade == $especialidade['especialidade_id']) {
+                    $especialidade_nome = $especialidade['nome'];
+                    break;
+                }
+            }
+
+            if ($especialidade_nome !== '') {
+                $response[] = [
+                    'especialidade_id' => $especialidade_id,
+                    'especialidade_nome' => $especialidade_nome,
+                    'error' => false,
+                    'message' => ''
+                ];
+            } else {
+                $response[] = [
+                    'especialidade_id' => $especialidade_id,
+                    'especialidade_nome' => '',
+                    'error' => true,
+                    'message' => 'Especialidade não atribuída a um profissional: https://app2.feegow.com/v8/?P=Profissionais'
+                ];
+            }
+        }
+
+        return $response;
+    }
 
     public function listAtendimentos()
     {
@@ -162,51 +227,6 @@ class Api
         return $response;
     }
 
-    private function getEspecialidadesByIdArray($procedimentos_especialidades_array, array $especialidades): array
-    {
-        $response = [];
-
-        if (empty($procedimentos_especialidades_array)) {
-            $response[] = [
-                'especialidade_id' => '',
-                'especialidade_nome' => 'Nenhuma especialidade atribuída',
-                'error' => true,
-                'message' => 'Nenhuma especialidade atribuída a este procedimento: https://app2.feegow.com/v8/?P=Procedimentos&Pers=Follow'
-            ];
-            return $response;
-        }
-
-        foreach ($procedimentos_especialidades_array as $procedimento_especialidade) {
-            $especialidade_id = $procedimento_especialidade;
-            $especialidade_nome = '';
-
-            foreach ($especialidades as $especialidade) {
-                if ($procedimento_especialidade == $especialidade['especialidade_id']) {
-                    $especialidade_nome = $especialidade['nome'];
-                    break;
-                }
-            }
-
-            if ($especialidade_nome !== '') {
-                $response[] = [
-                    'especialidade_id' => $especialidade_id,
-                    'especialidade_nome' => $especialidade_nome,
-                    'error' => false,
-                    'message' => ''
-                ];
-            } else {
-                $response[] = [
-                    'especialidade_id' => $especialidade_id,
-                    'especialidade_nome' => '',
-                    'error' => true,
-                    'message' => 'Especialidade não atribuída a um profissional: https://app2.feegow.com/v8/?P=Profissionais'
-                ];
-            }
-        }
-
-        return $response;
-    }
-
     public function listProcedimentos()
     {
 
@@ -256,27 +276,6 @@ class Api
         }
 
         return $response;
-    }
-
-    private function availableSchedule($profissional_id, $especialidade_id, $unidade_id, $data_start, $data_end)
-    {
-        $disponibilidade_horarios = $this->connectApi($this->disponibilidade_horarios . '?tipo=E&especialidade_id=' . $especialidade_id . '&unidade_id=' . $unidade_id . '&data_start=' . $data_start . '&data_end=' . $data_end);
-
-
-        if (isset($disponibilidade_horarios['error'])) {
-            return [
-                "status" => "erro",
-                "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
-            ];
-        }
-
-        $response = [];
-
-        foreach ($disponibilidade_horarios['content'] as $disponibilidade) {
-            $response = $disponibilidade[$profissional_id]['local_id'];
-        }
-
-        return array_shift($response);
     }
 
     public function listProfissionaisHorarios($unidade_id, $especialidade_id, $data_start, $data_end, $all = null)
@@ -431,17 +430,8 @@ class Api
         }
     }
 
-    public function createAgendamento(
-        $local_id,
-        $paciente_id,
-        $profissional_id,
-        $procedimento_id,
-        $especialidade_id,
-        $data,
-        $horario,
-        $valor,
-        $plano = 0
-    ) {
+    public function createAgendamento($local_id, $paciente_id, $profissional_id, $procedimento_id, $especialidade_id, $data, $horario, $valor, $plano = 0)
+    {
         $agendamento = $this->connectApi($this->agendamento, 'POST', json_encode([
             "local_id" => $local_id,
             "paciente_id" => $paciente_id,

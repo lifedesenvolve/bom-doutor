@@ -29,6 +29,18 @@ function rotas_bom_doutor()
     ),
   ));
 
+  register_rest_route('api/v1', '/paciente/', array(
+    'methods'  => 'GET',
+    'callback' => 'get_paciente_by_ID',
+    'args' => array(
+        'paciente_id' => array(
+          'validate_callback' => function ($param, $request, $key) {
+            return is_numeric($param);
+          }
+        ),
+    ),
+  ));
+
   register_rest_route('api/v1', '/registrar-paciente/', array(
     'methods'  => 'POST',
     'callback' => 'registrar_paciente',
@@ -127,4 +139,15 @@ function registrar_agendamento($request)
     "status" => "erro",
     "mensagem" => 'teste'
   ]); */
+}
+function get_paciente_by_ID($request)
+{
+    $paciente_id = $request->get_param('paciente_id');
+    $api = new Api();
+
+    $resultado = $api->getPacienteByID(
+        $paciente_id
+    );
+
+    echo json_encode($resultado);
 }

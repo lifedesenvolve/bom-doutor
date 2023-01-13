@@ -347,6 +347,7 @@ class Api
         }
 
         return [
+            'status' => $paciente['success'] ?? false,
             'paciente' => $paciente['content'] ?? null,
             'dependente' => $dependente
         ];
@@ -373,6 +374,7 @@ class Api
         }
 
         return [
+            'status' => $paciente['success'] ?? false,
             'paciente' => $paciente['content'] ?? null,
             'dependente' => $dependente
         ];

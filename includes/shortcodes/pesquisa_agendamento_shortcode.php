@@ -64,7 +64,7 @@ function pesquisa_agendamento_shortcode()
             color: white;
         }
     </style>
-    <form id="form-agendamento" action="/agendar">
+    <div id="form-agendamento" action="<?php echo site_url('/agendar') ?>">
         <div class="group-modalidade" id="tipoProcedimento"></div>
         <div class="group-inputs">
             <select id="unidade" name="unidade">
@@ -82,9 +82,8 @@ function pesquisa_agendamento_shortcode()
             <input type="hidden" name="filtro__procedimento" value='2'>
             <button class="elementor-button elementor-size-sm btn-pesquisa" onclick="pesquisaFeeGow()" style="cursor: pointer;">Pesquisar</button>
         </div>
+    </div>
 
-
-    </form>
     <script>
         const tiposProcedimentos = [{
                 "id": 1,

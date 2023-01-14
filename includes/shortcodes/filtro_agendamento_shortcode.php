@@ -83,6 +83,7 @@ function filtro_agendamento_shortcode()
                 </option>
             <?php } ?>
         </select><br><br>
+        <input type="hidden" name="filtro__procedimento">
         <button class="btn-filtro" id="btn-filtro">Buscar</button>
     </form>
 

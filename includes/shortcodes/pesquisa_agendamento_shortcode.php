@@ -67,12 +67,12 @@ function pesquisa_agendamento_shortcode()
     <div id="form-agendamento" action="<?php echo site_url('/agendar') ?>">
         <div class="group-modalidade" id="tipoProcedimento"></div>
         <div class="group-inputs">
-            <select id="unidade" name="unidade">
+            <select id="unidade" name="filtro__unidade">
                 <?php foreach ($lista_unidades as $unidade) { ?>
                     <option value="<?php echo $unidade['id'] ?>"><?php echo $unidade['cidade'] ?></option>
                 <?php } ?>
             </select>
-            <select id="especialidade" name="especialidade" class="modalidade-item">
+            <select id="especialidade" name="filtro__especialidades" class="modalidade-item">
                 <option value="">Selecione a especialidade</option>
                 <?php foreach ($lista_especialidades as $especialidade) { ?>
                     <option value="<?php echo $especialidade['especialidade_id'] ?>"><?php echo $especialidade['nome'] ?></option>

@@ -1,7 +1,7 @@
 <?php
 function page_agendamento_shortcode()
 {
-
+    $user_id = 1;
     if (is_user_logged_in()) {
         $usuario = wp_get_current_user();
         $email = $usuario->user_email;
@@ -373,7 +373,8 @@ function page_agendamento_shortcode()
                         </div>
 
                         <input hidden class="form-control" id="horario_escolhido" name="horario_escolhido" type="text">
-                        <input hidden class="form-control" id="profissional_escolhido" name="profissional_escolhido" type="text" data-name="">
+                        <input hidden class="form-control" id="profissional_escolhido" name="profissional_escolhido" type="text">
+                        <input hidden class="form-control" id="valor_procedimento" name="valor_procedimento" type="text" value="8900">
 
                         <div class="mb-3 px-5 row">
                             <label for="cpfTitular" class="col-sm-3 col-form-label">CPF</label>
@@ -432,7 +433,7 @@ function page_agendamento_shortcode()
                     <div class="step-3" style="display:none;">
                         <div class="steps mb-5"><img src="<?php echo PLUGIN_URL . "/assets/image/etapa-3.png" ?>"></div>
                         <div class="dados-agendamento px-5" id="dadosAgendamento"></div>
-                        <div id="mgsModal" class=" mb-5"></div>
+                        <div id="mgsModal" class="d-flex justify-content-center m-5"></div>
 
                         <div class="d-flex px-5 justify-content-end">
                             <button type="button" class="btn btn-default cta" id="step3">Enviar</button>
@@ -464,7 +465,7 @@ function page_agendamento_shortcode()
 
                 nomeTitular.value = dadosPaciente?.paciente.nome;
                 cpfTitular.value = dadosPaciente?.paciente.documentos.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-                telefoneTitular.value = dadosPaciente?.paciente.telefones[0];
+                telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
                 generoTitular.value = dadosPaciente?.paciente.sexo[0];                
                 emailTitular.value = dadosPaciente?.paciente.email[0];
             })
@@ -476,7 +477,7 @@ function page_agendamento_shortcode()
             const cpfTitular = document.querySelector('[name=cpf_titular]').value.replace(/\D/g,"");
             const emailTitular = document.querySelector('[name=email_titular]').value;
             const generoTitular = document.querySelector('[name=genero_titular]').value;
-            const telefoneTitular = document.querySelector('[name=telefone_titular]').value;
+            const telefoneTitular = document.querySelector('[name=telefone_titular]').value.replace(/\D/g,"");
             const horarioEscolhido = document.querySelector('[name=horario_escolhido]').value;
 
             const dados = {
@@ -500,12 +501,13 @@ function page_agendamento_shortcode()
             const especialidade = document.querySelector(`#tituloEspecialidade`).textContent;
             const data = `${document.querySelector(`.info-data`).textContent} às ${document.querySelector('[name=horario_escolhido]').value}`;
             const nomeMedico = document.querySelector('#profissional_escolhido').textContent
+            const valorProcedimento = document.querySelector("#valor_procedimento").value.replace(/([0-9]{2})$/g, ",$1")
 
             document.querySelector(`#dadosAgendamento`).innerHTML = `
             <div class="row"><b class="col-sm-3">Paciente: </b><span class="col-sm-9">${nomeTitular}</span></div>
             <div class="row"><b class="col-sm-3">Médico: </b><span class="col-sm-9">${nomeMedico}</span></div>
             <div class="row"><b class="col-sm-3">Especialidade: </b><span class="col-sm-9">${especialidade}</span></div>
-            <div class="row"><b class="col-sm-3">Valor: </b><span class="col-sm-9">R$ 120,00</span></div>
+            <div class="row"><b class="col-sm-3">Valor: </b><span class="col-sm-9">R$ ${valorProcedimento}</span></div>
             <div class="row"><b class="col-sm-3">Local: </b><span class="col-sm-9">Av. Afonso Pena, nº 955, Loja 03 - Centro, Belo Horizonte, MG.</span></div>
             <div class="row"><b class="col-sm-3">Data: </b><span class="col-sm-9">${data}</span></div>
             `;
@@ -597,6 +599,19 @@ function page_agendamento_shortcode()
             const procedimento_id = "4";
             const filtro__especialidades = searchURL.get('filtro__especialidades');
             const filtro__data = searchURL.get('filtro__data');
+            const bodyCadastro = 
+                {
+                    "local_id": filtro__unidade,
+                    "paciente_id": paciente_id,
+                    "profissional_id": profissional_id,
+                    "procedimento_id": procedimento_id,
+                    "especialidade_id": filtro__especialidades,
+                    "data": filtro__data,
+                    "horario": document.querySelector('#horario_escolhido').value + ":00",
+                    "valor": document.querySelector("#valor_procedimento").value ,
+                    "plano": 0
+                }
+
 
             const base_url = '<?php echo home_url(); ?>';
             const options = {
@@ -604,15 +619,7 @@ function page_agendamento_shortcode()
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    "filtro__unidade": filtro__unidade,
-                    "paciente_id": paciente_id,
-                    "profissional_id": profissional_id,
-                    "procedimento_id": procedimento_id,
-                    "filtro__especialidades": filtro__especialidades,
-                    "filtro__data": filtro__data,
-                    "horario_escolhido": document.querySelector('#horario_escolhido').value
-                })
+                body: JSON.stringify(bodyCadastro)
             };
 
             fetch(`${base_url}/wp-json/api/v1/registrar-agendamento`, options)
@@ -621,7 +628,9 @@ function page_agendamento_shortcode()
                     if (response.status === 'sucesso') {
                         document.querySelector(`.step-2`).style.display = 'none';
                         document.querySelector(`.step-3`).style.display = 'block';
-                        console.log(response.mensagem);
+
+                        document.querySelector(`#mgsModal`).style.color = "green";
+                        document.querySelector(`#mgsModal`).textContent = response.mensagem;
                     } else {
                         console.log(response.mensagem);
                     }
@@ -667,6 +676,7 @@ function page_agendamento_shortcode()
                 })
                 .catch(err => console.error(err));
         }
+
         function maskCPF(e){
             let cpf = e.target.value;
             cpf=cpf.replace(/\D/g,"")

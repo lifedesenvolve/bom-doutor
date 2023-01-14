@@ -4,7 +4,7 @@
  * Plugin Name: Bom Doutor
  * Plugin URI: https://github.com/spalmeida
  * Description: Plugin dedicado ao site bom doutor.
- * Version: 1.0.7
+ * Version: 1.0.8
  * Author: Samuel Almeida
  * Author URI: https://github.com/spalmeida
  */

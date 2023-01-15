@@ -1,0 +1,53 @@
+.group-modalidade {
+    padding: 0% 0% 2% 0%;
+    display: flex;
+}
+
+.btn-modalidade {
+    font-family: "Open Sans", Sans-serif;
+    font-size: 0.9vw;
+    font-weight: 500;
+    fill: #737373;
+    color: #737373;
+    background-color: #ffffff;
+    padding: 1em 1.5em 1em 1.5em;
+    border-radius: 3px;
+    margin-right: 2%;
+    height: 100%;
+    max-height: 70px;
+    line-height: 1;
+}
+
+.group-inputs {
+    display: flex;
+    gap: 20px;
+}
+
+.group-inputs select {
+    background-color: #ffffff;
+    border-width: 0px 0px 0px 0px;
+    font-family: "Open Sans", Sans-serif;
+    font-size: 1vw;
+    font-weight: 400;
+}
+
+.btn-pesquisa {
+    background-color: #2a2860;
+    color: #ffffff;
+    font-family: "Open Sans", Sans-serif;
+    font-size: 0.9vw;
+    font-weight: 500;
+    padding: 18px;
+    line-height: 1;
+}
+
+/* [data-procedimento="Cirurgia"],
+[data-procedimento="Exame"],
+[data-procedimento="Procedimento"] {
+    display: none;
+} */
+
+.btn-modalidade.ativo {
+    background-color: #2a2860;
+    color: white;
+}

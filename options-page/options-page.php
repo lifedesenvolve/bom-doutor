@@ -93,12 +93,8 @@ function bom_doutor_settings_page()
 
     $api = new Api();
 
-
-    /* testes api */
-
-    $api = new Api();
-
     echo '<pre>';
     print_r($api->listProcedimentos());
     echo '</pre>';
+    //177.820.767-73
 }

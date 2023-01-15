@@ -1,68 +1,12 @@
 <?php
 function filtro_agendamento_shortcode()
 {
+    wp_enqueue_style('filtro-agendamento-css');
     $api = new Api();
     $lista_unidades = $api->listUnidades();
     $lista_especialidades = $api->listEspecialidades();
 
 ?>
-    <style>
-        .btn-filtro {
-            display: flex;
-            width: 100%;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-            padding: 8px 24px;
-            gap: 10px;
-            background: #2A2860;
-            border-radius: 4px;
-            color: #fff;
-            cursor: pointer;
-        }
-
-        .filtro__data {
-            border: 1px solid #D6D6D6;
-            border-radius: 4px;
-            width: 100%;
-            padding: 12px;
-            outline: none;
-            line-height: 1;
-            font-size: 12px;
-            line-height: 15px;
-        }
-
-        .form-filtro select {
-            background-image: url('<?php echo PLUGIN_URL . "/assets/image/icon-seta.png" ?>');
-            background-position: right 20px center;
-            background-repeat: no-repeat;
-            background-size: 10px auto;
-            border-radius: 4px;
-            font-size: 12px;
-            line-height: 15px;
-            padding: 12px;
-        }
-
-        .label-filtro {
-            font-family: 'Inter';
-            font-style: normal;
-            font-weight: 400;
-            font-size: 14px;
-            line-height: 17px;
-            text-align: center;
-            color: #4D4D4D;
-        }
-
-        .titulo-filtro {
-            font-family: 'Inter';
-            font-style: normal;
-            font-weight: 500;
-            font-size: 20px;
-            line-height: 24px;
-            color: #383838;
-
-        }
-    </style>
     <form class="form-filtro">
         <h3 class="titulo-filtro">Filtro</h3>
         <label for="filtro__data" class="label-filtro">Data:</label><br>
@@ -102,24 +46,6 @@ function filtro_agendamento_shortcode()
 <?php
 }
 add_shortcode('filtro_agendamento', 'filtro_agendamento_shortcode');
-
-function logout_shortcode()
-{
-    wp_logout();
-    echo '<script type="text/javascript">window.location = "' . home_url() . '"</script>';
-    exit;
-}
-add_shortcode('logout', 'logout_shortcode');
-
-function login_shortcode()
-{
-    if (!is_user_logged_in()) {
-        echo '<script type="text/javascript">window.location = "' . home_url() . '"</script>';
-        exit;
-    }
-}
-add_shortcode('login', 'login_shortcode');
-
 
 function shortcode_atribuir_valores()
 {

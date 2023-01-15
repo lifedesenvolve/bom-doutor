@@ -5,7 +5,6 @@ class Api
 
     public function __construct()
     {
-        /* GET */
         $this->atendimentos = get_option('bom_doutor_api_url') . 'company/list-local';
         $this->especialidades = get_option('bom_doutor_api_url') . 'specialties/list';
         $this->unidades = get_option('bom_doutor_api_url') . 'company/list-unity';
@@ -17,6 +16,7 @@ class Api
         $this->paciente_create = get_option('bom_doutor_api_url') . 'patient/create';
         $this->dependentes = get_option('bom_doutor_api_url') . 'patient/list-dependents';
         $this->agendamento = get_option('bom_doutor_api_url') . 'appoints/new-appoint';
+        $this->tipos_procedimentos = get_option('bom_doutor_api_url') . 'procedures/types';
     }
 
     private function connectApi(string $url, string $type = 'GET', $body = ''): array
@@ -83,18 +83,12 @@ class Api
         return array_shift($response);
     }
 
-    private function getEspecialidadesByIdArray($procedimentos_especialidades_array, array $especialidades): array
+    private function getEspecialidadesByIdArray($procedimentos_especialidades_array, array $especialidades)
     {
         $response = [];
 
         if (empty($procedimentos_especialidades_array)) {
-            $response[] = [
-                'especialidade_id' => '',
-                'especialidade_nome' => 'Nenhuma especialidade atribuída',
-                'error' => true,
-                'message' => 'Nenhuma especialidade atribuída a este procedimento: https://app2.feegow.com/v8/?P=Procedimentos&Pers=Follow'
-            ];
-            return $response;
+            return false;
         }
 
         foreach ($procedimentos_especialidades_array as $procedimento_especialidade) {
@@ -111,22 +105,25 @@ class Api
             if ($especialidade_nome !== '') {
                 $response[] = [
                     'especialidade_id' => $especialidade_id,
-                    'especialidade_nome' => $especialidade_nome,
-                    'error' => false,
-                    'message' => ''
-                ];
-            } else {
-                $response[] = [
-                    'especialidade_id' => $especialidade_id,
-                    'especialidade_nome' => '',
-                    'error' => true,
-                    'message' => 'Especialidade não atribuída a um profissional: https://app2.feegow.com/v8/?P=Profissionais'
+                    'especialidade_nome' => $especialidade_nome
                 ];
             }
         }
 
         return $response;
     }
+
+    /*     private function verificarEspecialidadePorId($procedimentos_especialidades_array, $get_especialidade_id)
+    {
+        if (empty($procedimentos_especialidades_array)) return false;
+
+        foreach ($procedimentos_especialidades_array as $procedimento_especialidade) {
+            if ($get_especialidade_id == $procedimento_especialidade) {
+                return true;
+            }
+        }
+        return false;
+    } */
 
     public function listAtendimentos()
     {
@@ -175,25 +172,29 @@ class Api
         return $response;
     }
 
-    public function listLocais($unidade_id)
+    public function getEspecialidadeByProcedimentoId($procedimento_id)
     {
-        $locais = $this->connectApi($this->locais);
+        $especialidades = $this->connectApi($this->especialidades);
 
-        if (isset($locais['error'])) {
+        if (isset($especialidades['error'])) {
             return [
                 "status" => "erro",
                 "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
             ];
         }
 
-        $response = [];
-        foreach ($locais['content'] as $local) {
-            if ($local['unidade_id'] == $unidade_id) {
+        $procedimentos_lista = $this->connectApi($this->procedimentos)['content'];
 
-                return $local['unidade_id'];
-            }
+        $response = [];
+        foreach ($especialidades['content'] as $especialidade) {
+
+            $response[] = [
+                'especialidade_id' => $especialidade['especialidade_id'],
+                'nome' => $especialidade['nome']
+            ];
         }
-        return $response ?: false;
+
+        return $procedimentos_lista;
     }
 
     public function listUnidades()
@@ -231,6 +232,65 @@ class Api
     public function listProcedimentos()
     {
 
+        $procedimentos = $this->connectApi($this->tipos_procedimentos)['content'];
+
+        if (isset($procedimentos['error'])) {
+            return [
+                "status" => "erro",
+                "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+            ];
+        }
+        $procedimentos_lista = $this->connectApi($this->procedimentos)['content'];
+
+        $response = [];
+        foreach ($procedimentos as $procedimento) {
+            $procedimento_id = '';
+            $procedimento_nome = '';
+            foreach ($procedimentos_lista as $procedimento_lista) {
+                if ($procedimento['id'] == $procedimento_lista['tipo_procedimento'] && $procedimento_lista['valor'] > 0 && $procedimento_lista['especialidade_id']) {
+
+                    $procedimento_id = $procedimento['id'];
+                    $procedimento_nome = $procedimento['tipo'];
+                }
+            }
+
+            //$listarEspecialidadesPorProcedimento = $this->listarEspecialidadesPorProcedimento($procedimento_id);
+
+            if ($procedimento_id != "" && $procedimento_nome != "") {
+                $response[] = [
+                    'procedimento_id' => $procedimento_id,
+                    'procedimento_nome' => $procedimento_nome,
+                    //'especialidades' => $listarEspecialidadesPorProcedimento['especialidades']
+                ];
+            }
+        }
+
+        return $response;
+    }
+
+    public function listLocais($unidade_id)
+    {
+        $locais = $this->connectApi($this->locais);
+
+        if (isset($locais['error'])) {
+            return [
+                "status" => "erro",
+                "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+            ];
+        }
+
+        $response = [];
+        foreach ($locais['content'] as $local) {
+            if ($local['unidade_id'] == $unidade_id) {
+
+                return $local['unidade_id'];
+            }
+        }
+        return $response ?: false;
+    }
+
+    public function listarProcedimentosPorEspecialidade($especialidade_id, $procedimento_id)
+    {
         $procedimentos = $this->connectApi($this->procedimentos);
 
         if (isset($procedimentos['error'])) {
@@ -240,21 +300,53 @@ class Api
             ];
         }
 
-        $response = [];
-        $especialidades = self::listEspecialidades();
+        $filteredProcedures = array_filter($procedimentos['content'], function ($item) use ($especialidade_id, $procedimento_id) {
+            return (isset($item['procedimento_id']) && isset($item['especialidade_id']) && $item['procedimento_id'] == $procedimento_id && in_array($especialidade_id, $item['especialidade_id']));
+        });
 
-        foreach ($procedimentos['content'] as $procedimento) {
+        $filteredProcedure = reset($filteredProcedures);
 
-            $response[] = [
-                'tipo_procedimento' => $procedimento['tipo_procedimento'],
-                'procedimento_id' => $procedimento['procedimento_id'],
-                'procedimento_nome' => $procedimento['nome'],
-                'valor' => $procedimento['valor'],
-                'especialidades' => $this->getEspecialidadesByIdArray($procedimento['especialidade_id'], $especialidades)
+        if ($filteredProcedure) {
+            return [
+                'tipo_procedimento' => $filteredProcedure['tipo_procedimento'],
+                'valor' => $filteredProcedure['valor'],
+                'api_response' => $filteredProcedure
+            ];
+        } else {
+            return [
+                'error' => 'Valor não encontrado'
+            ];
+        }
+    }
+
+    public function listarEspecialidadesPorProcedimento($tipo_procedimento)
+    {
+        $procedimentos = $this->connectApi($this->procedimentos);
+
+        if (isset($procedimentos['error'])) {
+            return [
+                "status" => "erro",
+                "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
             ];
         }
 
-        return $response;
+        $filteredProcedures = array_filter($procedimentos['content'], function ($item) use ($tipo_procedimento) {
+            return (isset($item['procedimento_id']) && $item['tipo_procedimento'] == $tipo_procedimento);
+        });
+
+        $filteredProcedure = reset($filteredProcedures);
+        $especialidades = $this->listEspecialidades();
+
+        if ($filteredProcedure) {
+            return [
+                'tipo_procedimento' => $filteredProcedure['procedimento_id'],
+                'especialidades' => $this->getEspecialidadesByIdArray($filteredProcedure['especialidade_id'], $especialidades)
+            ];
+        } else {
+            return [
+                'error' => 'Valor não encontrado'
+            ];
+        }
     }
 
     public function listEspecialidadeByUnidade($unidade_id)

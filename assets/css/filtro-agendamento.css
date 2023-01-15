@@ -1,0 +1,54 @@
+.btn-filtro {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 24px;
+    gap: 10px;
+    background: #2a2860;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.filtro__data {
+    border: 1px solid #d6d6d6;
+    border-radius: 4px;
+    width: 100%;
+    padding: 12px;
+    outline: none;
+    line-height: 1;
+    font-size: 12px;
+    line-height: 15px;
+}
+
+.form-filtro select {
+    background-image: url("../image/icon-seta.png");
+    background-position: right 20px center;
+    background-repeat: no-repeat;
+    background-size: 10px auto;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 15px;
+    padding: 12px;
+}
+
+.label-filtro {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 17px;
+    text-align: center;
+    color: #4d4d4d;
+}
+
+.titulo-filtro {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+    color: #383838;
+}

@@ -24,3 +24,8 @@ function remove_admin_bar()
     }
 }
 add_action('after_setup_theme', 'remove_admin_bar');
+
+
+wp_register_style('page-agendamento-css', plugins_url('/assets/css/page-agendamento.css', __FILE__));
+wp_register_style('pesquisa-agendamento-css', plugins_url('/assets/css/pesquisa-agendamento.css', __FILE__));
+wp_register_style('filtro-agendamento-css', plugins_url('/assets/css/filtro-agendamento.css', __FILE__));

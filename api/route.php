@@ -2,9 +2,14 @@
 
 function rotas_bom_doutor()
 {
-    register_rest_route('api/v1', '/lista-especialidades/', array(
+    register_rest_route('api/v1', '/get-especialidades/', array(
         'methods'  => 'GET',
-        'callback' => 'lista_especialidades',
+        'callback' => 'getEspecialidadeByProcedimentoId',
+    ));
+
+    register_rest_route('api/v1', '/lista-procedimentos/', array(
+        'methods'  => 'GET',
+        'callback' => 'lista_procedimentos',
     ));
 
     register_rest_route('api/v1', '/lista-profissionais/', array(
@@ -55,14 +60,30 @@ function rotas_bom_doutor()
         'methods'  => 'POST',
         'callback' => 'registrar_agendamento',
     ));
+
+    register_rest_route('api/v1', '/procedimento-valor/', array(
+        'methods'  => 'GET',
+        'callback' => 'procedimento_valor',
+    ));
+
+    register_rest_route('api/v1', '/listar-especialidades/', array(
+        'methods'  => 'GET',
+        'callback' => 'listar_especialidades',
+    ));
 }
 add_action('rest_api_init', 'rotas_bom_doutor');
 
-function lista_especialidades()
+function getEspecialidadeByProcedimentoId($request)
 {
-
     $api = new Api();
-    $lista_especialidades = $api->listEspecialidades();
+    $lista_especialidades = $api->getEspecialidadeByProcedimentoId($request['procedimento_id']);
+    return $lista_especialidades;
+}
+
+function lista_procedimentos()
+{
+    $api = new Api();
+    $lista_especialidades = $api->listProcedimentos();
     return $lista_especialidades;
 }
 
@@ -140,10 +161,6 @@ function registrar_agendamento($request)
         ];
     }
     echo json_encode($response);
-    /*  echo json_encode([
-    "status" => "erro",
-    "mensagem" => 'teste'
-  ]); */
 }
 function get_paciente_by_ID($request)
 {
@@ -160,6 +177,19 @@ function listar_agendamento()
 {
     $api = new Api();
     $resultado = $api->listProcedimentos();
+    echo json_encode($resultado);
+}
 
+function procedimento_valor($request)
+{
+    $api = new Api();
+    $resultado = $api->listarProcedimentosPorEspecialidade($request['especialidade_id'], $request['procedimento_id']);
+    echo json_encode($resultado);
+}
+
+function listar_especialidades($request)
+{
+    $api = new Api();
+    $resultado = $api->listarEspecialidadesPorProcedimento($request['tipo_procedimento']);
     echo json_encode($resultado);
 }

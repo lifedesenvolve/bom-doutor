@@ -55,6 +55,8 @@ function filtro_agendamento_shortcode()
             const options = {
                 method: 'GET'
             };
+            htmlProcedimentos = "";
+
             fetch(`${base_url}/wp-json/api/v1/lista-procedimentos`, options)
                 .then(response => response.json())
                 .then(response => {
@@ -63,7 +65,7 @@ function filtro_agendamento_shortcode()
 
                     response.forEach((item) => {
                         htmlProcedimentos += `<option value="${item.procedimento_id}">${item.procedimento_nome}</option>`
-                        selectProcedimento.innerHTML = options;
+                        selectProcedimento.innerHTML = htmlProcedimentos;
                     });
                 })
                 .catch(err => console.error(err));

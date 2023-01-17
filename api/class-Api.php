@@ -247,7 +247,7 @@ class Api
             $procedimento_id = '';
             $procedimento_nome = '';
             foreach ($procedimentos_lista as $procedimento_lista) {
-                if ($procedimento['id'] == $procedimento_lista['tipo_procedimento'] && $procedimento_lista['valor'] > 0 && $procedimento_lista['especialidade_id']) {
+                if ($procedimento['id'] == $procedimento_lista['tipo_procedimento'] && $procedimento_lista['especialidade_id']) {
 
                     $procedimento_id = $procedimento['id'];
                     $procedimento_nome = $procedimento['tipo'];

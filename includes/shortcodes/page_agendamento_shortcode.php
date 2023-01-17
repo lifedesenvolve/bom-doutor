@@ -208,15 +208,16 @@ function page_agendamento_shortcode()
             return dados;
         }
 
-        function procedimento_valor(especialidade_id, procedimento_id) {
+        function procedimento_valor(especialidade_id, tipo_procedimento) {
             const base_url = '<?php echo home_url(); ?>';
             const options = {
                 method: 'GET'
             };
-            fetch(`${base_url}/wp-json/api/v1/procedimento-valor/?especialidade_id=${especialidade_id}&tipo_procedimento=${procedimento_id}`, options)
+            fetch(`${base_url}/wp-json/api/v1/procedimento-valor/?especialidade_id=${especialidade_id}&tipo_procedimento=${tipo_procedimento}`, options)
                 .then(response => response.json())
                 .then(response => {
-                    document.querySelector("#valor_procedimento").value = response.valor;
+                    document.querySelector("#valor_procedimento").innerText = response.api_response.valor;
+                    document.querySelector("#valor_procedimento").value = response.api_response.procedimento_id;
                     console.log(response)
                 })
                 .catch(err => console.error(err));
@@ -225,16 +226,16 @@ function page_agendamento_shortcode()
         function confirmacaoConsulta() {
 
             const searchURL = new URLSearchParams(window.location.search);
-            const procedimento_id = searchURL.get('filtro__procedimento');
+            const tipo_procedimento = searchURL.get('filtro__procedimento');
             const filtro__especialidades = searchURL.get('filtro__especialidades');
 
-            procedimento_valor(filtro__especialidades, procedimento_id);
+            procedimento_valor(filtro__especialidades, tipo_procedimento);
 
             const nomeTitular = document.querySelector('[name=nome_titular]').value;
             const especialidade = document.querySelector(`#tituloEspecialidade`).textContent;
             const data = `${document.querySelector(`.info-data`).textContent} às ${document.querySelector('[name=horario_escolhido]').value}`;
             const nomeMedico = document.querySelector('#profissional_escolhido').textContent
-            const valorProcedimento = document.querySelector("#valor_procedimento").value.replace(/([0-9]{2})$/g, ",$1")
+            const valorProcedimento = document.querySelector("#valor_procedimento").textContent.replace(/([0-9]{2})$/g, ",$1")
 
             document.querySelector(`#dadosAgendamento`).innerHTML = `
             <div class="row"><b class="col-sm-3">Paciente: </b><span class="col-sm-9">${nomeTitular}</span></div>
@@ -335,11 +336,11 @@ function page_agendamento_shortcode()
                 "local_id": filtro__unidade,
                 "paciente_id": paciente_id,
                 "profissional_id": profissional_id,
-                "procedimento_id": procedimento_id,
+                "procedimento_id": document.querySelector("#valor_procedimento").value,
                 "especialidade_id": filtro__especialidades,
                 "data": filtro__data,
                 "horario": document.querySelector('#horario_escolhido').value + ":00",
-                "valor": document.querySelector("#valor_procedimento").value,
+                "valor": document.querySelector("#valor_procedimento").innerText,
                 "plano": 0
             }
 

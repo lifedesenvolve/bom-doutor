@@ -3,11 +3,12 @@ function page_agendamento_shortcode()
 {
     wp_enqueue_style('page-agendamento-css');
 
-    $user_id = 1;
+    //$user_id = 1;
     if (is_user_logged_in()) {
         $usuario = wp_get_current_user();
         $email = $usuario->user_email;
         $user_id = $usuario->ID;
+        $test_field = get_field('user_id_feegow', $user_id);
     }
     if (get_field('user_id', 'user_' . get_current_user_id()) == "") {
 

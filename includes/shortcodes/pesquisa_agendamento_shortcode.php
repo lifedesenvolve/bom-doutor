@@ -5,7 +5,6 @@ function pesquisa_agendamento_shortcode()
     wp_enqueue_style('pesquisa-agendamento-css');
     $api = new Api();
     $lista_unidades = $api->listUnidades();
-    $lista_especialidades = $api->listEspecialidades();
 ?>
     <div id="form-agendamento">
         <div class="group-modalidade" id="tipoProcedimento"></div>
@@ -100,6 +99,7 @@ function pesquisa_agendamento_shortcode()
                     });
 
                     document.querySelector('#tipoProcedimento').innerHTML = htmlProcedimentos;
+                    document.querySelector('[data-procedimento="Consulta"]').click()
                 })
                 .catch(err => console.error(err));
         }

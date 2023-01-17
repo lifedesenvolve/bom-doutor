@@ -12,6 +12,12 @@ function filtro_agendamento_shortcode()
         <label for="filtro__data" class="label-filtro">Data:</label><br>
         <input type="date" id="filtro__data" class="filtro__data" name="filtro__data" value="<?php echo date("Y-m-d"); ?>">
         <br><br>
+
+        <!-- <label for="filtro__procedimento" class="label-filtro">Procedimentos:</label><br>
+        <select id="filtro__procedimento" name="filtro__procedimento">
+            <option value="">Selecione o procedimento</option>
+        </select><br><br> -->
+
         <label for="filtro__especialidades" class="label-filtro">Especialidades:</label><br>
         <select id="filtro__especialidades" name="filtro__especialidades">
             <?php foreach ($lista_especialidades as $especialidade) { ?>
@@ -27,7 +33,7 @@ function filtro_agendamento_shortcode()
                 </option>
             <?php } ?>
         </select><br><br>
-        <input type="hidden" name="filtro__procedimento">
+        <input hidden id="filtro__procedimento" name="filtro__procedimento" />
         <button class="btn-filtro" id="btn-filtro">Buscar</button>
     </form>
 
@@ -37,10 +43,56 @@ function filtro_agendamento_shortcode()
         const filtro_data = searchParams.get('filtro__data');
         const filtro_especialidades = searchParams.get('filtro__especialidades');
         const filtro_unidade = searchParams.get('filtro__unidade');
+        const filtro__procedimento = searchParams.get('filtro__procedimento');
 
         document.getElementById('filtro__data').value = filtro_data;
         document.getElementById('filtro__especialidades').value = filtro_especialidades;
         document.getElementById('filtro__unidade').value = filtro_unidade;
+        document.getElementById('filtro__procedimento').value = filtro__procedimento;
+
+        function lista_procedimentos() {
+            const base_url = '<?php echo home_url(); ?>';
+            const options = {
+                method: 'GET'
+            };
+            fetch(`${base_url}/wp-json/api/v1/lista-procedimentos`, options)
+                .then(response => response.json())
+                .then(response => {
+                    const selectProcedimento = document.querySelector('#filtro__procedimento');
+                    selectProcedimento.innerHTML = '<option value="">Selecione o procedimento</option>';
+
+                    response.forEach((item) => {
+                        htmlProcedimentos += `<option value="${item.procedimento_id}">${item.procedimento_nome}</option>`
+                        selectProcedimento.innerHTML = options;
+                    });
+                })
+                .catch(err => console.error(err));
+        }
+        //lista_procedimentos();
+
+
+        function lista_especialidades(tipo_procedimento) {
+            const base_url = '<?php echo home_url(); ?>';
+            const options = {
+                method: 'GET'
+            };
+            fetch(`${base_url}/wp-json/api/v1/listar-especialidades/?tipo_procedimento=${tipo_procedimento}`, options)
+                .then(response => response.json())
+                .then(response => {
+                    const selectEspecialidade = document.querySelector('#filtro__especialidades');
+                    selectEspecialidade.innerHTML = '<option value="">Selecione a especialidade</option>';
+
+                    let options = '';
+                    // Verifies if the especialidades object exists before iterating over it
+
+                    response.especialidades.forEach(especialidade => {
+                        options += `<option value="${especialidade.especialidade_id}">${especialidade.especialidade_nome}</option>`;
+                        selectEspecialidade.innerHTML = options;
+                    });
+                })
+                .catch(err => console.error(err));
+        }
+        lista_especialidades(filtro__procedimento);
     </script>
 
 <?php

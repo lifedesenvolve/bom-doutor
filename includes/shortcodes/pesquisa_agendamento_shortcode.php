@@ -46,6 +46,7 @@ function pesquisa_agendamento_shortcode()
         function pesquisaFeeGow() {
             let unidade_id = document.getElementById("unidade").value;
             let especialidade = document.getElementById("especialidade").value;
+            let filtro__procedimento_selected = document.querySelector(`[name="filtro__procedimento"]`).value;
 
             if (unidade_id === "") {
                 document.getElementById("unidade").style.borderColor = "red";
@@ -60,7 +61,7 @@ function pesquisa_agendamento_shortcode()
             if (unidade_id !== "" && especialidade !== "") {
                 <?php if (is_user_logged_in()) { ?>
                     // os campos foram selecionados, redireciona a página
-                    window.location.assign(`<?php echo home_url() ?>/agendar/?filtro__data=<?php echo date('Y-m-d') ?>&filtro__especialidades=${especialidade}&filtro__unidade=${unidade_id}&filtro__procedimento=${2}`);
+                    window.location.assign(`<?php echo home_url() ?>/agendar/?filtro__data=<?php echo date('Y-m-d') ?>&filtro__especialidades=${especialidade}&filtro__unidade=${unidade_id}&filtro__procedimento=${filtro__procedimento_selected}`);
                 <?php } else { ?>
                     elementorProFrontend.modules.popup.showPopup({
                         id: 1376

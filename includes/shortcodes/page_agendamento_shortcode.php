@@ -213,7 +213,7 @@ function page_agendamento_shortcode()
             const options = {
                 method: 'GET'
             };
-            fetch(`${base_url}/wp-json/api/v1/procedimento-valor/?especialidade_id=${especialidade_id}&procedimento_id=${procedimento_id}`, options)
+            fetch(`${base_url}/wp-json/api/v1/procedimento-valor/?especialidade_id=${especialidade_id}&tipo_procedimento=${procedimento_id}`, options)
                 .then(response => response.json())
                 .then(response => {
                     document.querySelector("#valor_procedimento").value = response.valor;
@@ -225,7 +225,7 @@ function page_agendamento_shortcode()
         function confirmacaoConsulta() {
 
             const searchURL = new URLSearchParams(window.location.search);
-            const procedimento_id = 4;
+            const procedimento_id = searchURL.get('filtro__procedimento');
             const filtro__especialidades = searchURL.get('filtro__especialidades');
 
             procedimento_valor(filtro__especialidades, procedimento_id);
@@ -328,7 +328,6 @@ function page_agendamento_shortcode()
             const filtro__unidade = searchURL.get('filtro__unidade');
             const paciente_id = "<?php echo $user_id ?>";
             const profissional_id = document.querySelector('#profissional_escolhido').value;
-            const procedimento_id = 4;
             const filtro__especialidades = searchURL.get('filtro__especialidades');
             const filtro__data = searchURL.get('filtro__data');
 
@@ -344,6 +343,7 @@ function page_agendamento_shortcode()
                 "plano": 0
             }
 
+            console.log(bodyCadastro);
 
             const base_url = '<?php echo home_url(); ?>';
             const options = {

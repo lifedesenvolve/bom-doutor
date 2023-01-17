@@ -183,7 +183,7 @@ function listar_agendamento()
 function procedimento_valor($request)
 {
     $api = new Api();
-    $resultado = $api->listarProcedimentosPorEspecialidade($request['especialidade_id'], $request['procedimento_id']);
+    $resultado = $api->listarProcedimentosPorEspecialidade($request['especialidade_id'], $request['tipo_procedimento']);
     echo json_encode($resultado);
 }
 

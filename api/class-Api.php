@@ -301,7 +301,7 @@ class Api
         }
 
         $filteredProcedures = array_filter($procedimentos['content'], function ($item) use ($especialidade_id, $procedimento_id) {
-            return (isset($item['procedimento_id']) && isset($item['especialidade_id']) && $item['procedimento_id'] == $procedimento_id && in_array($especialidade_id, $item['especialidade_id']));
+            return (isset($item['tipo_procedimento']) && isset($item['especialidade_id']) && $item['tipo_procedimento'] == $procedimento_id && in_array($especialidade_id, $item['especialidade_id']));
         });
 
         $filteredProcedure = reset($filteredProcedures);

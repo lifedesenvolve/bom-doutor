@@ -34,21 +34,19 @@ function filtro_agendamento_shortcode()
             <?php } ?>
         </select><br><br>
         <input hidden id="filtro__procedimento" name="filtro__procedimento" />
-        <button class="btn-filtro" id="btn-filtro">Buscar</button>
+        <button class="btn-filtro" id="btn-filtro" onclick="setStorange()" >Buscar</button>
     </form>
 
     <script>
-        const searchParams = new URLSearchParams(window.location.search);
-
-        const filtro_data = searchParams.get('filtro__data');
-        const filtro_especialidades = searchParams.get('filtro__especialidades');
-        const filtro_unidade = searchParams.get('filtro__unidade');
-        const filtro__procedimento = searchParams.get('filtro__procedimento');
+        const filtro_data = localStorage.getItem('@@bomdoutor:filtro__data');
+        const filtro_especialidades = localStorage.getItem('@@bomdoutor:filtro__especialidades');
+        const filtro_unidade = localStorage.getItem('@@bomdoutor:filtro__unidade');
+        const filtro_procedimento = localStorage.getItem('@@bomdoutor:filtro__procedimento');
 
         document.getElementById('filtro__data').value = filtro_data;
         document.getElementById('filtro__especialidades').value = filtro_especialidades;
         document.getElementById('filtro__unidade').value = filtro_unidade;
-        document.getElementById('filtro__procedimento').value = filtro__procedimento;
+        document.getElementById('filtro__procedimento').value = filtro_procedimento;
 
         function lista_procedimentos() {
             const base_url = '<?php echo home_url(); ?>';
@@ -78,23 +76,28 @@ function filtro_agendamento_shortcode()
             const options = {
                 method: 'GET'
             };
+            let = loadEspecialidades = "";
             fetch(`${base_url}/wp-json/api/v1/listar-especialidades/?tipo_procedimento=${tipo_procedimento}`, options)
                 .then(response => response.json())
                 .then(response => {
                     const selectEspecialidade = document.querySelector('#filtro__especialidades');
                     selectEspecialidade.innerHTML = '<option value="">Selecione a especialidade</option>';
 
-                    let options = '';
-                    // Verifies if the especialidades object exists before iterating over it
-
                     response.especialidades.forEach(especialidade => {
-                        options += `<option value="${especialidade.especialidade_id}">${especialidade.especialidade_nome}</option>`;
-                        selectEspecialidade.innerHTML = options;
+                        loadEspecialidades  += `<option value="${especialidade.especialidade_id}">${especialidade.especialidade_nome}</option>`;
+                        selectEspecialidade.innerHTML = loadEspecialidades;
                     });
                 })
                 .catch(err => console.error(err));
         }
         lista_especialidades(filtro__procedimento);
+
+        function setStorange(){
+            localStorage.setItem('@@bomdoutor:filtro__data', document.getElementById('filtro__data').value );
+            localStorage.setItem('@@bomdoutor:filtro__especialidades', document.getElementById('filtro__especialidades').value);
+            localStorage.setItem('@@bomdoutor:filtro__unidade', document.getElementById('filtro__unidade').value);
+            localStorage.setItem('@@bomdoutor:filtro__procedimento', document.getElementById('filtro__procedimento').value );
+        }
     </script>
 
 <?php

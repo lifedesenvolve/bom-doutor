@@ -160,9 +160,15 @@ function page_agendamento_shortcode()
 
     <div class="row"><span class="col-sm-3"></span><span class="col-sm-9"></span></div>
     <script>
+        const filtro__data = localStorage.getItem('@@bomdoutor:filtro__data');
+        const filtro__especialidades = localStorage.getItem('@@bomdoutor:filtro__especialidades');
+        const filtro__unidade = localStorage.getItem('@@bomdoutor:filtro__unidade');
+        const filtro__procedimento = localStorage.getItem('@@bomdoutor:filtro__procedimento');
+        
         const urlPlugin = "<?php echo PLUGIN_URL; ?>"
         const listaProfissionais = document.querySelector(`#listaProfissionais`);
         const tituloEspecialidade = document.querySelector(`#tituloEspecialidade`);
+        
         const url = `<?php echo home_url() ?>`;
         let dadosPaciente;
         fetch(`${url}/wp-json/api/v1/paciente/?paciente_id=<?php echo $user_id ?>`)
@@ -224,12 +230,10 @@ function page_agendamento_shortcode()
         }
 
         function confirmacaoConsulta() {
+            const tipo_procedimento = filtro__procedimento;
+            const id_especialidades = filtro__especialidades;
 
-            const searchURL = new URLSearchParams(window.location.search);
-            const tipo_procedimento = searchURL.get('filtro__procedimento');
-            const filtro__especialidades = searchURL.get('filtro__especialidades');
-
-            procedimento_valor(filtro__especialidades, tipo_procedimento);
+            procedimento_valor(id_especialidades, tipo_procedimento);
 
             const nomeTitular = document.querySelector('[name=nome_titular]').value;
             const especialidade = document.querySelector(`#tituloEspecialidade`).textContent;
@@ -247,14 +251,11 @@ function page_agendamento_shortcode()
             `;
         }
 
-        const searchURL = new URLSearchParams(window.location.search);
         const params = {
-            unidade: searchURL.get('filtro__unidade'),
-            especialidade: searchURL.get('filtro__especialidades'),
-            data: searchURL.get('filtro__data'),
+            unidade: filtro__unidade,
+            especialidade: filtro__especialidades,
+            data: filtro__data,
         };
-
-
 
         const queryString = new URLSearchParams(params).toString();
         const options = {
@@ -268,6 +269,7 @@ function page_agendamento_shortcode()
                 const {
                     profissionais
                 } = response;
+
                 console.log(`response:`, response)
 
                 listaProfissionais.innerHTML = profissionais.map(profissional => {
@@ -275,24 +277,24 @@ function page_agendamento_shortcode()
                     const {
                         horarios_disponiveis
                     } = profissional;
+
                     const dias_disponiveis = Object.values(horarios_disponiveis);
                     const horarios = Object.values(dias_disponiveis[0]);
                     return `<div class="card-profissional" style="display:flex;">
-                  <div class="card-imagem"><img src="${urlPlugin}assets/image/avatar-${profissional.sexo.toLowerCase()}.png" alt="" class="foto-especialista" width="100"></div>
-                  <div class="card-informacoes">
-                    <h3 class="nome-especialista">${profissional.tratamento === null ? `${profissional.nome}` : `${profissional.tratamento} ${profissional.nome}`} </h3>
-                    <span class="crm-especialista">${profissional.documento_conselho === `` ? `` : `CRM ${profissional.documento_conselho}`}</span>
-                    <div class="div-quadro-horarios">
-                      <h4 class="select">Selecione um horário</h4>
-                      <div class="quadro-horarios" data-id-profissional="${profissional.profissional_id}" >
-                      ${horarios.map(horario => { return `<button type="button" class="btn-horario" data-bs-toggle="modal" data-bs-target="#modalAgendamento">${horario.substr(0,5)}</button>` })
-            }
-                      </div>
-                      <hr>
+                    <div class="card-imagem"><img src="${urlPlugin}assets/image/avatar-${profissional.sexo.toLowerCase()}.png" alt="" class="foto-especialista" width="100"></div>
+                        <div class="card-informacoes">
+                            <h3 class="nome-especialista">${profissional.tratamento === null ? `${profissional.nome}` : `${profissional.tratamento} ${profissional.nome}`} </h3>
+                            <span class="crm-especialista">${profissional.documento_conselho === `` ? `` : `CRM ${profissional.documento_conselho}`}</span>
+                            <div class="div-quadro-horarios">
+                            <h4 class="select">Selecione um horário</h4>
+                            <div class="quadro-horarios" data-id-profissional="${profissional.profissional_id}" >
+                            ${horarios.map(horario => { return `<button type="button" class="btn-horario" data-bs-toggle="modal" data-bs-target="#modalAgendamento">${horario.substr(0,5)}</button>` })}
+                            </div>
+                            <hr>
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                </div>
-                `
+                    `
                 }).join().replaceAll(`,`, ``);
 
                 const select = document.querySelector('#filtro__especialidades');
@@ -313,6 +315,7 @@ function page_agendamento_shortcode()
                         confirmacaoConsulta();
                     });
                 });
+
             })
             .catch(err => {
                 console.error(err)
@@ -322,25 +325,27 @@ function page_agendamento_shortcode()
                 document.querySelector(`#loader`).style.display = "none"
             });
 
-        function cadastrarAgendamento() {
+        
+            function cadastrarAgendamento() {
 
-            const searchURL = new URLSearchParams(window.location.search);
-
-            const filtro__unidade = searchURL.get('filtro__unidade');
+            const unidade_id = filtro__unidade;
             const paciente_id = "<?php echo $user_id ?>";
             const profissional_id = document.querySelector('#profissional_escolhido').value;
-            const filtro__especialidades = searchURL.get('filtro__especialidades');
-            const filtro__data = searchURL.get('filtro__data');
+            const especialidade_id = filtro__especialidades;
+            const data_consulta = filtro__data;
+            const procedimento_id = document.querySelector("#valor_procedimento").value;
+            const horario_agendado = document.querySelector('#horario_escolhido').value + ":00";
+            const valor_consulta = document.querySelector("#valor_procedimento").innerText;
 
             const bodyCadastro = {
-                "local_id": filtro__unidade,
+                "local_id": unidade_id,
                 "paciente_id": paciente_id,
                 "profissional_id": profissional_id,
-                "procedimento_id": document.querySelector("#valor_procedimento").value,
-                "especialidade_id": filtro__especialidades,
-                "data": filtro__data,
-                "horario": document.querySelector('#horario_escolhido').value + ":00",
-                "valor": document.querySelector("#valor_procedimento").innerText,
+                "procedimento_id": procedimento_id,
+                "especialidade_id": especialidade_id,
+                "data": data_consulta,
+                "horario": horario_agendado,
+                "valor": valor_consulta,
                 "plano": 0
             }
 
@@ -423,7 +428,7 @@ function page_agendamento_shortcode()
             maskCPF(e)
         };
 
-        window.onload = function() {
+        window.onload = function() {           
 
             document.querySelector(`#step1`).onclick = function() {
                 if (capturarDados()) {
@@ -434,6 +439,7 @@ function page_agendamento_shortcode()
                     console.log('preencha todos os campos');
                 }
             }
+
             document.querySelector(`#step2`).onclick = function() {
                 const msg = document.querySelector(`#msgPagamento`)
                 if (document.querySelector(`#pagamentoLocal`).checked === false) {
@@ -446,9 +452,12 @@ function page_agendamento_shortcode()
                     confirmacaoConsulta();
                 }
             }
+
             document.querySelector(`#step3`).onclick = function() {
                 cadastrarAgendamento();
             }
+
+
         }
     </script>
 

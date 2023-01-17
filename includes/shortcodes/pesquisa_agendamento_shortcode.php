@@ -25,6 +25,13 @@ function pesquisa_agendamento_shortcode()
     </div>
 
     <script>
+        searchParams = new URLSearchParams(window.location.search);
+        isLogin = searchParams.get('login');
+        
+        if(isLogin){
+            window.location.href = `${window.location.origin}/agendar`
+        }
+
         function getEspecialidadeByProcedimentoId(procedimento_id) {
             const base_url = '<?php echo home_url(); ?>';
 
@@ -44,9 +51,15 @@ function pesquisa_agendamento_shortcode()
         }
 
         function pesquisaFeeGow() {
-            let unidade_id = document.getElementById("unidade").value;
-            let especialidade = document.getElementById("especialidade").value;
-            let filtro__procedimento_selected = document.querySelector(`[name="filtro__procedimento"]`).value;
+            const unidade_id = document.getElementById("unidade").value;
+            const especialidade = document.getElementById("especialidade").value;
+            const filtro__procedimento_selected = document.querySelector(`[name="filtro__procedimento"]`).value;
+            const data__filter = "<?php echo date('Y-m-d'); ?>"
+            
+            localStorage.setItem('@@bomdoutor:filtro__data', data__filter);
+            localStorage.setItem('@@bomdoutor:filtro__especialidades', especialidade);
+            localStorage.setItem('@@bomdoutor:filtro__unidade', unidade_id);
+            localStorage.setItem('@@bomdoutor:filtro__procedimento', filtro__procedimento_selected);
 
             if (unidade_id === "") {
                 document.getElementById("unidade").style.borderColor = "red";
@@ -58,16 +71,17 @@ function pesquisa_agendamento_shortcode()
             } else {
                 document.getElementById("especialidade").style.borderColor = "#D2D1D6";
             }
+
             if (unidade_id !== "" && especialidade !== "") {
                 <?php if (is_user_logged_in()) { ?>
-                    // os campos foram selecionados, redireciona a página
-                    window.location.assign(`<?php echo home_url() ?>/agendar/?filtro__data=<?php echo date('Y-m-d') ?>&filtro__especialidades=${especialidade}&filtro__unidade=${unidade_id}&filtro__procedimento=${filtro__procedimento_selected}`);
-                <?php } else { ?>
+                    window.location.assign(`<?php echo home_url() ?>/agendar/?filtro__data=${data__filter}&filtro__especialidades=${especialidade}&filtro__unidade=${unidade_id}&filtro__procedimento=${filtro__procedimento_selected}`);
+                    <?php  } else {  ?>
                     elementorProFrontend.modules.popup.showPopup({
                         id: 1376
                     });
-                <?php } ?>
+                 <?php  } ?>
             }
+            
         }
 
         function lista_procedimentos() {
@@ -89,6 +103,7 @@ function pesquisa_agendamento_shortcode()
                 })
                 .catch(err => console.error(err));
         }
+
         lista_procedimentos();
 
         function lista_especialidades(tipo_procedimento) {
@@ -113,28 +128,13 @@ function pesquisa_agendamento_shortcode()
                 .catch(err => console.error(err));
         }
 
-        function procedimentoAtivo() {
-            document.querySelectorAll(`#tipoProcedimento button`).forEach((item) => {
-                if (item.value == document.querySelector(`[name="filtro__procedimento"]`).value) {
-                    item.setAttribute(`class`, `btn-modalidade ativo`)
-                }
-            })
-            document.addEventListener('click', (event) => {
-                if (event.target.classList.contains('btn-modalidade')) {
-                    const selectedValue = event.target.value;
-                    loadEspecialidades(selectedValue)
-                }
-            });
-        }
-        procedimentoAtivo();
-
         function loadEspecialidades(tipoProcedimento) {
-            console.log(tipoProcedimento);
             const selectEspecialidade = document.querySelector('#especialidade');
             selectEspecialidade.innerHTML = '<option value="">Selecione a especialidade</option>';
 
             lista_especialidades(tipoProcedimento)
                 .then(response => {
+                    console.log(`tipoProcedimento`, response)
                     if (response.ok) {
                         return response.json();
                     }
@@ -158,6 +158,23 @@ function pesquisa_agendamento_shortcode()
                     loading.style.display = 'none';
                 });
         }
+
+
+        function procedimentoAtivo() {
+            document.querySelectorAll(`#tipoProcedimento button`).forEach((item) => {
+                if (item.value == document.querySelector(`[name="filtro__procedimento"]`).value) {
+                    item.setAttribute(`class`, `btn-modalidade ativo`)
+                }
+            })
+            document.addEventListener('click', (event) => {
+                if (event.target.classList.contains('btn-modalidade')) {
+                    const selectedValue = event.target.value;
+                    loadEspecialidades(selectedValue)
+                }
+            });
+        }
+        procedimentoAtivo();
+
 
 
         const tipoProcedimento = document.getElementById("tipoProcedimento");

@@ -1,32 +1,18 @@
-<?php
+﻿<?php
 function page_agendamento_shortcode()
 {
     wp_enqueue_style('page-agendamento-css');
 
-    //$user_id = 1;
     if (is_user_logged_in()) {
         $usuario = wp_get_current_user();
         $email = $usuario->user_email;
         $user_id = $usuario->ID;
-        $test_field = get_field('user_id_feegow', $user_id);
-    }
-    if (get_field('user_id', 'user_' . get_current_user_id()) == "") {
-
-
-?>
-    <?php }
-
-
-    setlocale(LC_TIME, 'pt_BR', 'pt_BR.utf-8', 'pt_BR.utf-8', 'portuguese');
-    date_default_timezone_set('America/Sao_Paulo');
-
-    if (isset($_GET['filtro__data'])) {
-        $filtro_data = $_GET['filtro__data'];
-        $date = strftime('%A, %d de %B de %Y', strtotime($filtro_data));
-    } else {
-        $date = strftime('%A, %d de %B de %Y', strtotime('today'));
+        $user_id_feegow = get_field('user_id_feegow', 'user_' . get_current_user_id());
     }
 
+    if(empty($user_id_feegow)){
+        $user_id_feegow = -1;
+    }
     ?>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -91,6 +77,7 @@ function page_agendamento_shortcode()
                         <input hidden class="form-control" id="horario_escolhido" name="horario_escolhido" type="text">
                         <input hidden class="form-control" id="profissional_escolhido" name="profissional_escolhido" type="text">
                         <input hidden class="form-control" id="valor_procedimento" name="valor_procedimento" type="text">
+                        <input hidden class="form-control" id="id_user_feegow" name="id_user_feegow" type="text">
 
                         <div class="mb-3 px-5 row">
                             <label for="cpfTitular" class="col-sm-3 col-form-label">CPF</label>
@@ -165,6 +152,12 @@ function page_agendamento_shortcode()
         const filtro__especialidades = localStorage.getItem('@@bomdoutor:filtro__especialidades');
         const filtro__unidade = localStorage.getItem('@@bomdoutor:filtro__unidade');
         const filtro__procedimento = localStorage.getItem('@@bomdoutor:filtro__procedimento');
+        document.querySelector(".info-data").innerHTML = new Date(filtro__data.replaceAll(`-`,` `)).toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        const idUserFeegow = <?php echo $user_id_feegow; ?>;
+        if(idUserFeegow !== -1){
+            document.querySelector(`#id_user_feegow`).value = idUserFeegow
+        }
         
         const urlPlugin = "<?php echo PLUGIN_URL; ?>"
         const listaProfissionais = document.querySelector(`#listaProfissionais`);
@@ -172,23 +165,27 @@ function page_agendamento_shortcode()
         
         const url = `<?php echo home_url() ?>`;
         let dadosPaciente;
-        fetch(`${url}/wp-json/api/v1/paciente/?paciente_id=<?php echo $user_id ?>`)
-            .then(response => response.json())
-            .then(data => {
-                dadosPaciente = data;
-                const nomeTitular = document.querySelector('[name=nome_titular]');
-                const cpfTitular = document.querySelector('[name=cpf_titular]');
-                const emailTitular = document.querySelector('[name=email_titular]');
-                const generoTitular = document.querySelector('[name=genero_titular]');
-                const telefoneTitular = document.querySelector('[name=telefone_titular]');
+        if(idUserFeegow !== -1){
+            fetch(`${url}/wp-json/api/v1/paciente/?paciente_id=${idUserFeegow}`)
+                .then(response => response.json())
+                .then(data => {
+                    dadosPaciente = data;
+                    const nomeTitular = document.querySelector('[name=nome_titular]');
+                    const cpfTitular = document.querySelector('[name=cpf_titular]');
+                    const emailTitular = document.querySelector('[name=email_titular]');
+                    const generoTitular = document.querySelector('[name=genero_titular]');
+                    const telefoneTitular = document.querySelector('[name=telefone_titular]');
 
-                nomeTitular.value = dadosPaciente?.paciente.nome;
-                cpfTitular.value = dadosPaciente?.paciente.documentos.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-                telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
-                generoTitular.value = dadosPaciente?.paciente.sexo[0];
-                emailTitular.value = dadosPaciente?.paciente.email[0];
-            })
-            .catch(error => console.log(error));
+                    nomeTitular.value = dadosPaciente?.paciente.nome;
+                    cpfTitular.value = dadosPaciente?.paciente.documentos.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+                    telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+                    generoTitular.value = dadosPaciente?.paciente.sexo[0];
+                    emailTitular.value = dadosPaciente?.paciente.email[0];
+                })
+                .catch(error => console.log(error));
+        }
+        
+
 
 
         function capturarDados() {
@@ -330,7 +327,7 @@ function page_agendamento_shortcode()
             function cadastrarAgendamento() {
 
             const unidade_id = filtro__unidade;
-            const paciente_id = "<?php echo $user_id ?>";
+            const paciente_id = document.querySelector(`#id_user_feegow`).value;
             const profissional_id = document.querySelector('#profissional_escolhido').value;
             const especialidade_id = filtro__especialidades;
             const data_consulta = filtro__data;
@@ -379,10 +376,21 @@ function page_agendamento_shortcode()
 
         function cadastraPaciente() {
             const nomeTitular = document.querySelector('[name=nome_titular]').value;
-            const cpfTitular = document.querySelector('[name=cpf_titular]').value;
+            const cpfTitular = document.querySelector('[name=cpf_titular]').value.replace(/[^\d]/g, "");
             const emailTitular = document.querySelector('[name=email_titular]').value;
             const generoTitular = document.querySelector('[name=genero_titular]').value;
-            const telefoneTitular = document.querySelector('[name=telefone_titular]').value;
+            const telefoneTitular = document.querySelector('[name=telefone_titular]').value.replace(/[^\d]/g, "");
+            let user_id = <?php echo get_current_user_id() ?>;
+
+            const bodyCadastro = {
+                    "nome_titular": nomeTitular,
+                    "cpf_titular": cpfTitular,
+                    "email_titular": emailTitular,
+                    "genero_titular": generoTitular,
+                    "telefone_titular": telefoneTitular,
+                    "user_id": user_id
+                }
+                console.log(bodyCadastro)
 
             const base_url = '<?php echo home_url(); ?>';
             const options = {
@@ -390,14 +398,7 @@ function page_agendamento_shortcode()
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    "nome_titular": nomeTitular,
-                    "cpf_titular": cpfTitular,
-                    "email_titular": emailTitular,
-                    "genero_titular": generoTitular,
-                    "telefone_titular": telefoneTitular,
-                    "user_id": "<?php echo $user_id ?>"
-                })
+                body: JSON.stringify(bodyCadastro)
             };
 
             fetch(`${base_url}/wp-json/api/v1/registrar-paciente`, options)
@@ -406,12 +407,12 @@ function page_agendamento_shortcode()
                     if (response.status === 'sucesso') {
                         document.querySelector(`.step-1`).style.display = 'none';
                         document.querySelector(`.step-2`).style.display = 'block';
-                        console.log(response.mensagem);
+                        document.querySelector(`#id_user_feegow`).value = response.content.paciente_id                        
+                        document.querySelector(`#stepModal`).innerText = "Forma de Pagamento";    
                     }
                     document.querySelector(`.step-1`).style.display = 'none';
                     document.querySelector(`.step-2`).style.display = 'block';
                     console.log(response.mensagem);
-                    document.querySelector(`#stepModal`).innerText = "Forma de Pagamento";
                 })
                 .catch(err => console.error(err));
         }

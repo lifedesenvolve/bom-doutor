@@ -120,8 +120,8 @@ function registrar_paciente($request)
             "content" => $resultado['content']
         ];
 
-        if (get_field('user_id', 'user_' . $dados['user_id']) === "") {
-            update_field('user_id', $resultado['content']['paciente_id'], 'user_' . $dados['user_id']);
+        if (get_field('user_id_feegow', 'user_' . $dados['user_id']) === "") {
+            update_field('user_id_feegow', $resultado['content']['paciente_id'], 'user_' . $dados['user_id']);
         }
     } else {
         $response = [

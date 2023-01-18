@@ -331,16 +331,32 @@ class Api
         }
 
         $filteredProcedures = array_filter($procedimentos['content'], function ($item) use ($tipo_procedimento) {
-            return (isset($item['procedimento_id']) && $item['tipo_procedimento'] == $tipo_procedimento);
+            return ($item['tipo_procedimento'] == $tipo_procedimento);
         });
 
         $filteredProcedure = reset($filteredProcedures);
         $especialidades = $this->listEspecialidades();
 
+        $lista_especialidades = [];
+
+        foreach ($filteredProcedures as  $filter) {
+            if (is_array($filter['especialidade_id'])) {
+
+                $lista_especialidades[] = $filter['especialidade_id'];
+            }
+        }
+
+        $filter_array = array();
+        array_walk_recursive($lista_especialidades, function ($val) use (&$filter_array) {
+            $filter_array[] = $val;
+        });
+
+        $listing = $this->getEspecialidadesByIdArray(array_unique($filter_array), $especialidades);
+
         if ($filteredProcedure) {
             return [
                 'tipo_procedimento' => $filteredProcedure['procedimento_id'],
-                'especialidades' => $this->getEspecialidadesByIdArray($filteredProcedure['especialidade_id'], $especialidades)
+                'especialidades' => $listing
             ];
         } else {
             return [

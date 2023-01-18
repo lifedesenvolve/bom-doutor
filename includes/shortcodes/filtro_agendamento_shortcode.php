@@ -34,7 +34,7 @@ function filtro_agendamento_shortcode()
             <?php } ?>
         </select><br><br>
         <input hidden id="filtro__procedimento" name="filtro__procedimento" />
-        <button class="btn-filtro" id="btn-filtro" onclick="setStorange()" >Buscar</button>
+        <button class="btn-filtro" id="btn-filtro" onclick="setStorange()">Buscar</button>
     </form>
 
     <script>
@@ -62,6 +62,7 @@ function filtro_agendamento_shortcode()
                     selectProcedimento.innerHTML = '<option value="">Selecione o procedimento</option>';
 
                     response.forEach((item) => {
+
                         htmlProcedimentos += `<option value="${item.procedimento_id}">${item.procedimento_nome}</option>`
                         selectProcedimento.innerHTML = htmlProcedimentos;
                     });
@@ -80,11 +81,19 @@ function filtro_agendamento_shortcode()
             fetch(`${base_url}/wp-json/api/v1/listar-especialidades/?tipo_procedimento=${tipo_procedimento}`, options)
                 .then(response => response.json())
                 .then(response => {
+                    const filtro_especialidades = localStorage.getItem('@@bomdoutor:filtro__especialidades');
                     const selectEspecialidade = document.querySelector('#filtro__especialidades');
                     selectEspecialidade.innerHTML = '<option value="">Selecione a especialidade</option>';
+                    let selected = "";
 
                     response.especialidades.forEach(especialidade => {
-                        loadEspecialidades  += `<option value="${especialidade.especialidade_id}">${especialidade.especialidade_nome}</option>`;
+                        if (filtro_especialidades === especialidade.especialidade_id) {
+                            selected = "selected";
+                        } else {
+                            selected = "";
+                        }
+
+                        loadEspecialidades += `<option ${selected} value="${especialidade.especialidade_id}">${especialidade.especialidade_nome}</option>`;
                         selectEspecialidade.innerHTML = loadEspecialidades;
                     });
                 })
@@ -92,11 +101,11 @@ function filtro_agendamento_shortcode()
         }
         lista_especialidades(filtro__procedimento);
 
-        function setStorange(){
-            localStorage.setItem('@@bomdoutor:filtro__data', document.getElementById('filtro__data').value );
+        function setStorange() {
+            localStorage.setItem('@@bomdoutor:filtro__data', document.getElementById('filtro__data').value);
             localStorage.setItem('@@bomdoutor:filtro__especialidades', document.getElementById('filtro__especialidades').value);
             localStorage.setItem('@@bomdoutor:filtro__unidade', document.getElementById('filtro__unidade').value);
-            localStorage.setItem('@@bomdoutor:filtro__procedimento', document.getElementById('filtro__procedimento').value );
+            localStorage.setItem('@@bomdoutor:filtro__procedimento', document.getElementById('filtro__procedimento').value);
         }
     </script>
 

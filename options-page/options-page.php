@@ -94,7 +94,43 @@ function bom_doutor_settings_page()
     $api = new Api();
 
     echo '<pre>';
-    print_r($api->listProcedimentos());
+    print_r($api->get('tipo_procedimento', 4)->procedimentos);
     echo '</pre>';
     //177.820.767-73
+    /* 
+    
+    Array
+(
+    [0] => Array
+        (
+            [procedimento_id] => 1
+            [procedimento_nome] => Cirurgia
+        )
+
+    [1] => Array
+        (
+            [procedimento_id] => 2
+            [procedimento_nome] => Consulta
+        )
+
+    [2] => Array
+        (
+            [procedimento_id] => 3
+            [procedimento_nome] => Exame
+        )
+
+    [3] => Array
+        (
+            [procedimento_id] => 4
+            [procedimento_nome] => Procedimento
+        )
+
+    [4] => Array
+        (
+            [procedimento_id] => 9
+            [procedimento_nome] => Retorno
+        )
+
+)
+    */
 }

@@ -5,11 +5,14 @@ class Api
 
     public function __construct()
     {
+        $this->procedimentos = get_option('bom_doutor_api_url') . 'procedures/list';
         $this->atendimentos = get_option('bom_doutor_api_url') . 'company/list-local';
         $this->especialidades = get_option('bom_doutor_api_url') . 'specialties/list';
+
+
+
         $this->unidades = get_option('bom_doutor_api_url') . 'company/list-unity';
         $this->locais = get_option('bom_doutor_api_url') . 'company/list-local';
-        $this->procedimentos = get_option('bom_doutor_api_url') . 'procedures/list';
         $this->profissionais = get_option('bom_doutor_api_url') . 'professional/list';
         $this->disponibilidade_horarios = get_option('bom_doutor_api_url') . 'appoints/available-schedule';
         $this->paciente = get_option('bom_doutor_api_url') . 'patient/search';
@@ -62,6 +65,40 @@ class Api
         return json_decode($data, true);
     }
 
+    public function list()
+    {
+        return (object) [
+            'procedimentos' => $this->connectApi($this->procedimentos)['content'],
+            'atendimentos' => $this->connectApi($this->atendimentos)['content'],
+            'especialidades' => $this->connectApi($this->especialidades)['content'],
+        ];
+    }
+
+    public function get($param, $value)
+    {
+        return (object) [
+
+            'procedimentos' => array_filter($this->connectApi($this->procedimentos)['content'], function ($item) use ($param, $value) {
+                if ($item[$param] == $value) {
+                    return $item;
+                }
+            }),
+
+            'atendimentos' => array_filter($this->connectApi($this->atendimentos)['content'], function ($item) use ($param, $value) {
+                if ($item[$param] == $value) {
+                    return $item;
+                }
+            }),
+
+            'especialidades' => array_filter($this->connectApi($this->especialidades)['content'], function ($item) use ($param, $value) {
+                if ($item[$param] == $value) {
+                    return $item;
+                }
+            }),
+        ];
+    }
+
+
     private function availableSchedule($profissional_id, $especialidade_id, $unidade_id, $data_start, $data_end)
     {
         $disponibilidade_horarios = $this->connectApi($this->disponibilidade_horarios . '?tipo=E&especialidade_id=' . $especialidade_id . '&unidade_id=' . $unidade_id . '&data_start=' . $data_start . '&data_end=' . $data_end);
@@ -112,18 +149,6 @@ class Api
 
         return $response;
     }
-
-    /*     private function verificarEspecialidadePorId($procedimentos_especialidades_array, $get_especialidade_id)
-    {
-        if (empty($procedimentos_especialidades_array)) return false;
-
-        foreach ($procedimentos_especialidades_array as $procedimento_especialidade) {
-            if ($get_especialidade_id == $procedimento_especialidade) {
-                return true;
-            }
-        }
-        return false;
-    } */
 
     public function listAtendimentos()
     {

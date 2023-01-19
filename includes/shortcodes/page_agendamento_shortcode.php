@@ -6,14 +6,13 @@ function page_agendamento_shortcode()
     if (is_user_logged_in()) {
         $usuario = wp_get_current_user();
         $email = $usuario->user_email;
-        $user_id = $usuario->ID;
-        $user_id_feegow = get_field('user_id_feegow', 'user_' . get_current_user_id());
+        $user_id_feegow = get_field('user_id_feegow', 'user_' . $usuario->ID);
     }
 
-    if(empty($user_id_feegow)){
+    if (empty($user_id_feegow)) {
         $user_id_feegow = -1;
     }
-    ?>
+?>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,20 +151,26 @@ function page_agendamento_shortcode()
         const filtro__especialidades = localStorage.getItem('@@bomdoutor:filtro__especialidades');
         const filtro__unidade = localStorage.getItem('@@bomdoutor:filtro__unidade');
         const filtro__procedimento = localStorage.getItem('@@bomdoutor:filtro__procedimento');
-        document.querySelector(".info-data").innerHTML = new Date(filtro__data.replaceAll(`-`,` `)).toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        document.querySelector(".info-data").innerHTML = new Date(filtro__data.replaceAll(`-`, ` `)).toLocaleDateString('pt-BR', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
 
         const idUserFeegow = <?php echo $user_id_feegow; ?>;
-        if(idUserFeegow !== -1){
+        if (idUserFeegow !== -1) {
             document.querySelector(`#id_user_feegow`).value = idUserFeegow
         }
-        
+
         const urlPlugin = "<?php echo PLUGIN_URL; ?>"
         const listaProfissionais = document.querySelector(`#listaProfissionais`);
         const tituloEspecialidade = document.querySelector(`#tituloEspecialidade`);
-        
+
         const url = `<?php echo home_url() ?>`;
         let dadosPaciente;
-        if(idUserFeegow !== -1){
+        console.log(idUserFeegow);
+        if (idUserFeegow !== -1) {
             fetch(`${url}/wp-json/api/v1/paciente/?paciente_id=${idUserFeegow}`)
                 .then(response => response.json())
                 .then(data => {
@@ -184,7 +189,7 @@ function page_agendamento_shortcode()
                 })
                 .catch(error => console.log(error));
         }
-        
+
 
 
 
@@ -323,8 +328,8 @@ function page_agendamento_shortcode()
                 document.querySelector(`#loader`).style.display = "none"
             });
 
-        
-            function cadastrarAgendamento() {
+
+        function cadastrarAgendamento() {
 
             const unidade_id = filtro__unidade;
             const paciente_id = document.querySelector(`#id_user_feegow`).value;
@@ -383,14 +388,14 @@ function page_agendamento_shortcode()
             let user_id = <?php echo get_current_user_id() ?>;
 
             const bodyCadastro = {
-                    "nome_titular": nomeTitular,
-                    "cpf_titular": cpfTitular,
-                    "email_titular": emailTitular,
-                    "genero_titular": generoTitular,
-                    "telefone_titular": telefoneTitular,
-                    "user_id": user_id
-                }
-                console.log(bodyCadastro)
+                "nome_titular": nomeTitular,
+                "cpf_titular": cpfTitular,
+                "email_titular": emailTitular,
+                "genero_titular": generoTitular,
+                "telefone_titular": telefoneTitular,
+                "user_id": user_id
+            }
+            console.log(bodyCadastro)
 
             const base_url = '<?php echo home_url(); ?>';
             const options = {
@@ -407,8 +412,8 @@ function page_agendamento_shortcode()
                     if (response.status === 'sucesso') {
                         document.querySelector(`.step-1`).style.display = 'none';
                         document.querySelector(`.step-2`).style.display = 'block';
-                        document.querySelector(`#id_user_feegow`).value = response.content.paciente_id                        
-                        document.querySelector(`#stepModal`).innerText = "Forma de Pagamento";    
+                        document.querySelector(`#id_user_feegow`).value = response.content.paciente_id
+                        document.querySelector(`#stepModal`).innerText = "Forma de Pagamento";
                     }
                     document.querySelector(`.step-1`).style.display = 'none';
                     document.querySelector(`.step-2`).style.display = 'block';
@@ -430,7 +435,7 @@ function page_agendamento_shortcode()
             maskCPF(e)
         };
 
-        window.onload = function() {           
+        window.onload = function() {
 
             document.querySelector(`#step1`).onclick = function() {
                 if (capturarDados()) {

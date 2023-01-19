@@ -14,7 +14,7 @@ function pesquisa_agendamento_shortcode()
                     <option value="<?php echo $unidade['id'] ?>"><?php echo $unidade['cidade'] ?></option>
                 <?php } ?>
             </select>
-            <select id="especialidade" name="filtro__especialidades" class="modalidade-item">
+            <select id="procedimento" name="filtro__procedimento" class="modalidade-item">
                 <option value="">Selecione a especialidade</option>
             </select>
             <input type="hidden" name="filtro__data" value='<?php echo date("Y-m-d"); ?>'>
@@ -22,74 +22,25 @@ function pesquisa_agendamento_shortcode()
             <button class="elementor-button elementor-size-sm btn-pesquisa" onclick="pesquisaFeeGow()" style="cursor: pointer;">Pesquisar</button>
         </div>
     </div>
-
     <script>
-        searchParams = new URLSearchParams(window.location.search);
-        isLogin = searchParams.get('login');
+        localStorage.setItem('@@bomdoutor:dados_lista_procedimento', "");
+        localStorage.setItem('@@bomdoutor:dados_filtro', "");
 
-        if (isLogin) {
-            window.location.href = `${window.location.origin}/agendar`
-        }
-
-        function loadEspecialidades(tipoProcedimento, data_listing) {
-            const selectEspecialidade = document.querySelector('#especialidade');
-            selectEspecialidade.innerHTML = '<option value="">Selecione a especialidade</option>';
+        function loadProcedimentos(tipoProcedimento, dados_lista_procedimentos) {
+            const selectProcedimentos = document.querySelector('#procedimento');
+            selectProcedimentos.innerHTML = '<option value="">Selecione a especialidade</option>';
 
             let options = '';
-            // Verifies if the especialidades object exists before iterating over it
 
-            //tipo_procedimento = document.querySelector("#tipoProcedimento .btn-modalidade.ativo").value
-            let lista = data_listing.filter(item => item.tipo_procedimento == tipoProcedimento)
+            let lista = dados_lista_procedimentos.filter(item => item.tipo_procedimento == tipoProcedimento && item.especialidade_id != null)
 
             console.log(lista);
 
-            lista.forEach(especialidade => {
-                options += `<option value="${especialidade.procedimento_id}">${especialidade.nome}</option>`;
+            lista.forEach(info => {
+                options += `<option value="${info.procedimento_id}">${info.nome}</option>`;
             });
-            selectEspecialidade.innerHTML = options;
-
-            /* lista_especialidades(tipoProcedimento)
-                .then(response => {
-                    console.log(`tipoProcedimento`, response)
-                    if (response.ok) {
-                        return response.json();
-                    }
-                    throw new Error(response.statusText);
-                })
-                .then(data => {
-                    let options = '';
-                    // Verifies if the especialidades object exists before iterating over it
-                    if (data.hasOwnProperty('especialidades')) {
-                        data.especialidades.forEach(especialidade => {
-                            options += `<option value="${especialidade.especialidade_id}">${especialidade.especialidade_nome}</option>`;
-                        });
-                        selectEspecialidade.innerHTML = options;
-                    }
-                    // Hides the loading message
-                    loading.style.display = 'none';
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    // Hides the loading message
-                    loading.style.display = 'none';
-                }); */
+            selectProcedimentos.innerHTML = options;
         }
-
-
-        function procedimentoAtivo(data_listing) {
-            document.querySelectorAll(`#tipoProcedimento button`).forEach((item) => {
-                if (item.value == document.querySelector(`[name="filtro__procedimento"]`).value) {
-                    item.setAttribute(`class`, `btn-modalidade ativo`)
-                }
-            })
-            document.addEventListener('click', (event) => {
-                if (event.target.classList.contains('btn-modalidade')) {
-                    const selectedValue = event.target.value;
-                    loadEspecialidades(selectedValue, data_listing)
-                }
-            });
-        }
-
 
         async function getEspecialidadeByProcedimentoId(procedimento_id) {
             const base_url = '<?php echo home_url(); ?>';
@@ -101,46 +52,59 @@ function pesquisa_agendamento_shortcode()
             try {
                 const response = await fetch(`${base_url}/wp-json/api/v1/get-especialidades/?procedimento_id=${procedimento_id}`, options);
                 const jsonData = await response.json();
-                //    tipo_procedimento = document.querySelector("#tipoProcedimento .btn-modalidade.ativo").value
-                //    jsonData.filter(item => item.tipo_procedimento == tipo_procedimento)
                 return jsonData;
             } catch (err) {
                 console.error(err);
             }
         }
-        let data_listing;
-        (async () => {
-            data_listing = await getEspecialidadeByProcedimentoId(2);
-            procedimentoAtivo(data_listing);
-        })();
 
-
-
+        function procedimentoAtivo(dados_lista_procedimentos) {
+            document.querySelectorAll(`#tipoProcedimento button`).forEach((item) => {
+                if (item.value == document.querySelector(`[name="filtro__procedimento"]`).value) {
+                    item.setAttribute(`class`, `btn-modalidade ativo`)
+                }
+            })
+            document.addEventListener('click', (event) => {
+                if (event.target.classList.contains('btn-modalidade')) {
+                    const selectedValue = event.target.value;
+                    loadProcedimentos(selectedValue, dados_lista_procedimentos)
+                }
+            });
+        }
         function pesquisaFeeGow() {
             const unidade_id = document.getElementById("unidade").value;
-            const especialidade = document.getElementById("especialidade").value;
-            const filtro__procedimento_selected = document.querySelector(`[name="filtro__procedimento"]`).value;
-            const data__filter = "<?php echo date('Y-m-d'); ?>"
+            const tipo_procedimento = document.querySelector(`#tipoProcedimento .btn-modalidade.ativo`).value;
+            const procedimento_id = document.getElementById("procedimento").value;
+            const dados_procedimento =  dados_lista_procedimentos.filter(item => item.procedimento_id == procedimento_id);
+            const filtro__data = "<?php echo date('Y-m-d'); ?>"
 
-            localStorage.setItem('@@bomdoutor:filtro__data', data__filter);
-            localStorage.setItem('@@bomdoutor:filtro__especialidades', especialidade);
-            localStorage.setItem('@@bomdoutor:filtro__unidade', unidade_id);
-            localStorage.setItem('@@bomdoutor:filtro__procedimento', filtro__procedimento_selected);
+
+            const dados_filtro = {
+                filtro__data: filtro__data,
+                filtro__procedimento_id: procedimento_id,
+                filtro__tipo_procedimento: tipo_procedimento,
+                filtro__unidade_id: unidade_id
+            }
+
+            localStorage.setItem('@@bomdoutor:dados_lista_procedimentos', JSON.stringify(dados_lista_procedimentos));
+            localStorage.setItem('@@bomdoutor:dados_procedimento', JSON.stringify(dados_procedimento));
+            localStorage.setItem('@@bomdoutor:dados_filtro', JSON.stringify(dados_filtro));
+            localStorage.setItem('@@bomdoutor:filtro__data', filtro__data);
+            localStorage.setItem('@@bomdoutor:filtro__procedimento_id', procedimento_id);
+            localStorage.setItem('@@bomdoutor:filtro__tipo_procedimento', tipo_procedimento);
+            localStorage.setItem('@@bomdoutor:filtro__unidade_id', unidade_id);
+
+            console.log(localStorage)
 
             if (unidade_id === "") {
                 document.getElementById("unidade").style.borderColor = "red";
             } else {
                 document.getElementById("unidade").style.borderColor = "#D2D1D6";
             }
-            if (especialidade === "") {
-                document.getElementById("especialidade").style.borderColor = "red";
-            } else {
-                document.getElementById("especialidade").style.borderColor = "#D2D1D6";
-            }
 
-            if (unidade_id !== "" && especialidade !== "") {
+            if (unidade_id !== "") {
                 <?php if (is_user_logged_in()) { ?>
-                    window.location.assign(`<?php echo home_url() ?>/agendar/?filtro__data=${data__filter}&filtro__especialidades=${especialidade}&filtro__unidade=${unidade_id}&filtro__procedimento=${filtro__procedimento_selected}`);
+                    window.location.assign(`<?php echo home_url() ?>/agendar/`);
                 <?php  } else {  ?>
                     elementorProFrontend.modules.popup.showPopup({
                         id: 1376
@@ -150,49 +114,52 @@ function pesquisa_agendamento_shortcode()
 
         }
 
-        function lista_procedimentos() {
+        async function lista_tipo_procedimentos() {
             const base_url = '<?php echo home_url(); ?>';
             const options = {
                 method: 'GET'
             };
-            fetch(`${base_url}/wp-json/api/v1/lista-procedimentos`, options)
+
+            await fetch(`${base_url}/wp-json/api/v1/lista-procedimentos`, options)
                 .then(response => response.json())
                 .then(response => {
                     let htmlProcedimentos = '';
                     response.forEach((item) => {
-                        htmlProcedimentos += `<button class="btn-modalidade" value="${item.procedimento_id}" data-procedimento="${item.procedimento_nome}">
-                    ${item.procedimento_nome}
-                </button>`
+                        htmlProcedimentos += `
+                            <button class="btn-modalidade" 
+                                value="${item.procedimento_id}" 
+                            >${item.procedimento_nome}
+                            </button>`
                     });
 
                     document.querySelector('#tipoProcedimento').innerHTML = htmlProcedimentos;
-                    document.querySelector('[data-procedimento="Consulta"]').click()
                 })
                 .catch(err => console.error(err));
         }
 
-        lista_procedimentos();
+        const dados_lista_procedimentos = [];
+        (async () => {
+            await lista_tipo_procedimentos();
+            await getEspecialidadeByProcedimentoId(2)
+                .then((response)=> {
+                    dados_lista_procedimentos.push(...response);
 
-        function lista_especialidades(tipo_procedimento) {
-            const base_url = '<?php echo home_url(); ?>';
-            const options = {
-                method: 'GET'
-            };
-            fetch(`${base_url}/wp-json/api/v1/listar-especialidades/?tipo_procedimento=${tipo_procedimento}`, options)
-                .then(response => response.json())
-                .then(response => {
-                    const selectEspecialidade = document.querySelector('#especialidade');
-                    selectEspecialidade.innerHTML = '<option value="">Selecione a especialidade</option>';
+                    return response;
+                }).then((response)=> {
 
-                    let options = '';
-                    // Verifies if the especialidades object exists before iterating over it
+                    //document.querySelector('[data-procedimento="Consulta"]').click()
 
-                    response.especialidades.forEach(especialidade => {
-                        options += `<option value="${especialidade.especialidade_id}">${especialidade.especialidade_nome}</option>`;
-                        selectEspecialidade.innerHTML = options;
-                    });
-                })
-                .catch(err => console.error(err));
+                    return response;
+                }).then((response)=> procedimentoAtivo(response))
+                .then(()=>{document.querySelector(`#tipoProcedimento .btn-modalidade[value="2"]`).click()});
+        })();
+
+        window.addEventListener('load', (event) => {
+            searchParams = new URLSearchParams(window.location.search);
+        isLogin = searchParams.get('login');
+
+        if (isLogin) {
+            window.location.href = `${window.location.origin}/agendar`
         }
 
         const tipoProcedimento = document.getElementById("tipoProcedimento");
@@ -212,6 +179,7 @@ function pesquisa_agendamento_shortcode()
                     document.querySelector(`[name="filtro__procedimento"]`).value = button.value
                 }
             })
+        });
         });
     </script>
 

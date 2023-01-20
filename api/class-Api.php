@@ -5,20 +5,24 @@ class Api
 
     public function __construct()
     {
+        /* listing */
         $this->procedimentos = get_option('bom_doutor_api_url') . 'procedures/list';
         $this->atendimentos = get_option('bom_doutor_api_url') . 'company/list-local';
         $this->especialidades = get_option('bom_doutor_api_url') . 'specialties/list';
-
-
-
-        $this->unidades = get_option('bom_doutor_api_url') . 'company/list-unity';
-        $this->locais = get_option('bom_doutor_api_url') . 'company/list-local';
         $this->profissionais = get_option('bom_doutor_api_url') . 'professional/list';
-        $this->disponibilidade_horarios = get_option('bom_doutor_api_url') . 'appoints/available-schedule';
+        $this->locais = get_option('bom_doutor_api_url') . 'company/list-local';
+        $this->unidades = get_option('bom_doutor_api_url') . 'company/list-unity';
+
+        /* find */
         $this->paciente = get_option('bom_doutor_api_url') . 'patient/search';
+
+        /* create */
+        $this->create_paciente = get_option('bom_doutor_api_url') . 'patient/create';
+        $this->agendamento = get_option('bom_doutor_api_url') . 'appoints/new-appoint';
+
+        $this->disponibilidade_horarios = get_option('bom_doutor_api_url') . 'appoints/available-schedule';
         $this->paciente_create = get_option('bom_doutor_api_url') . 'patient/create';
         $this->dependentes = get_option('bom_doutor_api_url') . 'patient/list-dependents';
-        $this->agendamento = get_option('bom_doutor_api_url') . 'appoints/new-appoint';
         $this->tipos_procedimentos = get_option('bom_doutor_api_url') . 'procedures/types';
     }
 
@@ -65,39 +69,235 @@ class Api
         return json_decode($data, true);
     }
 
-    public function list()
+    private function disponibilidade_horarios($profissional_id, $especialidade_id, $unidade_id, $data_start, $data_end)
     {
-        return (object) [
+        $disponibilidade_horarios = $this->connectApi($this->disponibilidade_horarios . '?tipo=E&especialidade_id=' . $especialidade_id . '&unidade_id=' . $unidade_id . '&data_start=' . $data_start . '&data_end=' . $data_end);
+
+
+        if (isset($disponibilidade_horarios['error'])) {
+            return [
+                "status" => "erro",
+                "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+            ];
+        }
+
+        $response = [];
+
+        foreach ($disponibilidade_horarios['content'] as $disponibilidade) {
+            $response = $disponibilidade[$profissional_id]['local_id'];
+        }
+
+        return array_shift($response);
+    }
+
+    public function list($list, $where = false)
+    {
+        $response = [
             'procedimentos' => $this->connectApi($this->procedimentos)['content'],
             'atendimentos' => $this->connectApi($this->atendimentos)['content'],
             'especialidades' => $this->connectApi($this->especialidades)['content'],
+            'profissionais' => $this->connectApi($this->profissionais)['content'],
+            'locais' => $this->connectApi($this->locais)['content'],
+            'unidades' => $this->connectApi($this->unidades)['content'],
         ];
+
+        if ($where) {
+            $listing = $response[$list];
+            $param = $where[0];
+            $value = $where[1];
+            return array_filter($listing, function ($item) use ($param, $value) {
+                return isset($item[$param]) && $item[$param] == $value;
+            });
+        }
+
+        return $response[$list];
     }
 
-    public function get($param, $value)
+    public function paciente_by_cpf($paciente_cpf)
     {
-        return (object) [
+        $paciente = $this->connectApi($this->paciente . '?paciente_cpf=' . $paciente_cpf);
+        $dependente = null;
 
-            'procedimentos' => array_filter($this->connectApi($this->procedimentos)['content'], function ($item) use ($param, $value) {
-                if ($item[$param] == $value) {
-                    return $item;
-                }
-            }),
+        if (isset($paciente['error'])) {
+            if ($paciente['error'] == 409) {
+                return;
+            } else {
+                return [
+                    "status" => "erro",
+                    "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+                ];
+            }
+        }
 
-            'atendimentos' => array_filter($this->connectApi($this->atendimentos)['content'], function ($item) use ($param, $value) {
-                if ($item[$param] == $value) {
-                    return $item;
-                }
-            }),
+        if (isset($paciente['content'])) {
+            $dependente = $this->connectApi($this->dependentes . '?paciente_id=' . $paciente['content']['id'])['content'];
+        }
 
-            'especialidades' => array_filter($this->connectApi($this->especialidades)['content'], function ($item) use ($param, $value) {
-                if ($item[$param] == $value) {
-                    return $item;
-                }
-            }),
+        return [
+            'status' => $paciente['success'] ?? false,
+            'paciente' => $paciente['content'] ?? null,
+            'dependente' => $dependente
         ];
     }
 
+    public function paciente_by_id($paciente_id)
+    {
+        $paciente = $this->connectApi($this->paciente . '?paciente_id=' . $paciente_id);
+        $dependente = null;
+
+        if (isset($paciente['error'])) {
+            if ($paciente['error'] == 409) {
+                return;
+            } else {
+                return [
+                    "status" => "erro",
+                    "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
+                ];
+            }
+        }
+
+        if (isset($paciente['content'])) {
+            $dependente = $this->connectApi($this->dependentes . '?paciente_id=' . $paciente_id)['content'];
+        }
+
+        return [
+            'status' => $paciente['success'] ?? false,
+            'paciente' => $paciente['content'] ?? null,
+            'dependente' => $dependente
+        ];
+    }
+
+    public function create_paciente($paciente_nome, $paciente_cpf, $paciente_email = "", $paciente_data_nascimento = "", $paciente_sexo = "", $paciente_telefone = "")
+    {
+
+        if (!empty(self::paciente_by_cpf($paciente_cpf)['paciente'])) {
+            return [
+                "status" => "sucesso",
+                "mensagem" => "Paciente já existe"
+            ];
+        } else {
+
+            $paciente_create = $this->connectApi($this->paciente_create, 'POST', json_encode([
+                "nome_completo" => $paciente_nome,
+                "cpf" => $paciente_cpf,
+                'email' =>  $paciente_email,
+                'data_nascimento' => date('Y-m-d', strtotime($paciente_data_nascimento)),
+                'sexo' => $paciente_sexo,
+                'telefone' => $paciente_telefone,
+            ]));
+
+            if (isset($paciente_create['error'])) {
+                return [
+                    "status" => "erro",
+                    "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token ) " . $paciente_create['error']
+                ];
+            } else {
+                return [
+                    "status" => "sucesso",
+                    "mensagem" => "Paciente criado com sucesso",
+                    "content" => $paciente_create['content']
+                ];
+            }
+        }
+    }
+
+    public function create_agendamento($local_id, $paciente_id, $profissional_id, $procedimento_id, $especialidade_id, $data, $horario, $valor, $plano = 0)
+    {
+        $agendamento = $this->connectApi($this->agendamento, 'POST', json_encode([
+            "local_id" => $local_id,
+            "paciente_id" => $paciente_id,
+            'profissional_id' =>  $profissional_id,
+            'procedimento_id' =>  $procedimento_id,
+            'especialidade_id' =>  $especialidade_id,
+            'data' => date('d-m-Y', strtotime($data)),
+            'horario' =>  $horario,
+            'valor' => $valor,
+            'plano' => $plano
+        ]));
+
+        if (isset($agendamento['error'])) {
+            return [
+                "status" => "erro",
+                "mensagem" => $agendamento,
+            ];
+        } else {
+            return [
+                "status" => "sucesso",
+                "mensagem" => "Agendamento realizado com sucesso",
+                "content" => $agendamento['content']
+            ];
+        }
+    }
+
+    public function profissionais_agenda($unidade_id, $especialidade_id, $data_start, $data_end, $all = null)
+    {
+
+        if ($all) {
+            return $this->connectApi($this->profissionais);
+        }
+
+        $profissionais = $this->connectApi($this->profissionais . "?unidade_id=$unidade_id&especialidade_id=$especialidade_id");
+
+        if (isset($profissionais['error'])) {
+            echo "Erro na consulta verifique os campos ( API Url e API Token ) " . $profissionais['error'];
+            return;
+        }
+
+        $response = [];
+
+        foreach ($profissionais['content'] as $profissional) {
+
+            $response['profissionais'][] = [
+                'profissional_id' => $profissional['profissional_id'],
+                'tratamento' => $profissional['tratamento'],
+                'nome' => $profissional['nome'],
+                'foto' => $profissional['foto'],
+                'sexo' => $profissional['sexo'],
+                'conselho' => $profissional['conselho'],
+                'documento_conselho' => $profissional['documento_conselho'],
+                'horarios_disponiveis' => $this->disponibilidade_horarios(
+                    $profissional['profissional_id'],
+                    $especialidade_id,
+                    $unidade_id,
+                    $data_start,
+                    $data_end
+                )
+            ];
+        }
+
+        $response = [
+            'unidade_id' => $unidade_id,
+            'especialidade_id' => $especialidade_id,
+            'data_start' => $data_start,
+            'data_end' => $data_end,
+            'profissionais' => $response['profissionais'] ?? 'Nenhum profisional encontrado para essa "unidade/especialidade" ou "unidade/especialidade" não criada'
+        ];
+
+        return $response;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* old */
 
     private function availableSchedule($profissional_id, $especialidade_id, $unidade_id, $data_start, $data_end)
     {

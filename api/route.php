@@ -92,9 +92,7 @@ function lista_profissionais($request)
     $unidade = $request->get_param('unidade');
     $especialidade = $request->get_param('especialidade');
     $data = $request->get_param('data');
-
     $api = new Api();
-
     $lista_profissionais = $api->listProfissionaisHorarios($unidade, $especialidade, $data, $data);
     return $lista_profissionais;
 }

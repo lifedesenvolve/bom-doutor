@@ -680,9 +680,13 @@ class Api
         ];
     }
 
-    public function getPacienteByID($paciente_id)
+    public function getPacienteByIDOrCpf($paciente_id, $paciente_cpf = null)
     {
-        $paciente = $this->connectApi($this->paciente . '?paciente_id=' . $paciente_id);
+        if (empty($paciente_cpf)) {
+            $paciente = $this->connectApi($this->paciente . '?paciente_id=' . $paciente_id);
+        } else {
+            $paciente = $this->connectApi($this->paciente . '?paciente_cpf=' . $paciente_cpf);
+        }
         $dependente = null;
 
         if (isset($paciente['error'])) {

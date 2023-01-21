@@ -170,6 +170,7 @@ function page_agendamento_shortcode()
         const url = `<?php echo home_url() ?>`;
         let dadosPaciente;
         console.log(idUserFeegow);
+
         if (idUserFeegow !== -1) {
             fetch(`${url}/wp-json/api/v1/paciente/?paciente_id=${idUserFeegow}`)
                 .then(response => response.json())
@@ -190,8 +191,27 @@ function page_agendamento_shortcode()
                 .catch(error => console.log(error));
         }
 
+        document.querySelector('[name=nome_titular]').addEventListener("focus", async (paciente) => {
+            let paciente_cpf = document.querySelector('[name=cpf_titular]').value.replace(/[^\d]/g, "");
+            console.log(paciente_cpf);
+            await fetch(`${url}/wp-json/api/v1/paciente/?paciente_cpf=${paciente_cpf}`)
+                .then(response => response.json())
+                .then(data => {
+                    dadosPaciente = data;
+                    const nomeTitular = document.querySelector('[name=nome_titular]');
+                    const cpfTitular = document.querySelector('[name=cpf_titular]');
+                    const emailTitular = document.querySelector('[name=email_titular]');
+                    const generoTitular = document.querySelector('[name=genero_titular]');
+                    const telefoneTitular = document.querySelector('[name=telefone_titular]');
 
-
+                    nomeTitular.value = dadosPaciente?.paciente.nome;
+                    cpfTitular.value = dadosPaciente?.paciente.documentos.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+                    telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+                    generoTitular.value = dadosPaciente?.paciente.sexo[0];
+                    emailTitular.value = dadosPaciente?.paciente.email[0];
+                })
+                .catch(error => console.log(error));
+        });
 
         function capturarDados() {
             const nomeTitular = document.querySelector('[name=nome_titular]').value;

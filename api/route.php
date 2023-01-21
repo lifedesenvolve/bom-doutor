@@ -36,7 +36,7 @@ function rotas_bom_doutor()
 
     register_rest_route('api/v1', '/paciente/', array(
         'methods'  => 'GET',
-        'callback' => 'get_paciente_by_ID',
+        'callback' => 'get_paciente_by_ID_or_CPF',
         'args' => array(
             'paciente_id' => array(
                 'validate_callback' => function ($param, $request, $key) {
@@ -162,14 +162,22 @@ function registrar_agendamento($request)
     }
     echo json_encode($response);
 }
-function get_paciente_by_ID($request)
+function get_paciente_by_ID_or_CPF($request)
 {
-    $paciente_id = $request->get_param('paciente_id');
     $api = new Api();
 
-    $resultado = $api->getPacienteByID(
-        $paciente_id
-    );
+    if (!empty($request->get_param('paciente_cpf'))) {
+        $paciente = $request->get_param('paciente_cpf');
+        $resultado = $api->getPacienteByIDOrCpf(
+            "",
+            $paciente
+        );
+    } else {
+        $paciente = $request->get_param('paciente_id');
+        $resultado = $api->getPacienteByIDOrCpf(
+            $paciente
+        );
+    }
 
     echo json_encode($resultado);
 }

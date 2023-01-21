@@ -314,15 +314,20 @@ function page_agendamento_shortcode()
             })
             .then(response => response.json())
             .then(response => {
-                console.log(response);
-                const {
-                    profissionais
-                } = response;
+                const { profissionais } = response
 
-                console.log(`response:`, response)
+                profissionaisUnicos =  profissionais.reduce((acc, current) => {
+                    acc[JSON.stringify(current)] = current;
+                    return acc;
+                }, []);
 
+
+                return Object.values(profissionaisUnicos);
+            })
+            .then(profissionais => {
+                console.log(`profissionais`,profissionais)                
                 listaProfissionais.innerHTML = profissionais.map(profissional => {
-
+                    
                     const {
                         horarios_disponiveis
                     } = profissional;

@@ -69,25 +69,10 @@ class Api
         return json_decode($data, true);
     }
 
-    private function disponibilidade_horarios($profissional_id, $especialidade_id, $unidade_id, $data_start, $data_end)
+    private function disponibilidade_horarios($profissional_id, $procedimento_id, $unidade_id, $data_start, $data_end)
     {
-        $disponibilidade_horarios = $this->connectApi($this->disponibilidade_horarios . '?tipo=E&especialidade_id=' . $especialidade_id . '&unidade_id=' . $unidade_id . '&data_start=' . $data_start . '&data_end=' . $data_end);
-
-
-        if (isset($disponibilidade_horarios['error'])) {
-            return [
-                "status" => "erro",
-                "mensagem" => "Erro na consulta verifique os campos ( API Url e API Token )"
-            ];
-        }
-
-        $response = [];
-
-        foreach ($disponibilidade_horarios['content'] as $disponibilidade) {
-            $response = $disponibilidade[$profissional_id]['local_id'];
-        }
-
-        return array_shift($response);
+        $response = $this->connectApi($this->disponibilidade_horarios . '?tipo=P&procedimento_id=' . $procedimento_id . '&unidade_id=' . $unidade_id . '&data_start=' . $data_start . '&data_end=' . $data_end)['content']['profissional_id'][1]['local_id'];
+        return reset($response);
     }
 
     public function list($list, $where = false)
@@ -614,40 +599,47 @@ class Api
         return $response;
     }
 
-    public function listProfissionaisHorarios($unidade_id, $especialidade_id, $data_start, $data_end, $all = null)
+    public function listProfissionaisHorarios($unidade_id, $especialidade_id, $procedimento_id, $data_start, $data_end, $all = null)
     {
 
         if ($all) {
             return $this->connectApi($this->profissionais);
         }
 
-        $profissionais = $this->connectApi($this->profissionais . "?unidade_id=$unidade_id&especialidade_id=$especialidade_id");
-
-        if (isset($profissionais['error'])) {
-            echo "Erro na consulta verifique os campos ( API Url e API Token ) " . $profissionais['error'];
-            return;
+        $profissionais = [];
+        foreach ($especialidade_id as $especialidade) {
+            $profissionais[] = [
+                'procedimento' => $procedimento_id,
+                'profissionais' => $this->connectApi($this->profissionais . "?unidade_id=$unidade_id&especialidade_id=$especialidade")['content']
+            ];
+            $profissionais['item_especialidade'] = $especialidade;
         }
 
         $response = [];
 
-        foreach ($profissionais['content'] as $profissional) {
+        foreach ($profissionais as $profissional_list) {
 
-            $response['profissionais'][] = [
-                'profissional_id' => $profissional['profissional_id'],
-                'tratamento' => $profissional['tratamento'],
-                'nome' => $profissional['nome'],
-                'foto' => $profissional['foto'],
-                'sexo' => $profissional['sexo'],
-                'conselho' => $profissional['conselho'],
-                'documento_conselho' => $profissional['documento_conselho'],
-                'horarios_disponiveis' => $this->availableSchedule(
-                    $profissional['profissional_id'],
-                    $especialidade_id,
-                    $unidade_id,
-                    $data_start,
-                    $data_end
-                )
-            ];
+            if (isset($profissional_list['profissionais'])) {
+                foreach ($profissional_list['profissionais'] as $profissional) {
+
+                    $response['profissionais'][] = [
+                        'profissional_id' => $profissional['profissional_id'],
+                        'tratamento' => $profissional['tratamento'],
+                        'nome' => $profissional['nome'],
+                        'foto' => $profissional['foto'],
+                        'sexo' => $profissional['sexo'],
+                        'conselho' => $profissional['conselho'],
+                        'documento_conselho' => $profissional['documento_conselho'],
+                        'horarios_disponiveis' => $this->disponibilidade_horarios(
+                            $profissional['profissional_id'],
+                            $profissional_list['procedimento'],
+                            $unidade_id,
+                            $data_start,
+                            $data_end
+                        )
+                    ];
+                }
+            }
         }
 
         $response = [

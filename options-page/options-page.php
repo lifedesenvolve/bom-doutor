@@ -94,12 +94,15 @@ function bom_doutor_settings_page()
     $api = new Api();
 
     echo '<pre>';
-    print_r($api->listProfissionaisHorarios(3, 129, '21-01-2023', '21-01-2023'));
+    print_r($api->listProfissionaisHorarios(3, [
+        0 => 131,
+        1 => 187,
+        2 => 271,
+    ], 1, '23-01-2023', '23-01-2023'));
     echo '</pre>';
     //->procedimentos->where('tipo_procedimento', 4)
     //177.820.767-73
-    /* 
-    
+    /*
     Array
 (
     [0] => Array

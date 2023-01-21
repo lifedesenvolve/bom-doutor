@@ -254,21 +254,30 @@ function page_agendamento_shortcode()
             `;
         }
 
+        function carrega_profissionais() {}
+
+        const dados = JSON.parse(localStorage.getItem('@@bomdoutor:dados_procedimento'))[0];
+        const filtro = JSON.parse(localStorage.getItem(`@@bomdoutor:dados_filtro`));
+
         const params = {
-            unidade: filtro__unidade,
-            especialidade: filtro__especialidades,
-            data: filtro__data,
-        };
+            "unidade": filtro.filtro__unidade_id,
+            "especialidadesArray": dados.especialidade_id,
+            "data": filtro.filtro__data,
+            "procedimento_id": filtro.filtro__procedimento_id,
+        }
 
-        const queryString = new URLSearchParams(params).toString();
-        const options = {
-            method: 'GET'
-        };
+        console.log(params);
 
-        fetch(`<?php echo home_url('/wp-json/api/v1/lista-profissionais/') ?>?${queryString}`, options)
+        fetch(`<?php echo home_url() . '/wp-json/api/v1/lista-profissionais?=' ?>`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(params)
+            })
             .then(response => response.json())
             .then(response => {
-                console.log(response)
+                console.log(response);
                 const {
                     profissionais
                 } = response;
@@ -283,8 +292,11 @@ function page_agendamento_shortcode()
 
                     const dias_disponiveis = Object.values(horarios_disponiveis);
                     const horarios = Object.values(dias_disponiveis[0]);
+
                     return `<div class="card-profissional" style="display:flex;">
-                    <div class="card-imagem"><img src="${urlPlugin}assets/image/avatar-${profissional.sexo.toLowerCase()}.png" alt="" class="foto-especialista" width="100"></div>
+                    <div class="card-imagem">
+                    <img src="${profissional.foto === null ? `${urlPlugin}assets/image/avatar-${profissional.sexo.toLowerCase()}.png` : profissional.foto}" alt="" class="foto-especialista" width="100">
+                    </div>
                         <div class="card-informacoes">
                             <h3 class="nome-especialista">${profissional.tratamento === null ? `${profissional.nome}` : `${profissional.tratamento} ${profissional.nome}`} </h3>
                             <span class="crm-especialista">${profissional.documento_conselho === `` ? `` : `CRM ${profissional.documento_conselho}`}</span>

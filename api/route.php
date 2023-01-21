@@ -13,7 +13,7 @@ function rotas_bom_doutor()
     ));
 
     register_rest_route('api/v1', '/lista-profissionais/', array(
-        'methods'  => 'GET',
+        'methods'  => 'POST',
         'callback' => 'lista_profissionais',
         'args' => array(
             'unidade' => array(
@@ -90,10 +90,12 @@ function lista_procedimentos()
 function lista_profissionais($request)
 {
     $unidade = $request->get_param('unidade');
-    $especialidade = $request->get_param('especialidade');
+    $especialidadesArray = $request->get_param('especialidadesArray');
+    $procedimento_id = $request->get_param('procedimento_id');
     $data = $request->get_param('data');
+
     $api = new Api();
-    $lista_profissionais = $api->listProfissionaisHorarios($unidade, $especialidade, $data, $data);
+    $lista_profissionais = $api->listProfissionaisHorarios($unidade, $especialidadesArray, $procedimento_id, $data, $data);
     return $lista_profissionais;
 }
 

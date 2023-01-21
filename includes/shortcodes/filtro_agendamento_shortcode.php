@@ -13,11 +13,6 @@ function filtro_agendamento_shortcode()
         <input type="date" id="filtro__data" class="filtro__data" name="filtro__data" value="<?php echo date("Y-m-d"); ?>">
         <br><br>
 
-        <!-- <label for="filtro__procedimento" class="label-filtro">Procedimentos:</label><br>
-        <select id="filtro__procedimento" name="filtro__procedimento">
-            <option value="">Selecione o procedimento</option>
-        </select><br><br> -->
-
         <label for="filtro__especialidades" class="label-filtro">Especialidades:</label><br>
         <select id="filtro__especialidades" name="filtro__especialidades">
             <?php foreach ($lista_especialidades as $especialidade) { ?>

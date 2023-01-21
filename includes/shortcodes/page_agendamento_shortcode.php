@@ -204,26 +204,40 @@ function page_agendamento_shortcode()
 
         function getpacienteByCpf() {
             document.querySelector('[name=nome_titular]').addEventListener("focus", (paciente) => {
+                const url = `<?php echo home_url() ?>`;
                 let paciente_cpf = document.getElementById('cpfTitular').value.replace(/[^\d]/g, "");
-                console.log(paciente_cpf);
                 //221.044.620-10
-                fetch(`${url}/wp-json/api/v1/paciente/?paciente_cpf=${paciente_cpf}`)
+                const options = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+
+                fetch(`${url}/wp-json/api/v1/paciente/?paciente_cpf=${paciente_cpf}`, options)
                     .then(response => response.json())
                     .then(data => {
                         dadosPaciente = data;
-                        /* const nomeTitular = document.querySelector('[name=nome_titular]');
-                        const cpfTitular = document.querySelector('[name=cpf_titular]');
-                        const emailTitular = document.querySelector('[name=email_titular]');
-                        const generoTitular = document.querySelector('[name=genero_titular]');
-                        const telefoneTitular = document.querySelector('[name=telefone_titular]');
+                        console.log(dadosPaciente);
 
-                        nomeTitular.value = dadosPaciente?.paciente.nome;
-                        cpfTitular.value = dadosPaciente?.paciente.documentos.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-                        telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
-                        generoTitular.value = dadosPaciente?.paciente.sexo[0];
-                        emailTitular.value = dadosPaciente?.paciente.email[0]; */
+                        if (dadosPaciente.status !== 'error') {
+                            const nomeTitular = document.querySelector('[name=nome_titular]');
+                            const cpfTitular = document.querySelector('[name=cpf_titular]');
+                            const emailTitular = document.querySelector('[name=email_titular]');
+                            const generoTitular = document.querySelector('[name=genero_titular]');
+                            const telefoneTitular = document.querySelector('[name=telefone_titular]');
+                            const dataAniversario = document.querySelector('[name=data_aniversario]');
+
+                            console.log(dataAniversario);
+
+                            nomeTitular.value = dadosPaciente?.paciente.nome;
+                            cpfTitular.value = dadosPaciente?.paciente.documentos.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+                            telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+                            generoTitular.value = dadosPaciente?.paciente.sexo[0];
+                            emailTitular.value = dadosPaciente?.paciente.email[0];
+                            dataAniversario.value = dadosPaciente?.paciente.nascimento.replace(/(\d+)-(\d+)-(\d+)/, "$3-$2-$1");
+                        }
                     })
-                    .catch(error => console.log(error));
+                    .catch(err => console.error(err));
             });
         }
         getpacienteByCpf();
@@ -291,51 +305,53 @@ function page_agendamento_shortcode()
             `;
         }
 
-        function carrega_profissionais() {}
+        function carrega_profissionais() {
+            const dados = JSON.parse(localStorage.getItem('@@bomdoutor:dados_procedimento'))[0];
+            const filtro = JSON.parse(localStorage.getItem(`@@bomdoutor:dados_filtro`));
+            const dataSelecionada = localStorage.getItem(`@@bomdoutor:filtro__data`);
 
-        const dados = JSON.parse(localStorage.getItem('@@bomdoutor:dados_procedimento'))[0];
-        const filtro = JSON.parse(localStorage.getItem(`@@bomdoutor:dados_filtro`));
+            document.getElementById('filtro__data').value
 
-        const params = {
-            "unidade": filtro.filtro__unidade_id,
-            "especialidadesArray": dados.especialidade_id,
-            "data": filtro.filtro__data,
-            "procedimento_id": filtro.filtro__procedimento_id,
-        }
+            const params = {
+                "unidade": filtro.filtro__unidade_id,
+                "especialidadesArray": dados.especialidade_id,
+                "data": dataSelecionada,
+                "procedimento_id": filtro.filtro__procedimento_id,
+            }
 
-        console.log(params);
-
-        fetch(`<?php echo home_url() . '/wp-json/api/v1/lista-profissionais?=' ?>`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(params)
-            })
-            .then(response => response.json())
-            .then(response => {
-                const { profissionais } = response
-
-                profissionaisUnicos =  profissionais.reduce((acc, current) => {
-                    acc[JSON.stringify(current)] = current;
-                    return acc;
-                }, []);
-
-
-                return Object.values(profissionaisUnicos);
-            })
-            .then(profissionais => {
-                console.log(`profissionais`,profissionais)                
-                listaProfissionais.innerHTML = profissionais.map(profissional => {
-                    
+            fetch(`<?php echo home_url() . '/wp-json/api/v1/lista-profissionais?=' ?>`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(params)
+                })
+                .then(response => response.json())
+                .then(response => {
                     const {
-                        horarios_disponiveis
-                    } = profissional;
+                        profissionais
+                    } = response
 
-                    const dias_disponiveis = Object.values(horarios_disponiveis);
-                    const horarios = Object.values(dias_disponiveis[0]);
+                    profissionaisUnicos = profissionais.reduce((acc, current) => {
+                        acc[JSON.stringify(current)] = current;
+                        return acc;
+                    }, []);
 
-                    return `<div class="card-profissional" style="display:flex;">
+
+                    return Object.values(profissionaisUnicos);
+                })
+                .then(profissionais => {
+                    console.log(`profissionais`, profissionais)
+                    listaProfissionais.innerHTML = profissionais.map(profissional => {
+
+                        const {
+                            horarios_disponiveis
+                        } = profissional;
+
+                        const dias_disponiveis = Object.values(horarios_disponiveis);
+                        const horarios = Object.values(dias_disponiveis[0]);
+
+                        return `<div class="card-profissional" style="display:flex;">
                     <div class="card-imagem">
                     <img src="${profissional.foto === null ? `${urlPlugin}assets/image/avatar-${profissional.sexo.toLowerCase()}.png` : profissional.foto}" alt="" class="foto-especialista" width="100">
                     </div>
@@ -352,36 +368,36 @@ function page_agendamento_shortcode()
                         </div>
                     </div>
                     `
-                }).join().replaceAll(`,`, ``);
+                    }).join().replaceAll(`,`, ``);
 
-                const select = document.querySelector('#filtro__especialidades');
-                document.querySelector(`#tituloEspecialidade`).innerText = select.options[select.selectedIndex].text;
+                    const select = document.querySelector('#filtro__especialidades');
+                    document.querySelector(`#tituloEspecialidade`).innerText = select.options[select.selectedIndex].text;
 
-                const botoes = document.querySelectorAll('.btn-horario');
-                botoes.forEach(botao => {
-                    botao.addEventListener('click', function() {
-                        const cardInfo = document.querySelector('.btn-horario').parentNode.parentNode.parentNode;
-                        cardInfo.querySelector(`.nome-especialista`).textContent;
+                    const botoes = document.querySelectorAll('.btn-horario');
+                    botoes.forEach(botao => {
+                        botao.addEventListener('click', function() {
+                            const cardInfo = document.querySelector('.btn-horario').parentNode.parentNode.parentNode;
+                            cardInfo.querySelector(`.nome-especialista`).textContent;
 
-                        document.querySelector('#horario_escolhido').value = this.innerHTML;
-                        document.querySelector('#profissional_escolhido').textContent = cardInfo.querySelector(`.nome-especialista`).textContent;
+                            document.querySelector('#horario_escolhido').value = this.innerHTML;
+                            document.querySelector('#profissional_escolhido').textContent = cardInfo.querySelector(`.nome-especialista`).textContent;
 
-                        var professionalId = this.parentElement.getAttribute("data-id-profissional");
-                        document.querySelector('#profissional_escolhido').value = professionalId;
+                            var professionalId = this.parentElement.getAttribute("data-id-profissional");
+                            document.querySelector('#profissional_escolhido').value = professionalId;
 
-                        confirmacaoConsulta();
+                            confirmacaoConsulta();
+                        });
                     });
+
+                })
+                .catch(err => {
+                    console.error(err)
+                    document.querySelector(`#tituloEspecialidade`).innerText = "Nenhum horário disponível";
+                }).finally(() => {
+                    document.querySelector(`#loader`).removeAttribute(`class`, `active`)
+                    document.querySelector(`#loader`).style.display = "none"
                 });
-
-            })
-            .catch(err => {
-                console.error(err)
-                document.querySelector(`#tituloEspecialidade`).innerText = "Nenhum horário disponível";
-            }).finally(() => {
-                document.querySelector(`#loader`).removeAttribute(`class`, `active`)
-                document.querySelector(`#loader`).style.display = "none"
-            });
-
+        }
 
         function cadastrarAgendamento() {
 
@@ -492,6 +508,8 @@ function page_agendamento_shortcode()
         };
 
         window.onload = function() {
+            setStorange();
+            carrega_profissionais();
 
             document.querySelector(`#step1`).onclick = function() {
                 if (capturarDados()) {

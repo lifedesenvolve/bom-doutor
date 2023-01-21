@@ -14,24 +14,7 @@ function rotas_bom_doutor()
 
     register_rest_route('api/v1', '/lista-profissionais/', array(
         'methods'  => 'POST',
-        'callback' => 'lista_profissionais',
-        'args' => array(
-            'unidade' => array(
-                'validate_callback' => function ($param, $request, $key) {
-                    return is_numeric($param);
-                }
-            ),
-            'especialidade' => array(
-                'validate_callback' => function ($param, $request, $key) {
-                    return is_numeric($param);
-                }
-            ),
-            'data' => array(
-                'validate_callback' => function ($param, $request, $key) {
-                    return preg_match('/^\d{4}-\d{2}-\d{2}$/', $param);
-                }
-            ),
-        ),
+        'callback' => 'lista_profissionais'
     ));
 
     register_rest_route('api/v1', '/paciente/', array(
@@ -96,7 +79,7 @@ function lista_profissionais($request)
 
     $api = new Api();
     $lista_profissionais = $api->listProfissionaisHorarios($unidade, $especialidadesArray, $procedimento_id, $data, $data);
-    return $lista_profissionais;
+    echo json_encode($lista_profissionais);
 }
 
 function registrar_paciente($request)

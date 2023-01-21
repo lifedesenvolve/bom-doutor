@@ -98,11 +98,11 @@ function filtro_agendamento_shortcode()
 
         function setStorange() {
             document.getElementById('form-filtro').addEventListener('submit', (event) => {
-                event.preventDefault();
                 localStorage.setItem('@@bomdoutor:filtro__data', document.getElementById('filtro__data').value);
                 localStorage.setItem('@@bomdoutor:filtro__especialidades', document.getElementById('filtro__especialidades').value);
                 localStorage.setItem('@@bomdoutor:filtro__unidade', document.getElementById('filtro__unidade').value);
                 localStorage.setItem('@@bomdoutor:filtro__procedimento', document.getElementById('filtro__procedimento').value);
+                event.preventDefault();
                 window.location.reload(true);
             });
         }

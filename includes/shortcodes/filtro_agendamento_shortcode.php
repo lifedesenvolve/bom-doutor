@@ -7,7 +7,7 @@ function filtro_agendamento_shortcode()
     $lista_especialidades = $api->listEspecialidades();
 
 ?>
-    <form class="form-filtro">
+    <form class="form-filtro" id="form-filtro">
         <h3 class="titulo-filtro">Filtro</h3>
         <label for="filtro__data" class="label-filtro">Data:</label><br>
         <input type="date" id="filtro__data" class="filtro__data" name="filtro__data" value="<?php echo date("Y-m-d"); ?>">
@@ -97,10 +97,14 @@ function filtro_agendamento_shortcode()
         lista_especialidades(filtro__procedimento);
 
         function setStorange() {
-            localStorage.setItem('@@bomdoutor:filtro__data', document.getElementById('filtro__data').value);
-            localStorage.setItem('@@bomdoutor:filtro__especialidades', document.getElementById('filtro__especialidades').value);
-            localStorage.setItem('@@bomdoutor:filtro__unidade', document.getElementById('filtro__unidade').value);
-            localStorage.setItem('@@bomdoutor:filtro__procedimento', document.getElementById('filtro__procedimento').value);
+            document.getElementById('form-filtro').addEventListener('submit', (event) => {
+                event.preventDefault();
+                localStorage.setItem('@@bomdoutor:filtro__data', document.getElementById('filtro__data').value);
+                localStorage.setItem('@@bomdoutor:filtro__especialidades', document.getElementById('filtro__especialidades').value);
+                localStorage.setItem('@@bomdoutor:filtro__unidade', document.getElementById('filtro__unidade').value);
+                localStorage.setItem('@@bomdoutor:filtro__procedimento', document.getElementById('filtro__procedimento').value);
+                window.location.reload(true);
+            });
         }
     </script>
 

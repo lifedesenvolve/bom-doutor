@@ -27,6 +27,13 @@
     width: 100%;
     padding-left: 20px;
 }
+.card-profissional .foto-especialista{
+    border-radius: 50%!important;
+    object-fit: fill;
+    height: 100px;
+    min-width: 100px;
+    display: block;
+}
 
 .select {
     font-family: "Inter";

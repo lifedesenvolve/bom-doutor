@@ -102,6 +102,12 @@ function page_agendamento_shortcode()
                             </div>
                         </div>
                         <div class="mb-3 px-5 row">
+                            <label for="data_aniversario" class="col-sm-3 col-form-label">Data Aniversário</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" name="data_aniversario" type="date" id="data_aniversario">
+                            </div>
+                        </div>
+                        <div class="mb-3 px-5 row">
                             <label for="telefone" class="col-sm-3 col-form-label">Telefone do titular</label>
                             <div class="col-sm-9">
                                 <input class="form-control" name="telefone_titular" type="phone" id="telefone">
@@ -168,25 +174,29 @@ function page_agendamento_shortcode()
         const tituloEspecialidade = document.querySelector(`#tituloEspecialidade`);
 
         const url = `<?php echo home_url() ?>`;
-        let dadosPaciente;
+
         console.log(idUserFeegow);
 
         if (idUserFeegow !== -1) {
             fetch(`${url}/wp-json/api/v1/paciente/?paciente_id=${idUserFeegow}`)
                 .then(response => response.json())
-                .then(data => {
-                    dadosPaciente = data;
+                .then(dadosPaciente => {
                     const nomeTitular = document.querySelector('[name=nome_titular]');
                     const cpfTitular = document.querySelector('[name=cpf_titular]');
                     const emailTitular = document.querySelector('[name=email_titular]');
                     const generoTitular = document.querySelector('[name=genero_titular]');
                     const telefoneTitular = document.querySelector('[name=telefone_titular]');
+                    const dataAniversario = document.querySelector('[name=data_aniversario]');
+                    console.log(dadosPaciente)
 
                     nomeTitular.value = dadosPaciente?.paciente.nome;
                     cpfTitular.value = dadosPaciente?.paciente.documentos.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
                     telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
                     generoTitular.value = dadosPaciente?.paciente.sexo[0];
                     emailTitular.value = dadosPaciente?.paciente.email[0];
+                    dataAniversario.value = dadosPaciente?.paciente.nascimento.replace(/(\d+)-(\d+)-(\d+)/, "$3-$2-$1");
+                    //dataAniversario.value = new Date();
+                    
                 })
                 .catch(error => console.log(error));
         }
@@ -220,6 +230,7 @@ function page_agendamento_shortcode()
             const generoTitular = document.querySelector('[name=genero_titular]').value;
             const telefoneTitular = document.querySelector('[name=telefone_titular]').value.replace(/\D/g, "");
             const horarioEscolhido = document.querySelector('[name=horario_escolhido]').value;
+            const dataAniversario = document.querySelector('[name=data_aniversario]').value;
 
             const dados = {
                 nome_titular: nomeTitular,
@@ -227,10 +238,11 @@ function page_agendamento_shortcode()
                 email_titular: emailTitular,
                 genero_titular: generoTitular,
                 telefone_titular: telefoneTitular,
-                horario_escolhido: horarioEscolhido
+                horario_escolhido: horarioEscolhido,
+                dataAniversario: dataAniversario
             };
 
-            if (!nomeTitular || !cpfTitular || !emailTitular || !telefoneTitular || !horarioEscolhido) {
+            if (!nomeTitular || !cpfTitular || !emailTitular || !telefoneTitular || !horarioEscolhido || !dataAniversario) {
                 return false;
             }
 
@@ -417,6 +429,7 @@ function page_agendamento_shortcode()
             const emailTitular = document.querySelector('[name=email_titular]').value;
             const generoTitular = document.querySelector('[name=genero_titular]').value;
             const telefoneTitular = document.querySelector('[name=telefone_titular]').value.replace(/[^\d]/g, "");
+            const dataAniversario = document.querySelector('[name=data_aniversario]');
             let user_id = <?php echo get_current_user_id() ?>;
 
             const bodyCadastro = {
@@ -424,6 +437,7 @@ function page_agendamento_shortcode()
                 "cpf_titular": cpfTitular,
                 "email_titular": emailTitular,
                 "genero_titular": generoTitular,
+                "data_nascimento": dataAniversario,
                 "telefone_titular": telefoneTitular,
                 "user_id": user_id
             }

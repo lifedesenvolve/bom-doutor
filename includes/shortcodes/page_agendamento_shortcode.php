@@ -178,27 +178,36 @@ function page_agendamento_shortcode()
         console.log(idUserFeegow);
 
         if (idUserFeegow !== -1) {
-            fetch(`${url}/wp-json/api/v1/paciente/?paciente_id=${idUserFeegow}`)
+            const options = {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            fetch(`${url}/wp-json/api/v1/paciente/?paciente_id=${idUserFeegow}`, options)
                 .then(response => response.json())
-                .then(dadosPaciente => {
-                    const nomeTitular = document.querySelector('[name=nome_titular]');
-                    const cpfTitular = document.querySelector('[name=cpf_titular]');
-                    const emailTitular = document.querySelector('[name=email_titular]');
-                    const generoTitular = document.querySelector('[name=genero_titular]');
-                    const telefoneTitular = document.querySelector('[name=telefone_titular]');
-                    const dataAniversario = document.querySelector('[name=data_aniversario]');
-                    console.log(dadosPaciente)
+                .then(data => {
+                    dadosPaciente = data;
+                    console.log(dadosPaciente);
 
-                    nomeTitular.value = dadosPaciente?.paciente.nome;
-                    cpfTitular.value = dadosPaciente?.paciente.documentos.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-                    telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
-                    generoTitular.value = dadosPaciente?.paciente.sexo[0];
-                    emailTitular.value = dadosPaciente?.paciente.email[0];
-                    dataAniversario.value = dadosPaciente?.paciente.nascimento.replace(/(\d+)-(\d+)-(\d+)/, "$3-$2-$1");
-                    //dataAniversario.value = new Date();
+                    if (dadosPaciente.status !== 'error') {
+                        const nomeTitular = document.querySelector('[name=nome_titular]');
+                        const cpfTitular = document.querySelector('[name=cpf_titular]');
+                        const emailTitular = document.querySelector('[name=email_titular]');
+                        const generoTitular = document.querySelector('[name=genero_titular]');
+                        const telefoneTitular = document.querySelector('[name=telefone_titular]');
+                        const dataAniversario = document.querySelector('[name=data_aniversario]');
 
+                        console.log(dataAniversario);
+
+                        nomeTitular.value = dadosPaciente?.paciente.nome;
+                        cpfTitular.value = dadosPaciente?.paciente.documentos.cpf;
+                        telefoneTitular.value = dadosPaciente?.paciente.telefones[0];
+                        generoTitular.value = dadosPaciente?.paciente.sexo[0];
+                        emailTitular.value = dadosPaciente?.paciente.email[0];
+                        dataAniversario.value = dadosPaciente?.paciente.nascimento.replace(/(\d+)-(\d+)-(\d+)/, "$3-$2-$1");
+                    }
                 })
-                .catch(error => console.log(error));
+                .catch(err => console.error(err));
         }
 
 
@@ -454,8 +463,8 @@ function page_agendamento_shortcode()
             const cpfTitular = document.querySelector('[name=cpf_titular]').value.replace(/[^\d]/g, "");
             const emailTitular = document.querySelector('[name=email_titular]').value;
             const generoTitular = document.querySelector('[name=genero_titular]').value;
-            const telefoneTitular = document.querySelector('[name=telefone_titular]').value.replace(/[^\d]/g, "");
-            const dataAniversario = document.querySelector('[name=data_aniversario]');
+            const telefoneTitular = document.querySelector('[name=telefone_titular]').value;
+            const dataAniversario = document.querySelector('[name=data_aniversario]').value;
             let user_id = <?php echo get_current_user_id() ?>;
 
             const bodyCadastro = {
@@ -464,7 +473,7 @@ function page_agendamento_shortcode()
                 "email_titular": emailTitular,
                 "genero_titular": generoTitular,
                 "data_nascimento": dataAniversario,
-                "telefone_titular": telefoneTitular,
+                "telefone_titular": document.querySelector('[name=telefone_titular]').value,
                 "user_id": user_id
             }
             console.log(bodyCadastro)
@@ -478,20 +487,23 @@ function page_agendamento_shortcode()
                 body: JSON.stringify(bodyCadastro)
             };
 
-            fetch(`${base_url}/wp-json/api/v1/registrar-paciente`, options)
-                .then(response => response.json())
-                .then(response => {
-                    if (response.status === 'sucesso') {
+            if (capturarDados()) {
+                fetch(`${base_url}/wp-json/api/v1/registrar-paciente`, options)
+                    .then(response => response.json())
+                    .then(response => {
+                        if (response.status === 'sucesso') {
+                            document.querySelector(`.step-1`).style.display = 'none';
+                            document.querySelector(`.step-2`).style.display = 'block';
+                            document.querySelector(`#id_user_feegow`).value = response.content.paciente_id
+                            document.querySelector(`#stepModal`).innerText = "Forma de Pagamento";
+                        }
                         document.querySelector(`.step-1`).style.display = 'none';
                         document.querySelector(`.step-2`).style.display = 'block';
-                        document.querySelector(`#id_user_feegow`).value = response.content.paciente_id
-                        document.querySelector(`#stepModal`).innerText = "Forma de Pagamento";
-                    }
-                    document.querySelector(`.step-1`).style.display = 'none';
-                    document.querySelector(`.step-2`).style.display = 'block';
-                    console.log(response.mensagem);
-                })
-                .catch(err => console.error(err));
+                        console.log(response.mensagem);
+                    })
+                    .catch(err => console.error(err));
+            }
+
         }
 
         function maskCPF(e) {

@@ -91,7 +91,7 @@ function registrar_paciente($request)
         $dados['nome_titular'],
         $dados['cpf_titular'],
         $dados['email_titular'],
-        $dados['data_nascimento_titular'],
+        $dados['data_nascimento'],
         $dados['genero_titular'],
         $dados['telefone_titular']
     );

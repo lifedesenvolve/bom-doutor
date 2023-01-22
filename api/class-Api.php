@@ -746,7 +746,7 @@ class Api
                 'email' =>  $paciente_email,
                 'data_nascimento' => date('Y-m-d', strtotime($paciente_data_nascimento)),
                 'sexo' => $paciente_sexo,
-                'telefone' => $paciente_telefone,
+                'telefone' => "$paciente_telefone"
             ]));
 
             if (isset($paciente_create['error'])) {

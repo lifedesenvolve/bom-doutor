@@ -153,11 +153,20 @@ function page_agendamento_shortcode()
 
     <div class="row"><span class="col-sm-3"></span><span class="col-sm-9"></span></div>
     <script>
+        /*
         const filtro__data = localStorage.getItem('@@bomdoutor:filtro__data');
         const filtro__especialidades = localStorage.getItem('@@bomdoutor:filtro__especialidades');
-        const filtro__unidade = localStorage.getItem('@@bomdoutor:filtro__unidade');
+        const filtro__unidade_id = localStorage.getItem('@@bomdoutor:filtro__unidade_id');
         const filtro__procedimento = localStorage.getItem('@@bomdoutor:filtro__procedimento');
-        document.querySelector(".info-data").innerHTML = new Date(filtro__data.replaceAll(`-`, ` `)).toLocaleDateString('pt-BR', {
+        const filtro__procedimento_id = localStorage.getItem('@@bomdoutor:filtro__procedimento_id');
+        */
+        filtro = JSON.parse(localStorage.getItem('@@bomdoutor:dados_filtro'))
+        const lt_procedimentos = JSON.parse(localStorage.getItem('@@bomdoutor:dados_lista_procedimentos'));
+        console.log(lt_procedimentos)
+        //const dados = JSON.parse(localStorage.getItem('@@bomdoutor:dados_procedimento'))[0];
+        
+
+        document.querySelector(".info-data").innerHTML = new Date(filtro.filtro__data.replaceAll(`-`, ` `)).toLocaleDateString('pt-BR', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
@@ -197,11 +206,9 @@ function page_agendamento_shortcode()
                         const telefoneTitular = document.querySelector('[name=telefone_titular]');
                         const dataAniversario = document.querySelector('[name=data_aniversario]');
 
-                        console.log(dataAniversario);
-
                         nomeTitular.value = dadosPaciente?.paciente.nome;
-                        cpfTitular.value = dadosPaciente?.paciente.documentos.cpf;
-                        telefoneTitular.value = dadosPaciente?.paciente.telefones[0];
+                        cpfTitular.value = dadosPaciente?.paciente.documentos.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+                        telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
                         generoTitular.value = dadosPaciente?.paciente.sexo[0];
                         emailTitular.value = dadosPaciente?.paciente.email[0];
                         dataAniversario.value = dadosPaciente?.paciente.nascimento.replace(/(\d+)-(\d+)-(\d+)/, "$3-$2-$1");
@@ -277,32 +284,16 @@ function page_agendamento_shortcode()
             return dados;
         }
 
-        function procedimento_valor(especialidade_id, tipo_procedimento) {
-            const base_url = '<?php echo home_url(); ?>';
-            const options = {
-                method: 'GET'
-            };
-            fetch(`${base_url}/wp-json/api/v1/procedimento-valor/?especialidade_id=${especialidade_id}&tipo_procedimento=${tipo_procedimento}`, options)
-                .then(response => response.json())
-                .then(response => {
-                    document.querySelector("#valor_procedimento").innerText = response.api_response.valor;
-                    document.querySelector("#valor_procedimento").value = response.api_response.procedimento_id;
-                    console.log(response)
-                })
-                .catch(err => console.error(err));
-        }
-
         function confirmacaoConsulta() {
-            const tipo_procedimento = filtro__procedimento;
-            const id_especialidades = filtro__especialidades;
+            const procedimento_id = filtro.filtro__procedimento_id;
 
-            procedimento_valor(id_especialidades, tipo_procedimento);
+            const infoProcedimento = lt_procedimentos.filter((procedimento)=> procedimento.procedimento_id == procedimento_id);
 
             const nomeTitular = document.querySelector('[name=nome_titular]').value;
-            const especialidade = document.querySelector(`#tituloEspecialidade`).textContent;
+            const especialidade = lt_procedimentos.filter((procedimento)=> procedimento.procedimento_id == procedimento_id)[0].nome;
             const data = `${document.querySelector(`.info-data`).textContent} às ${document.querySelector('[name=horario_escolhido]').value}`;
             const nomeMedico = document.querySelector('#profissional_escolhido').textContent
-            const valorProcedimento = document.querySelector("#valor_procedimento").textContent.replace(/([0-9]{2})$/g, ",$1")
+            const valorProcedimento = String(infoProcedimento[0].valor).replace(/([0-9]{2})$/g, ",$1")
 
             document.querySelector(`#dadosAgendamento`).innerHTML = `
             <div class="row"><b class="col-sm-3">Paciente: </b><span class="col-sm-9">${nomeTitular}</span></div>
@@ -315,17 +306,24 @@ function page_agendamento_shortcode()
         }
 
         function carrega_profissionais() {
-            const dados = JSON.parse(localStorage.getItem('@@bomdoutor:dados_procedimento'))[0];
+
+
             const filtro = JSON.parse(localStorage.getItem(`@@bomdoutor:dados_filtro`));
-            const dataSelecionada = localStorage.getItem(`@@bomdoutor:filtro__data`);
+            //const dataSelecionada = localStorage.getItem(`@@bomdoutor:filtro__data`);
+           // const procedimento_id = localStorage.getItem(`@@bomdoutor:filtro__data`)
+            console.log(`todos dados`)
+
+            const procedimento_id = filtro.filtro__procedimento_id;
+            const infoProcedimento = lt_procedimentos.filter((procedimento)=> procedimento.procedimento_id == procedimento_id)[0];
+            console.log(infoProcedimento)
 
             document.getElementById('filtro__data').value
 
-            const params = {
+            const params = {    
                 "unidade": filtro.filtro__unidade_id,
-                "especialidadesArray": dados.especialidade_id,
-                "data": dataSelecionada,
-                "procedimento_id": filtro.filtro__procedimento_id,
+                "especialidadesArray": infoProcedimento.especialidade_id,
+                "data": filtro.filtro__data,
+                "procedimento_id": procedimento_id,
             }
 
             fetch(`<?php echo home_url() . '/wp-json/api/v1/lista-profissionais?=' ?>`, {
@@ -380,7 +378,7 @@ function page_agendamento_shortcode()
                     }).join().replaceAll(`,`, ``);
 
                     const select = document.querySelector('#filtro__especialidades');
-                    document.querySelector(`#tituloEspecialidade`).innerText = select.options[select.selectedIndex].text;
+                    document.querySelector(`#tituloEspecialidade`).innerText = infoProcedimento.nome;
 
                     const botoes = document.querySelectorAll('.btn-horario');
                     botoes.forEach(botao => {
@@ -410,24 +408,23 @@ function page_agendamento_shortcode()
 
         function cadastrarAgendamento() {
 
-            const unidade_id = filtro__unidade;
+            const unidade_id = filtro.filtro__unidade_id;
             const paciente_id = document.querySelector(`#id_user_feegow`).value;
             const profissional_id = document.querySelector('#profissional_escolhido').value;
-            const especialidade_id = filtro__especialidades;
-            const data_consulta = filtro__data;
-            const procedimento_id = document.querySelector("#valor_procedimento").value;
+            const data_consulta = filtro.filtro__data;
+            const procedimento_id = filtro.filtro__procedimento_id;
             const horario_agendado = document.querySelector('#horario_escolhido').value + ":00";
-            const valor_consulta = document.querySelector("#valor_procedimento").innerText;
+            const {valor, especialidade_id} = lt_procedimentos.filter((procedimento)=> procedimento.procedimento_id == procedimento_id)[0];
 
             const bodyCadastro = {
                 "local_id": unidade_id,
                 "paciente_id": paciente_id,
                 "profissional_id": profissional_id,
                 "procedimento_id": procedimento_id,
-                "especialidade_id": especialidade_id,
+                "especialidade_id": especialidade_id[0],
                 "data": data_consulta,
                 "horario": horario_agendado,
-                "valor": valor_consulta,
+                "valor": valor,
                 "plano": 0
             }
 

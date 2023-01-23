@@ -23,19 +23,16 @@ function pesquisa_agendamento_shortcode()
         </div>
     </div>
     <script>
-        localStorage.setItem('@@bomdoutor:dados_lista_procedimento', "");
+        localStorage.setItem('@@bomdoutor:dados_lista_procedimentos', "");
         localStorage.setItem('@@bomdoutor:dados_filtro', "");
 
         function loadProcedimentos(tipoProcedimento, dados_lista_procedimentos) {
             const selectProcedimentos = document.querySelector('#procedimento');
-            selectProcedimentos.innerHTML = '<option value="">Selecione a especialidade</option>';
-
             let options = '';
-
             let lista = dados_lista_procedimentos.filter(item => item.tipo_procedimento == tipoProcedimento && item.especialidade_id != null)
 
             console.log(lista);
-
+           
             lista.forEach(info => {
                 options += `<option value="${info.procedimento_id}">${info.nome}</option>`;
             });
@@ -75,9 +72,7 @@ function pesquisa_agendamento_shortcode()
             const unidade_id = document.getElementById("unidade").value;
             const tipo_procedimento = document.querySelector(`#tipoProcedimento .btn-modalidade.ativo`).value;
             const procedimento_id = document.getElementById("procedimento").value;
-            const dados_procedimento =  dados_lista_procedimentos.filter(item => item.procedimento_id == procedimento_id);
             const filtro__data = "<?php echo date('Y-m-d'); ?>"
-
 
             const dados_filtro = {
                 filtro__data: filtro__data,
@@ -87,14 +82,9 @@ function pesquisa_agendamento_shortcode()
             }
 
             localStorage.setItem('@@bomdoutor:dados_lista_procedimentos', JSON.stringify(dados_lista_procedimentos));
-            localStorage.setItem('@@bomdoutor:dados_procedimento', JSON.stringify(dados_procedimento));
             localStorage.setItem('@@bomdoutor:dados_filtro', JSON.stringify(dados_filtro));
-            localStorage.setItem('@@bomdoutor:filtro__data', filtro__data);
-            localStorage.setItem('@@bomdoutor:filtro__procedimento_id', procedimento_id);
-            localStorage.setItem('@@bomdoutor:filtro__tipo_procedimento', tipo_procedimento);
-            localStorage.setItem('@@bomdoutor:filtro__unidade_id', unidade_id);
 
-            console.log(localStorage)
+
 
             if (unidade_id === "") {
                 document.getElementById("unidade").style.borderColor = "red";

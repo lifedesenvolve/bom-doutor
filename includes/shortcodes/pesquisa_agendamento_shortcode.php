@@ -26,13 +26,35 @@ function pesquisa_agendamento_shortcode()
         localStorage.setItem('@@bomdoutor:dados_lista_procedimentos', "");
         localStorage.setItem('@@bomdoutor:dados_filtro', "");
 
+        function create_select_mobile() {
+            document.getElementById("tipoProcedimento").insertAdjacentHTML("afterend", "<select id='selectForMobile'></select>");
+
+            let btnContainer = document.getElementById("tipoProcedimento");
+            let select = document.getElementById('selectForMobile');
+            select.id = "selectProcedimento";
+
+            // Adiciona as opções ao select baseado nos botões existentes
+            for (let i = 0; i < btnContainer.children.length; i++) {
+                let option = document.createElement("option");
+                option.value = btnContainer.children[i].value;
+                option.text = btnContainer.children[i].textContent;
+                select.appendChild(option);
+            }
+
+            select.addEventListener("change", function() {
+                var selectedValue = this.value;
+                var button = document.querySelector(`button[value="${selectedValue}"]`);
+                button.click();
+            });
+        }
+
         function loadProcedimentos(tipoProcedimento, dados_lista_procedimentos) {
             const selectProcedimentos = document.querySelector('#procedimento');
             let options = '';
             let lista = dados_lista_procedimentos.filter(item => item.tipo_procedimento == tipoProcedimento && item.especialidade_id != null)
 
             console.log(lista);
-           
+
             lista.forEach(info => {
                 options += `<option value="${info.procedimento_id}">${info.nome}</option>`;
             });
@@ -68,6 +90,7 @@ function pesquisa_agendamento_shortcode()
                 }
             });
         }
+
         function pesquisaFeeGow() {
             const unidade_id = document.getElementById("unidade").value;
             const tipo_procedimento = document.querySelector(`#tipoProcedimento .btn-modalidade.ativo`).value;
@@ -123,6 +146,7 @@ function pesquisa_agendamento_shortcode()
                     });
 
                     document.querySelector('#tipoProcedimento').innerHTML = htmlProcedimentos;
+                    create_select_mobile();
                 })
                 .catch(err => console.error(err));
         }
@@ -131,45 +155,47 @@ function pesquisa_agendamento_shortcode()
         (async () => {
             await lista_tipo_procedimentos();
             await getEspecialidadeByProcedimentoId(2)
-                .then((response)=> {
+                .then((response) => {
                     dados_lista_procedimentos.push(...response);
 
                     return response;
-                }).then((response)=> {
+                }).then((response) => {
 
                     //document.querySelector('[data-procedimento="Consulta"]').click()
 
                     return response;
-                }).then((response)=> procedimentoAtivo(response))
-                .then(()=>{document.querySelector(`#tipoProcedimento .btn-modalidade[value="2"]`).click()});
+                }).then((response) => procedimentoAtivo(response))
+                .then(() => {
+                    document.querySelector(`#tipoProcedimento .btn-modalidade[value="2"]`).click()
+                });
         })();
 
         window.addEventListener('load', (event) => {
             searchParams = new URLSearchParams(window.location.search);
-        isLogin = searchParams.get('login');
+            isLogin = searchParams.get('login');
 
-        if (isLogin) {
-            window.location.href = `${window.location.origin}/agendar`
-        }
-
-        const tipoProcedimento = document.getElementById("tipoProcedimento");
-        tipoProcedimento.addEventListener("click", function(event) {
-
-            event.preventDefault();
-            if (event.target.classList.contains("btn-modalidade")) {
-                const buttons = tipoProcedimento.querySelectorAll(".btn-modalidade");
-                buttons.forEach(function(button) {
-                    button.classList.remove("ativo");
-                });
-                event.target.classList.add("ativo");
+            if (isLogin) {
+                window.location.href = `${window.location.origin}/agendar`
             }
 
-            document.querySelectorAll(`#tipoProcedimento .btn-modalidade`).forEach(function(button) {
-                if (button.classList.value === "btn-modalidade ativo") {
-                    document.querySelector(`[name="filtro__procedimento"]`).value = button.value
+            const tipoProcedimento = document.getElementById("tipoProcedimento");
+            tipoProcedimento.addEventListener("click", function(event) {
+
+                event.preventDefault();
+                if (event.target.classList.contains("btn-modalidade")) {
+                    const buttons = tipoProcedimento.querySelectorAll(".btn-modalidade");
+                    buttons.forEach(function(button) {
+                        button.classList.remove("ativo");
+                    });
+                    event.target.classList.add("ativo");
                 }
-            })
-        });
+
+                document.querySelectorAll(`#tipoProcedimento .btn-modalidade`).forEach(function(button) {
+                    if (button.classList.value === "btn-modalidade ativo") {
+                        document.querySelector(`[name="filtro__procedimento"]`).value = button.value
+                    }
+                })
+            });
         });
     </script>
 

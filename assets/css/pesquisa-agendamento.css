@@ -52,7 +52,6 @@
     color: white;
 }
 
-
 button.btn-modalidade {
     font-size: 1vw !important;
 }
@@ -89,6 +88,11 @@ button.btn-modalidade {
     #selectProcedimento{
         display:block !important;
         margin-bottom: 3vw !important;
+        font-family: "Open Sans", Sans-serif;
+        font-weight: 400;
+        font-size: 3vw !important;
+        line-height: 1.5em;
+        border-radius: 0.5em;
     }
     .group-inputs{
         display: flex !important;
@@ -97,8 +101,12 @@ button.btn-modalidade {
     }
     .group-inputs select{
         font-size: 3vw !important;
+        line-height: 1.5em;
+        border-radius: 0.5em;
     }
     .group-inputs button{
         font-size: 3vw !important;
+        line-height: 1.5em;
+        border-radius: 0.5em;
     }
 }

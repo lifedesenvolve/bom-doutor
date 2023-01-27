@@ -27,8 +27,8 @@
     width: 100%;
     padding-left: 20px;
 }
-.card-profissional .foto-especialista{
-    border-radius: 50%!important;
+.card-profissional .foto-especialista {
+    border-radius: 50% !important;
     object-fit: fill;
     height: 100px;
     min-width: 100px;
@@ -284,5 +284,17 @@
 
     to {
         stroke-dashoffset: -351.86;
+    }
+}
+
+@media (max-width: 500px) {
+    .card-profissional {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card-profissional img {
+        margin-bottom: 2em;
     }
 }

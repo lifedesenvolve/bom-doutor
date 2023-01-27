@@ -69,10 +69,12 @@ class Api
         return json_decode($data, true);
     }
 
-    private function disponibilidade_horarios($profissional_id, $procedimento_id, $unidade_id, $data_start, $data_end)
+    public function disponibilidade_horarios($procedimento_id, $unidade_id, $data_start, $data_end)
     {
-        $response = $this->connectApi($this->disponibilidade_horarios . '?tipo=P&procedimento_id=' . $procedimento_id . '&unidade_id=' . $unidade_id . '&data_start=' . $data_start . '&data_end=' . $data_end)['content']['profissional_id'][1]['local_id'];
-        return reset($response);
+        $response = $this->connectApi($this->disponibilidade_horarios . '?tipo=P&procedimento_id=' . $procedimento_id . '&unidade_id=' . $unidade_id . '&data_start=' . $data_start . '&data_end=' . $data_end);
+        if (isset($response['content']['profissional_id'])) {
+            return reset(reset(reset($response['content']['profissional_id'])));
+        }
     }
 
     public function list($list, $where = false)
@@ -214,7 +216,7 @@ class Api
         }
     }
 
-    public function profissionais_agenda($unidade_id, $especialidade_id, $data_start, $data_end, $all = null)
+    /*     public function profissionais_agenda($unidade_id, $especialidade_id, $data_start, $data_end, $all = null)
     {
 
         if ($all) {
@@ -259,7 +261,7 @@ class Api
         ];
 
         return $response;
-    }
+    } */
 
 
 
@@ -284,7 +286,7 @@ class Api
 
     /* old */
 
-    private function availableSchedule($profissional_id, $especialidade_id, $unidade_id, $data_start, $data_end)
+    /*     private function availableSchedule($profissional_id, $especialidade_id, $unidade_id, $data_start, $data_end)
     {
         $disponibilidade_horarios = $this->connectApi($this->disponibilidade_horarios . '?tipo=E&especialidade_id=' . $especialidade_id . '&unidade_id=' . $unidade_id . '&data_start=' . $data_start . '&data_end=' . $data_end);
 
@@ -303,7 +305,7 @@ class Api
         }
 
         return array_shift($response);
-    }
+    } */
 
     private function getEspecialidadesByIdArray($procedimentos_especialidades_array, array $especialidades)
     {
@@ -622,6 +624,13 @@ class Api
             if (isset($profissional_list['profissionais'])) {
                 foreach ($profissional_list['profissionais'] as $profissional) {
 
+                    $horarios = $this->disponibilidade_horarios(
+                        $procedimento_id,
+                        $unidade_id,
+                        date("d-m-Y", strtotime($data_start)),
+                        date("d-m-Y", strtotime($data_start))
+                    );
+
                     $response['profissionais'][] = [
                         'profissional_id' => $profissional['profissional_id'],
                         'tratamento' => $profissional['tratamento'],
@@ -630,13 +639,7 @@ class Api
                         'sexo' => $profissional['sexo'],
                         'conselho' => $profissional['conselho'],
                         'documento_conselho' => $profissional['documento_conselho'],
-                        'horarios_disponiveis' => $this->disponibilidade_horarios(
-                            $profissional['profissional_id'],
-                            $profissional_list['procedimento'],
-                            $unidade_id,
-                            $data_start,
-                            $data_end
-                        )
+                        'horarios_disponiveis' => $horarios,
                     ];
                 }
             }

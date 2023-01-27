@@ -164,7 +164,7 @@ function page_agendamento_shortcode()
         const lt_procedimentos = JSON.parse(localStorage.getItem('@@bomdoutor:dados_lista_procedimentos'));
         console.log(lt_procedimentos)
         //const dados = JSON.parse(localStorage.getItem('@@bomdoutor:dados_procedimento'))[0];
-        
+
 
         document.querySelector(".info-data").innerHTML = new Date(filtro.filtro__data.replaceAll(`-`, ` `)).toLocaleDateString('pt-BR', {
             weekday: 'long',
@@ -287,10 +287,10 @@ function page_agendamento_shortcode()
         function confirmacaoConsulta() {
             const procedimento_id = filtro.filtro__procedimento_id;
 
-            const infoProcedimento = lt_procedimentos.filter((procedimento)=> procedimento.procedimento_id == procedimento_id);
+            const infoProcedimento = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id);
 
             const nomeTitular = document.querySelector('[name=nome_titular]').value;
-            const especialidade = lt_procedimentos.filter((procedimento)=> procedimento.procedimento_id == procedimento_id)[0].nome;
+            const especialidade = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id)[0].nome;
             const data = `${document.querySelector(`.info-data`).textContent} às ${document.querySelector('[name=horario_escolhido]').value}`;
             const nomeMedico = document.querySelector('#profissional_escolhido').textContent
             const valorProcedimento = String(infoProcedimento[0].valor).replace(/([0-9]{2})$/g, ",$1")
@@ -310,16 +310,16 @@ function page_agendamento_shortcode()
 
             const filtro = JSON.parse(localStorage.getItem(`@@bomdoutor:dados_filtro`));
             //const dataSelecionada = localStorage.getItem(`@@bomdoutor:filtro__data`);
-           // const procedimento_id = localStorage.getItem(`@@bomdoutor:filtro__data`)
+            // const procedimento_id = localStorage.getItem(`@@bomdoutor:filtro__data`)
             console.log(`todos dados`)
 
             const procedimento_id = filtro.filtro__procedimento_id;
-            const infoProcedimento = lt_procedimentos.filter((procedimento)=> procedimento.procedimento_id == procedimento_id)[0];
+            const infoProcedimento = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id)[0];
             console.log(infoProcedimento)
 
             document.getElementById('filtro__data').value
 
-            const params = {    
+            const params = {
                 "unidade": filtro.filtro__unidade_id,
                 "especialidadesArray": infoProcedimento.especialidade_id,
                 "data": filtro.filtro__data,
@@ -339,6 +339,7 @@ function page_agendamento_shortcode()
                         profissionais
                     } = response
 
+
                     profissionaisUnicos = profissionais.reduce((acc, current) => {
                         acc[JSON.stringify(current)] = current;
                         return acc;
@@ -349,8 +350,8 @@ function page_agendamento_shortcode()
                 })
                 .then(profissionais => {
                     console.log(`profissionais`, profissionais)
-                    listaProfissionais.innerHTML = profissionais.map(profissional => {
 
+                    listaProfissionais.innerHTML = profissionais.map(profissional => {
                         const {
                             horarios_disponiveis
                         } = profissional;
@@ -414,7 +415,10 @@ function page_agendamento_shortcode()
             const data_consulta = filtro.filtro__data;
             const procedimento_id = filtro.filtro__procedimento_id;
             const horario_agendado = document.querySelector('#horario_escolhido').value + ":00";
-            const {valor, especialidade_id} = lt_procedimentos.filter((procedimento)=> procedimento.procedimento_id == procedimento_id)[0];
+            const {
+                valor,
+                especialidade_id
+            } = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id)[0];
 
             const bodyCadastro = {
                 "local_id": unidade_id,

@@ -92,49 +92,7 @@ function bom_doutor_settings_page()
 <?php
 
     $api = new Api();
-
-    echo '<pre>';
-    print_r($api->listProfissionaisHorarios(3, [
-        0 => 131,
-        1 => 187,
-        2 => 271,
-    ], 1, '23-01-2023', '23-01-2023'));
-    echo '</pre>';
-    //->procedimentos->where('tipo_procedimento', 4)
-    //177.820.767-73
-    /*
-    Array
-(
-    [0] => Array
-        (
-            [procedimento_id] => 1
-            [procedimento_nome] => Cirurgia
-        )
-
-    [1] => Array
-        (
-            [procedimento_id] => 2
-            [procedimento_nome] => Consulta
-        )
-
-    [2] => Array
-        (
-            [procedimento_id] => 3
-            [procedimento_nome] => Exame
-        )
-
-    [3] => Array
-        (
-            [procedimento_id] => 4
-            [procedimento_nome] => Procedimento
-        )
-
-    [4] => Array
-        (
-            [procedimento_id] => 9
-            [procedimento_nome] => Retorno
-        )
-
-)
-    */
+    /* echo '<pre>';
+    print_r($api->disponibilidade_horarios(14, 3, '27-01-2023', '27-01-2023'));
+    echo '</pre>'; */
 }

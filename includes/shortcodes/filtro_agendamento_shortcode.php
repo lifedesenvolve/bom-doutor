@@ -43,7 +43,8 @@ function filtro_agendamento_shortcode()
 
 
             document.querySelector(`select#filtro__procedimentos`).innerHTML = lista.filter((procedimento)=> procedimento.tipo_procedimento == filtro.filtro__tipo_procedimento && procedimento.especialidade_id
-!= null)
+!= null && procedimento.permite_agendamento_online
+ == true)
                 .map((procedimento) => {
                 return `<option value="${procedimento.procedimento_id}" ${procedimento.procedimento_id == filtro.filtro__procedimento_id ? `selected`: ``}>
                         ${procedimento.nome}

@@ -51,7 +51,8 @@ function pesquisa_agendamento_shortcode()
         function loadProcedimentos(tipoProcedimento, dados_lista_procedimentos) {
             const selectProcedimentos = document.querySelector('#procedimento');
             let options = '';
-            let lista = dados_lista_procedimentos.filter(item => item.tipo_procedimento == tipoProcedimento && item.especialidade_id != null)
+            let lista = dados_lista_procedimentos.filter(item => item.tipo_procedimento == tipoProcedimento && item.especialidade_id != null && item.permite_agendamento_online
+ == true)
 
             console.log(lista);
 

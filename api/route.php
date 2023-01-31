@@ -72,13 +72,12 @@ function lista_procedimentos()
 
 function lista_profissionais($request)
 {
-    $unidade = $request->get_param('unidade');
-    $especialidadesArray = $request->get_param('especialidadesArray');
     $procedimento_id = $request->get_param('procedimento_id');
-    $data = $request->get_param('data');
+    $unidade = $request->get_param('unidade');
+    $data = date("d-m-Y", strtotime($request->get_param('data')));
 
     $api = new Api();
-    $lista_profissionais = $api->listProfissionaisHorarios($unidade, $especialidadesArray, $procedimento_id, $data, $data);
+    $lista_profissionais = $api->horarios($procedimento_id, $unidade, $data, $data);
     echo json_encode($lista_profissionais);
 }
 

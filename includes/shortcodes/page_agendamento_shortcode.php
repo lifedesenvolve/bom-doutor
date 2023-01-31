@@ -357,7 +357,7 @@ function page_agendamento_shortcode()
                         } = profissional;
 
                         const dias_disponiveis = Object.values(horarios_disponiveis);
-                        const horarios = Object.values(dias_disponiveis[0]);
+                        const horarios = Object.values(dias_disponiveis);
 
                         return `<div class="card-profissional" style="display:flex;">
                     <div class="card-imagem">

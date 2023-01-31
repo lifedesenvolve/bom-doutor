@@ -51,8 +51,8 @@ function pesquisa_agendamento_shortcode()
         function loadProcedimentos(tipoProcedimento, dados_lista_procedimentos) {
             const selectProcedimentos = document.querySelector('#procedimento');
             let options = '';
-            let lista = dados_lista_procedimentos.filter(item => item.tipo_procedimento == tipoProcedimento && item.especialidade_id != null && item.permite_agendamento_online
- == true)
+            let lista = dados_lista_procedimentos.filter(item => item.tipo_procedimento == tipoProcedimento && item.especialidade_id != null && item.permite_agendamento_online ==
+                true)
 
             console.log(lista);
 
@@ -73,6 +73,7 @@ function pesquisa_agendamento_shortcode()
                 const response = await fetch(`${base_url}/wp-json/api/v1/get-especialidades/?procedimento_id=${procedimento_id}`, options);
                 const jsonData = await response.json();
                 return jsonData;
+
             } catch (err) {
                 console.error(err);
             }
@@ -137,6 +138,16 @@ function pesquisa_agendamento_shortcode()
             await fetch(`${base_url}/wp-json/api/v1/lista-procedimentos`, options)
                 .then(response => response.json())
                 .then(response => {
+
+                    let form_shortcode = document.getElementById('form-agendamento');
+
+                    if (response.length < 0) {
+                        form_shortcode.style = 'display: none';
+                        return;
+                    } else {
+                        form_shortcode.style = 'display: block';
+                    }
+
                     let htmlProcedimentos = '';
                     response.forEach((item) => {
                         htmlProcedimentos += `

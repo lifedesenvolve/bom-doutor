@@ -51,3 +51,62 @@
     background-color: #2a2860;
     color: white;
 }
+
+button.btn-modalidade {
+    font-size: 1vw !important;
+}
+
+.group-inputs select{
+    font-size: 1vw !important;
+}
+
+.group-inputs button{
+    font-size: 1vw !important;
+}
+
+#selectProcedimento{
+    display:none !important;
+}
+
+@media(max-width: 750px){
+    button.btn-modalidade {
+        font-size: 2vw !important;
+    }
+    .group-inputs select{
+        font-size: 2vw !important;
+    }
+    .group-inputs button{
+        font-size: 2vw !important;
+    }
+}
+
+
+@media(max-width: 500px){
+    button.btn-modalidade {
+        display:none !important
+    }
+    #selectProcedimento{
+        display:block !important;
+        margin-bottom: 3vw !important;
+        font-family: "Open Sans", Sans-serif;
+        font-weight: 400;
+        font-size: 3vw !important;
+        line-height: 1.5em;
+        border-radius: 0.5em;
+    }
+    .group-inputs{
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 3vw;
+    }
+    .group-inputs select{
+        font-size: 3vw !important;
+        line-height: 1.5em;
+        border-radius: 0.5em;
+    }
+    .group-inputs button{
+        font-size: 3vw !important;
+        line-height: 1.5em;
+        border-radius: 0.5em;
+    }
+}

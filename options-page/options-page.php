@@ -92,9 +92,7 @@ function bom_doutor_settings_page()
 <?php
 
     $api = new Api();
-
     echo '<pre>';
-    print_r($api->listProcedimentos());
+    print_r($api->horarios(11, 3, '31-01-2023', '31-01-2023'));
     echo '</pre>';
-    //177.820.767-73
 }

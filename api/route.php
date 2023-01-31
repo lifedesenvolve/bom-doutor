@@ -13,30 +13,13 @@ function rotas_bom_doutor()
     ));
 
     register_rest_route('api/v1', '/lista-profissionais/', array(
-        'methods'  => 'GET',
-        'callback' => 'lista_profissionais',
-        'args' => array(
-            'unidade' => array(
-                'validate_callback' => function ($param, $request, $key) {
-                    return is_numeric($param);
-                }
-            ),
-            'especialidade' => array(
-                'validate_callback' => function ($param, $request, $key) {
-                    return is_numeric($param);
-                }
-            ),
-            'data' => array(
-                'validate_callback' => function ($param, $request, $key) {
-                    return preg_match('/^\d{4}-\d{2}-\d{2}$/', $param);
-                }
-            ),
-        ),
+        'methods'  => 'POST',
+        'callback' => 'lista_profissionais'
     ));
 
     register_rest_route('api/v1', '/paciente/', array(
         'methods'  => 'GET',
-        'callback' => 'get_paciente_by_ID',
+        'callback' => 'get_paciente_by_ID_or_CPF',
         'args' => array(
             'paciente_id' => array(
                 'validate_callback' => function ($param, $request, $key) {
@@ -89,14 +72,13 @@ function lista_procedimentos()
 
 function lista_profissionais($request)
 {
+    $procedimento_id = $request->get_param('procedimento_id');
     $unidade = $request->get_param('unidade');
-    $especialidade = $request->get_param('especialidade');
-    $data = $request->get_param('data');
+    $data = date("d-m-Y", strtotime($request->get_param('data')));
 
     $api = new Api();
-
-    $lista_profissionais = $api->listProfissionaisHorarios($unidade, $especialidade, $data, $data);
-    return $lista_profissionais;
+    $lista_profissionais = $api->horarios($procedimento_id, $unidade, $data, $data);
+    echo json_encode($lista_profissionais);
 }
 
 function registrar_paciente($request)
@@ -108,7 +90,7 @@ function registrar_paciente($request)
         $dados['nome_titular'],
         $dados['cpf_titular'],
         $dados['email_titular'],
-        $dados['data_nascimento_titular'],
+        $dados['data_nascimento'],
         $dados['genero_titular'],
         $dados['telefone_titular']
     );
@@ -162,14 +144,22 @@ function registrar_agendamento($request)
     }
     echo json_encode($response);
 }
-function get_paciente_by_ID($request)
+function get_paciente_by_ID_or_CPF($request)
 {
-    $paciente_id = $request->get_param('paciente_id');
     $api = new Api();
 
-    $resultado = $api->getPacienteByID(
-        $paciente_id
-    );
+    if (!empty($request->get_param('paciente_cpf'))) {
+        $paciente = $request->get_param('paciente_cpf');
+        $resultado = $api->getPacienteByIDOrCpf(
+            "",
+            $paciente
+        );
+    } else {
+        $paciente = $request->get_param('paciente_id');
+        $resultado = $api->getPacienteByIDOrCpf(
+            $paciente
+        );
+    }
 
     echo json_encode($resultado);
 }

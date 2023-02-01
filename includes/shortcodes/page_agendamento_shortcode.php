@@ -524,6 +524,21 @@ function page_agendamento_shortcode()
             maskCPF(e)
         };
 
+        document.querySelector("#step1").addEventListener("click", function() {
+            let inputs = document.querySelectorAll("input:not([hidden])");
+            let valid = true;
+            let mgsAlert = document.getElementById('mgsAlert');
+
+            for (let i = 0; i < inputs.length; i++) {
+                if (!inputs[i].value) {
+                    inputs[i].style.border = "1px solid red";
+                    valid = false;
+                } else {
+                    inputs[i].style.border = "1px solid #ccc";
+                }
+            }
+        });
+
         window.onload = function() {
             setStorange();
             carrega_profissionais();

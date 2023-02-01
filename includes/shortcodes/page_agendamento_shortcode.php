@@ -113,6 +113,7 @@ function page_agendamento_shortcode()
                                 <input class="form-control" name="telefone_titular" type="phone" id="telefone">
                             </div>
                         </div>
+                        <div id="mgsAlert" class="d-flex justify-content-center m-5"></div>
 
                         <input hidden class="form-control" name="email_titular" value="<?php echo $email; ?>" type="text">
 
@@ -160,6 +161,27 @@ function page_agendamento_shortcode()
         const filtro__procedimento = localStorage.getItem('@@bomdoutor:filtro__procedimento');
         const filtro__procedimento_id = localStorage.getItem('@@bomdoutor:filtro__procedimento_id');
         */
+        document.querySelector("#step1").addEventListener("click", function() {
+            let inputs = document.querySelectorAll("input:not([hidden])");
+            let valid = true;
+            let mgsAlert = document.getElementById('mgsAlert');
+
+            for (let i = 0; i < inputs.length; i++) {
+                if (!inputs[i].value) {
+                    inputs[i].style.border = "1px solid red";
+                    valid = false;
+                } else {
+                    inputs[i].style.border = "1px solid #ccc";
+                }
+            }
+
+            /*  if (valid) {
+                 mgsAlert.innerText = "";
+             } else {
+                 mgsAlert.innerText = "Preencha todos os campos";
+             } */
+        });
+
         filtro = JSON.parse(localStorage.getItem('@@bomdoutor:dados_filtro'))
         const lt_procedimentos = JSON.parse(localStorage.getItem('@@bomdoutor:dados_lista_procedimentos'));
         console.log(lt_procedimentos)

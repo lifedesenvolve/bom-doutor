@@ -5,7 +5,7 @@ function pesquisa_agendamento_shortcode()
     wp_enqueue_style('pesquisa-agendamento-css');
     $api = new Api();
     $lista_unidades = $api->listUnidades();
-?>
+    ?>
     <div id="form-agendamento">
         <div class="group-modalidade" id="tipoProcedimento"></div>
         <div class="group-inputs">
@@ -25,6 +25,7 @@ function pesquisa_agendamento_shortcode()
     <script>
         localStorage.setItem('@@bomdoutor:dados_lista_procedimentos', "");
         localStorage.setItem('@@bomdoutor:dados_filtro', "");
+        localStorage.setItem('@@bomdoutor:dados_confirmacao_agendamento', "");
 
         function create_select_mobile() {
             document.getElementById("tipoProcedimento").insertAdjacentHTML("afterend", "<select id='selectForMobile'></select>");

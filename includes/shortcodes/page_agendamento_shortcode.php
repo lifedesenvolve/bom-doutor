@@ -153,18 +153,9 @@ function page_agendamento_shortcode()
 
     <div class="row"><span class="col-sm-3"></span><span class="col-sm-9"></span></div>
     <script>
-        /*
-        const filtro__data = localStorage.getItem('@@bomdoutor:filtro__data');
-        const filtro__especialidades = localStorage.getItem('@@bomdoutor:filtro__especialidades');
-        const filtro__unidade_id = localStorage.getItem('@@bomdoutor:filtro__unidade_id');
-        const filtro__procedimento = localStorage.getItem('@@bomdoutor:filtro__procedimento');
-        const filtro__procedimento_id = localStorage.getItem('@@bomdoutor:filtro__procedimento_id');
-        */
+
         filtro = JSON.parse(localStorage.getItem('@@bomdoutor:dados_filtro'))
         const lt_procedimentos = JSON.parse(localStorage.getItem('@@bomdoutor:dados_lista_procedimentos'));
-        console.log(lt_procedimentos)
-        //const dados = JSON.parse(localStorage.getItem('@@bomdoutor:dados_procedimento'))[0];
-
 
         document.querySelector(".info-data").innerHTML = new Date(filtro.filtro__data.replaceAll(`-`, ` `)).toLocaleDateString('pt-BR', {
             weekday: 'long',
@@ -216,7 +207,6 @@ function page_agendamento_shortcode()
                 })
                 .catch(err => console.error(err));
         }
-
 
         function getpacienteByCpf() {
             document.querySelector('[name=nome_titular]').addEventListener("focus", (paciente) => {
@@ -289,16 +279,28 @@ function page_agendamento_shortcode()
 
             const infoProcedimento = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id);
 
-            const nomeTitular = document.querySelector('[name=nome_titular]').value;
-            const especialidade = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id)[0].nome;
+            const nomePaciente = document.querySelector('[name=nome_titular]').value;
+            const nomeProcedimento = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id)[0].nome;
             const data = `${document.querySelector(`.info-data`).textContent} às ${document.querySelector('[name=horario_escolhido]').value}`;
             const nomeMedico = document.querySelector('#profissional_escolhido').textContent
             const valorProcedimento = String(infoProcedimento[0].valor).replace(/([0-9]{2})$/g, ",$1")
 
+            const dadosConfirmacaoAgendamento = {
+                "procedimento_id": procedimento_id,
+                "nomePaciente": nomePaciente,
+                "nomeMedico": nomeMedico,
+                "nomeProcedimento": nomeProcedimento,
+                "valorProcedimento": valorProcedimento,
+                "infoProcedimento": infoProcedimento,
+                "dataAgendada": data
+            }
+            
+            localStorage.setItem('@@bomdoutor:dados_confirmacao_agendamento', JSON.stringify(dadosConfirmacaoAgendamento));
+
             document.querySelector(`#dadosAgendamento`).innerHTML = `
-            <div class="row"><b class="col-sm-3">Paciente: </b><span class="col-sm-9">${nomeTitular}</span></div>
+            <div class="row"><b class="col-sm-3">Paciente: </b><span class="col-sm-9">${nomePaciente}</span></div>
             <div class="row"><b class="col-sm-3">Médico: </b><span class="col-sm-9">${nomeMedico}</span></div>
-            <div class="row"><b class="col-sm-3">Especialidade: </b><span class="col-sm-9">${especialidade}</span></div>
+            <div class="row"><b class="col-sm-3">Especialidade: </b><span class="col-sm-9">${nomeProcedimento}</span></div>
             <div class="row"><b class="col-sm-3">Valor: </b><span class="col-sm-9">R$ ${valorProcedimento}</span></div>
             <div class="row"><b class="col-sm-3">Local: </b><span class="col-sm-9">Av. Afonso Pena, nº 955, Loja 03 - Centro, Belo Horizonte, MG.</span></div>
             <div class="row"><b class="col-sm-3">Data: </b><span class="col-sm-9">${data}</span></div>
@@ -368,7 +370,7 @@ function page_agendamento_shortcode()
                             <span class="crm-especialista">${profissional.documento_conselho === `` ? `` : `CRM ${profissional.documento_conselho}`}</span>
                             <div class="div-quadro-horarios">
                             <h4 class="select">Selecione um horário</h4>
-                            <div class="quadro-horarios" data-id-profissional="${profissional.profissional_id}" >
+                            <div class="quadro-horarios" data-id-profissional="${profissional.profissional_id}" data-nome-profissional="${profissional.nome}">
                             ${horarios.map(horario => { return `<button type="button" class="btn-horario" data-bs-toggle="modal" data-bs-target="#modalAgendamento">${horario.substr(0,5)}</button>` })}
                             </div>
                             <hr>
@@ -388,7 +390,7 @@ function page_agendamento_shortcode()
                             cardInfo.querySelector(`.nome-especialista`).textContent;
 
                             document.querySelector('#horario_escolhido').value = this.innerHTML;
-                            document.querySelector('#profissional_escolhido').textContent = cardInfo.querySelector(`.nome-especialista`).textContent;
+                            document.querySelector('#profissional_escolhido').textContent = this.parentElement.getAttribute("data-nome-profissional");
 
                             var professionalId = this.parentElement.getAttribute("data-id-profissional");
                             document.querySelector('#profissional_escolhido').value = professionalId;
@@ -452,6 +454,8 @@ function page_agendamento_shortcode()
 
                         document.querySelector(`#mgsModal`).style.color = "green";
                         document.querySelector(`#mgsModal`).textContent = response.mensagem;
+
+                        window.location.href = `${window.location.origin}/confirmacao-de-agendamento/`
                     } else {
                         console.log(response.mensagem);
                     }

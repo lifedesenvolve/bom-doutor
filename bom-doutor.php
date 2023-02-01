@@ -2,11 +2,11 @@
 
 /**
  * Plugin Name: Bom Doutor
- * Plugin URI: https://github.com/spalmeida
+ * Plugin URI: https://github.com/lifedesenvolve/bom-doutor/
  * Description: Plugin dedicado ao site bom doutor.
- * Version: 1.0.17
- * Author: Samuel Almeida
- * Author URI: https://github.com/spalmeida
+ * Version: 1.0.18
+ * Author: Agencia Life 
+ * Author URI: https://github.com/lifedesenvolve/
  */
 
 define('PLUGIN_URL', plugin_dir_url(__FILE__));

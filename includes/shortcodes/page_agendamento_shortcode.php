@@ -457,7 +457,7 @@ function page_agendamento_shortcode()
 
                         window.location.href = `${window.location.origin}/confirmacao-de-agendamento/`
                     } else {
-                        console.log(response.mensagem);
+                        document.querySelector(`#mgsModal`).textContent = `Não foi possível realizar o agendamento. Favor entrar em contato com nossa equipe pelo whatsapp.`;
                     }
                 })
                 .catch(err => console.error(err));

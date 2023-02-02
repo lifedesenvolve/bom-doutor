@@ -5,7 +5,7 @@ function pesquisa_agendamento_shortcode()
     wp_enqueue_style('pesquisa-agendamento-css');
     $api = new Api();
     $lista_unidades = $api->listUnidades();
-    ?>
+?>
     <div id="form-agendamento">
         <div class="group-modalidade" id="tipoProcedimento"></div>
         <div class="group-inputs">
@@ -34,11 +34,16 @@ function pesquisa_agendamento_shortcode()
             let select = document.getElementById('selectForMobile');
             select.id = "selectProcedimento";
 
-            // Adiciona as opções ao select baseado nos botões existentes
             for (let i = 0; i < btnContainer.children.length; i++) {
                 let option = document.createElement("option");
-                option.value = btnContainer.children[i].value;
-                option.text = btnContainer.children[i].textContent;
+                if (btnContainer.children[i].value == 2) {
+                    option.value = btnContainer.children[i].value;
+                    option.text = btnContainer.children[i].textContent;
+                    option.setAttribute('selected', 'selected');
+                } else {
+                    option.value = btnContainer.children[i].value;
+                    option.text = btnContainer.children[i].textContent;
+                }
                 select.appendChild(option);
             }
 

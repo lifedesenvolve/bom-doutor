@@ -21,6 +21,7 @@
 .group-inputs {
     display: flex;
     gap: 20px;
+    align-items: center;
 }
 
 .group-inputs select {
@@ -56,37 +57,59 @@ button.btn-modalidade {
     font-size: 1vw !important;
 }
 
-.group-inputs select{
+.group-inputs select {
     font-size: 1vw !important;
 }
 
-.group-inputs button{
+.group-inputs button {
     font-size: 1vw !important;
 }
 
-#selectProcedimento{
-    display:none !important;
+#selectProcedimento {
+    display: none !important;
 }
 
-@media(max-width: 750px){
+@media (max-width: 750px) {
     button.btn-modalidade {
         font-size: 2vw !important;
     }
-    .group-inputs select{
+    .group-inputs select {
         font-size: 2vw !important;
     }
-    .group-inputs button{
+    .group-inputs button {
         font-size: 2vw !important;
     }
 }
 
+span.select2-selection.select2-selection--single {
+    border-width: 0px;
+}
 
-@media(max-width: 500px){
+span#select2-procedimento-container {
+    width: 100%;
+    background: #fff;
+    padding: 12px 15px;
+    outline: none;
+    line-height: 1;
+    font-family: "Open Sans", Sans-serif;
+    font-size: 1vw;
+    font-weight: 400;
+}
+
+span.select2-selection.select2-selection--single {
+    align-items: center !important;
+}
+
+span.select2-selection.select2-selection--single {
+    display: flex !important;
+}
+
+@media (max-width: 500px) {
     button.btn-modalidade {
-        display:none !important
+        display: none !important;
     }
-    #selectProcedimento{
-        display:block !important;
+    #selectProcedimento {
+        display: block !important;
         margin-bottom: 3vw !important;
         font-family: "Open Sans", Sans-serif;
         font-weight: 400;
@@ -94,17 +117,27 @@ button.btn-modalidade {
         line-height: 1.5em;
         border-radius: 0.5em;
     }
-    .group-inputs{
+    span.select2.select2-container.select2-container--default.select2-container--below {
+        width: 100% !important;
+        margin-top: 0.5em;
+    }
+    span#select2-procedimento-container {
+        font-size: 3vw;
+        margin-top: 0.5em;
+        border-radius: 5px;
+    }
+
+    .group-inputs {
         display: flex !important;
         flex-direction: column !important;
         gap: 3vw;
     }
-    .group-inputs select{
+    .group-inputs select {
         font-size: 3vw !important;
         line-height: 1.5em;
         border-radius: 0.5em;
     }
-    .group-inputs button{
+    .group-inputs button {
         font-size: 3vw !important;
         line-height: 1.5em;
         border-radius: 0.5em;

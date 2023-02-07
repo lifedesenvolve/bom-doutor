@@ -6,6 +6,9 @@ function pesquisa_agendamento_shortcode()
     $api = new Api();
     $lista_unidades = $api->listUnidades();
 ?>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
     <div id="form-agendamento">
         <div class="group-modalidade" id="tipoProcedimento"></div>
         <div class="group-inputs">
@@ -26,6 +29,9 @@ function pesquisa_agendamento_shortcode()
         localStorage.setItem('@@bomdoutor:dados_lista_procedimentos', "");
         localStorage.setItem('@@bomdoutor:dados_filtro', "");
         localStorage.setItem('@@bomdoutor:dados_confirmacao_agendamento', "");
+        $(document).ready(function() {
+            $("#procedimento").select2();
+        });
 
         function create_select_mobile() {
             document.getElementById("tipoProcedimento").insertAdjacentHTML("afterend", "<select id='selectForMobile'></select>");
@@ -63,7 +69,9 @@ function pesquisa_agendamento_shortcode()
             console.log(lista);
 
             lista.forEach(info => {
-                options += `<option value="${info.procedimento_id}">${info.nome}</option>`;
+                const valor = info.valor;
+                const formattedValue = "R$ " + (valor / 100).toFixed(2).replace(".", ",");
+                options += `<option value="${info.procedimento_id}">${info.nome} - ${formattedValue}</option>`;
             });
             selectProcedimentos.innerHTML = options;
         }

@@ -69,16 +69,8 @@ button.btn-modalidade {
     display: none !important;
 }
 
-@media (max-width: 750px) {
-    button.btn-modalidade {
-        font-size: 2vw !important;
-    }
-    .group-inputs select {
-        font-size: 2vw !important;
-    }
-    .group-inputs button {
-        font-size: 2vw !important;
-    }
+.group-inputs select {
+    width: 38% !important;
 }
 
 span.select2-selection.select2-selection--single {
@@ -104,9 +96,31 @@ span.select2-selection.select2-selection--single {
     display: flex !important;
 }
 
+@media (max-width: 767px) {
+    button.btn-modalidade {
+        font-size: 2vw !important;
+    }
+    .group-inputs select {
+        width: 100% !important;
+    }
+
+    .group-inputs select {
+        font-size: 2vw !important;
+    }
+    span#select2-procedimento-container {
+        font-size: 2vw !important;
+    }
+    .group-inputs button {
+        font-size: 2vw !important;
+    }
+}
+
 @media (max-width: 500px) {
     button.btn-modalidade {
         display: none !important;
+    }
+    span#select2-procedimento-container {
+        font-size: 3vw !important;
     }
     #selectProcedimento {
         display: block !important;
@@ -120,6 +134,9 @@ span.select2-selection.select2-selection--single {
     span.select2.select2-container.select2-container--default.select2-container--below {
         width: 100% !important;
         margin-top: 0.5em;
+    }
+    span.select2.select2-container.select2-container--default {
+        width: 100% !important;
     }
     span#select2-procedimento-container {
         font-size: 3vw;
@@ -139,7 +156,8 @@ span.select2-selection.select2-selection--single {
     }
     .group-inputs button {
         font-size: 3vw !important;
-        line-height: 1.5em;
+        line-height: 0.5em;
         border-radius: 0.5em;
+        margin-top: 1vw;
     }
 }

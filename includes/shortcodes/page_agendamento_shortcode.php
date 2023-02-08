@@ -153,7 +153,6 @@ function page_agendamento_shortcode()
 
     <div class="row"><span class="col-sm-3"></span><span class="col-sm-9"></span></div>
     <script>
-
         filtro = JSON.parse(localStorage.getItem('@@bomdoutor:dados_filtro'))
         const lt_procedimentos = JSON.parse(localStorage.getItem('@@bomdoutor:dados_lista_procedimentos'));
 
@@ -294,7 +293,7 @@ function page_agendamento_shortcode()
                 "infoProcedimento": infoProcedimento,
                 "dataAgendada": data
             }
-            
+
             localStorage.setItem('@@bomdoutor:dados_confirmacao_agendamento', JSON.stringify(dadosConfirmacaoAgendamento));
 
             document.querySelector(`#dadosAgendamento`).innerHTML = `
@@ -367,7 +366,7 @@ function page_agendamento_shortcode()
                     </div>
                         <div class="card-informacoes">
                             <h3 class="nome-especialista">${profissional.tratamento === null ? `${profissional.nome}` : `${profissional.tratamento} ${profissional.nome}`} </h3>
-                            <span class="crm-especialista">${profissional.documento_conselho === `` ? `` : `CRM ${profissional.documento_conselho}`}</span>
+                            <span class="crm-especialista">${profissional.documento_conselho === `` ? `` : `conselho ${profissional.documento_conselho}`}</span>
                             <div class="div-quadro-horarios">
                             <h4 class="select">Selecione um horário</h4>
                             <div class="quadro-horarios" data-id-profissional="${profissional.profissional_id}" data-nome-profissional="${profissional.nome}">

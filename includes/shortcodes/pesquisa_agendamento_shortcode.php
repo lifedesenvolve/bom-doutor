@@ -69,9 +69,8 @@ function pesquisa_agendamento_shortcode()
             console.log(lista);
 
             lista.forEach(info => {
-                const valor = info.valor;
-                const formattedValue = "R$ " + (valor / 100).toFixed(2).replace(".", ",");
-                options += `<option value="${info.procedimento_id}">${info.nome} - ${formattedValue}</option>`;
+                const valor = String(info.valor).replace(/([0-9]{2})$/g, ",$1");
+                options += `<option value="${info.procedimento_id}">${info.nome} - R$ ${valor}</option>`;
             });
             selectProcedimentos.innerHTML = options;
         }
@@ -105,6 +104,7 @@ function pesquisa_agendamento_shortcode()
                     loadProcedimentos(selectedValue, dados_lista_procedimentos)
                 }
             });
+
         }
 
         function pesquisaFeeGow() {
@@ -141,6 +141,10 @@ function pesquisa_agendamento_shortcode()
                 <?php  } ?>
             }
 
+        }
+
+        function redirect_whatsapp() {
+            const retorno = document.querySelector('btn-modalidade')
         }
 
         async function lista_tipo_procedimentos() {
@@ -208,6 +212,21 @@ function pesquisa_agendamento_shortcode()
             tipoProcedimento.addEventListener("click", function(event) {
 
                 event.preventDefault();
+
+                const modalidade = document.querySelectorAll('.btn-modalidade');
+
+                modalidade.forEach((el) => {
+                    el.addEventListener('click', () => {
+                        if (el.value == 9) {
+                            document.querySelector(".btn-pesquisa").addEventListener("click", function() {
+                                let procedimento = document.querySelector('.select2-selection__rendered').title;
+                                parts = procedimento.split(" - ")
+                                window.location.href = `https://api.whatsapp.com/send/?phone=553136588135&text=Gostaria%20de%20agendar%20o%20retorno%20da%20minha%20consulta%20da%20especialidade%20${parts[0]}%20&type=phone_number&app_absent=0`;
+                            });
+                        }
+                    });
+                })
+
                 if (event.target.classList.contains("btn-modalidade")) {
                     const buttons = tipoProcedimento.querySelectorAll(".btn-modalidade");
                     buttons.forEach(function(button) {
@@ -220,7 +239,8 @@ function pesquisa_agendamento_shortcode()
                     if (button.classList.value === "btn-modalidade ativo") {
                         document.querySelector(`[name="filtro__procedimento"]`).value = button.value
                     }
-                })
+                });
+
             });
         });
     </script>

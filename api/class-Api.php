@@ -99,7 +99,7 @@ class Api
                     $response['content']['profissional_id']
                 ];
 
-                $horarios = reset(reset(reset($profissional)));
+                $horarios = reset(reset($profissional));
 
                 $data_consulta = reset(reset($profissional));
                 $data_filter = [];

@@ -27,6 +27,7 @@
     width: 100%;
     padding-left: 20px;
 }
+
 .card-profissional .foto-especialista {
     border-radius: 50% !important;
     object-fit: fill;
@@ -180,6 +181,48 @@
 .smiley__mouth2 {
     animation-name: mouth2;
     visibility: hidden;
+}
+
+.card-data {
+    border: 1px solid #d9d9d9;
+    border-radius: 10px;
+    padding: 5%;
+    margin-bottom: 1vw;
+    box-shadow: 6px 10px 5px 0px rgb(237 237 237 / 75%);
+    transition-duration: 0.5s;
+}
+
+.card-data:hover {
+    box-shadow: none !important;
+    transition-duration: 0.5s;
+}
+
+#pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10%;
+}
+
+#pagination button {
+  border: none;
+  background-color: #2A2860;
+  color: white;
+  width: 2.5em;
+  height: 2.5em;
+  margin: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.5s;
+  border-radius: 5px;
+}
+
+#pagination button.active {
+  background-color: #62B5A8;
+}
+
+#pagination button:hover:not(.active) {
+  background-color: #62B5A8;
 }
 
 /* Dark theme */

@@ -99,7 +99,14 @@ class Api
                     $response['content']['profissional_id']
                 ];
 
-                $horarios = reset(reset(reset($profissional)));
+                $horarios = reset(reset($profissional));
+
+                $data_consulta = reset(reset($profissional));
+                $data_filter = [];
+
+                foreach ($data_consulta as $index => $value) {
+                    $data_filter[] = $index;
+                }
 
                 $data['profissionais'][] = [
                     'profissional_id' => $key,
@@ -109,6 +116,7 @@ class Api
                     'sexo' => $profissional_info['sexo'],
                     'conselho' => $profissional_info['conselho'],
                     'documento_conselho' => $profissional_info['documento_conselho'],
+                    'data' => $data_filter,
                     'horarios_disponiveis' => $horarios,
                 ];
             }

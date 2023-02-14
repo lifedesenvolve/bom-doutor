@@ -74,10 +74,13 @@ function lista_profissionais($request)
 {
     $procedimento_id = $request->get_param('procedimento_id');
     $unidade = $request->get_param('unidade');
-    $data = date("d-m-Y", strtotime($request->get_param('data')));
+    $date_start = date("d-m-Y", strtotime($request->get_param('data')));
+
+    $date_end = new DateTime($date_start);
+    $date_end->modify("+7 days");
 
     $api = new Api();
-    $lista_profissionais = $api->horarios($procedimento_id, $unidade, $data, $data);
+    $lista_profissionais = $api->horarios($procedimento_id, $unidade, $date_start, $date_end->format("d-m-Y"));
     echo json_encode($lista_profissionais);
 }
 

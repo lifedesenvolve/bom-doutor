@@ -132,6 +132,7 @@ function pesquisa_agendamento_shortcode()
             }
 
             if (unidade_id !== "") {
+                window.location.assign(`<?php echo home_url() ?>/agendar/`);
                 <?php if (is_user_logged_in()) { ?>
                     window.location.assign(`<?php echo home_url() ?>/agendar/`);
                 <?php  } else {  ?>

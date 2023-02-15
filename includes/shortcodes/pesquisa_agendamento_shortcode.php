@@ -70,7 +70,11 @@ function pesquisa_agendamento_shortcode()
 
             lista.forEach(info => {
                 const valor = String(info.valor).replace(/([0-9]{2})$/g, ",$1");
-                options += `<option value="${info.procedimento_id}">${info.nome} - R$ ${valor}</option>`;
+                if(info.tipo_procedimento === 4){
+                    options += `<option value="${info.procedimento_id}">${info.nome}</option>`;
+                }else{
+                    options += `<option value="${info.procedimento_id}">${info.nome} - R$ ${valor}</option>`;
+                }                
             });
             selectProcedimentos.innerHTML = options;
         }

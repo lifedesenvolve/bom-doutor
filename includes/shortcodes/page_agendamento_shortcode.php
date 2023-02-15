@@ -56,7 +56,7 @@ function page_agendamento_shortcode()
     <h1 class="titulo-especialidade" id="tituloEspecialidade"></h1>
 
     <!-- inicio do loop -->
-    <h3 class="info-data"></h3>
+    <h3 class="info-data" style="display:none"></h3>
     <div class="lista-profissionais" id="listaProfissionais"></div>
     <div id="pagination"></div>
     <!-- fim do loop -->
@@ -143,7 +143,7 @@ function page_agendamento_shortcode()
                         <div id="mgsModal" class="d-flex justify-content-center m-5"></div>
 
                         <div class="d-flex px-5 justify-content-end">
-                            <button type="button" class="btn btn-default cta" id="step3">Enviar</button>
+                            <button type="button" class="btn btn-default cta" id="step3">confirmar agendamento</button>
                         </div>
 
                     </div>
@@ -155,8 +155,28 @@ function page_agendamento_shortcode()
 
     <div class="row"><span class="col-sm-3"></span><span class="col-sm-9"></span></div>
     <script>
-        filtro = JSON.parse(localStorage.getItem('@@bomdoutor:dados_filtro'))
-        const lt_procedimentos = JSON.parse(localStorage.getItem('@@bomdoutor:dados_lista_procedimentos'));
+
+        function isUserLoggedIn() {
+          var loggedIn = false;
+          
+  // Faz uma chamada AJAX para o WordPress para verificar se o usuário está logado
+          jQuery.ajax({
+            type: 'POST',
+            url: 'http://localhost/new-bomdoutor/wp-admin/admin-ajax.php',
+            data: {
+              action: 'is_user_logged_in'
+          },
+          success: function(response) {
+              loggedIn = response === '1';
+          },
+          async: false
+      });
+
+          return loggedIn;
+      }
+
+      filtro = JSON.parse(localStorage.getItem('@@bomdoutor:dados_filtro'))
+      const lt_procedimentos = JSON.parse(localStorage.getItem('@@bomdoutor:dados_lista_procedimentos'));
 
         // document.querySelector(".info-data").innerHTML = new Date(filtro.filtro__data.replaceAll(`-`, ` `)).toLocaleDateString('pt-BR', {
         //     weekday: 'long',
@@ -165,26 +185,62 @@ function page_agendamento_shortcode()
         //     day: 'numeric'
         // });
 
-        const idUserFeegow = <?php echo $user_id_feegow; ?>;
-        if (idUserFeegow !== -1) {
-            document.querySelector(`#id_user_feegow`).value = idUserFeegow
-        }
+      const idUserFeegow = <?php echo $user_id_feegow; ?>;
+      if (idUserFeegow !== -1) {
+        document.querySelector(`#id_user_feegow`).value = idUserFeegow
+    }
 
-        const urlPlugin = "<?php echo PLUGIN_URL; ?>"
-        const listaProfissionais = document.querySelector(`#listaProfissionais`);
-        const tituloEspecialidade = document.querySelector(`#tituloEspecialidade`);
+    const urlPlugin = "<?php echo PLUGIN_URL; ?>"
+    const listaProfissionais = document.querySelector(`#listaProfissionais`);
+    const tituloEspecialidade = document.querySelector(`#tituloEspecialidade`);
 
-        const url = `<?php echo home_url() ?>`;
+    const url = `<?php echo home_url() ?>`;
 
-        console.log(idUserFeegow);
+    console.log(idUserFeegow);
 
-        if (idUserFeegow !== -1) {
+    if (idUserFeegow !== -1) {
+        const options = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+        fetch(`${url}/wp-json/api/v1/paciente/?paciente_id=${idUserFeegow}`, options)
+        .then(response => response.json())
+        .then(data => {
+            dadosPaciente = data;
+            console.log(dadosPaciente);
+
+            if (dadosPaciente.status !== 'error') {
+                const nomeTitular = document.querySelector('[name=nome_titular]');
+                const cpfTitular = document.querySelector('[name=cpf_titular]');
+                const emailTitular = document.querySelector('[name=email_titular]');
+                const generoTitular = document.querySelector('[name=genero_titular]');
+                const telefoneTitular = document.querySelector('[name=telefone_titular]');
+                const dataAniversario = document.querySelector('[name=data_aniversario]');
+
+                nomeTitular.value = dadosPaciente?.paciente.nome;
+                cpfTitular.value = dadosPaciente?.paciente.documentos.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+                telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+                generoTitular.value = dadosPaciente?.paciente.sexo[0];
+                emailTitular.value = dadosPaciente?.paciente.email[0];
+                dataAniversario.value = dadosPaciente?.paciente.nascimento.replace(/(\d+)-(\d+)-(\d+)/, "$3-$2-$1");
+            }
+        })
+        .catch(err => console.error(err));
+    }
+
+    function getpacienteByCpf() {
+        document.querySelector('[name=nome_titular]').addEventListener("focus", (paciente) => {
+            const url = `<?php echo home_url() ?>`;
+            let paciente_cpf = document.getElementById('cpfTitular').value.replace(/[^\d]/g, "");
+                //221.044.620-10
             const options = {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             };
-            fetch(`${url}/wp-json/api/v1/paciente/?paciente_id=${idUserFeegow}`, options)
+
+            fetch(`${url}/wp-json/api/v1/paciente/?paciente_cpf=${paciente_cpf}`, options)
             .then(response => response.json())
             .then(data => {
                 dadosPaciente = data;
@@ -198,6 +254,8 @@ function page_agendamento_shortcode()
                     const telefoneTitular = document.querySelector('[name=telefone_titular]');
                     const dataAniversario = document.querySelector('[name=data_aniversario]');
 
+                    console.log(dataAniversario);
+
                     nomeTitular.value = dadosPaciente?.paciente.nome;
                     cpfTitular.value = dadosPaciente?.paciente.documentos.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
                     telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
@@ -207,234 +265,205 @@ function page_agendamento_shortcode()
                 }
             })
             .catch(err => console.error(err));
+        });
+    }
+    getpacienteByCpf();
+
+    function capturarDados() {
+        const nomeTitular = document.querySelector('[name=nome_titular]').value;
+        const cpfTitular = document.querySelector('[name=cpf_titular]').value.replace(/\D/g, "");
+        const emailTitular = document.querySelector('[name=email_titular]').value;
+        const generoTitular = document.querySelector('[name=genero_titular]').value;
+        const telefoneTitular = document.querySelector('[name=telefone_titular]').value.replace(/\D/g, "");
+        const horarioEscolhido = document.querySelector('[name=horario_escolhido]').value;
+        const dataAniversario = document.querySelector('[name=data_aniversario]').value;
+
+        const dados = {
+            nome_titular: nomeTitular,
+            cpf_titular: cpfTitular,
+            email_titular: emailTitular,
+            genero_titular: generoTitular,
+            telefone_titular: telefoneTitular,
+            horario_escolhido: horarioEscolhido,
+            dataAniversario: dataAniversario
+        };
+
+        if (!nomeTitular || !cpfTitular || !emailTitular || !telefoneTitular || !horarioEscolhido || !dataAniversario) {
+            return false;
         }
 
-        function getpacienteByCpf() {
-            document.querySelector('[name=nome_titular]').addEventListener("focus", (paciente) => {
-                const url = `<?php echo home_url() ?>`;
-                let paciente_cpf = document.getElementById('cpfTitular').value.replace(/[^\d]/g, "");
-                //221.044.620-10
-                const options = {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                };
+        return dados;
+    }
 
-                fetch(`${url}/wp-json/api/v1/paciente/?paciente_cpf=${paciente_cpf}`, options)
-                .then(response => response.json())
-                .then(data => {
-                    dadosPaciente = data;
-                    console.log(dadosPaciente);
+    function confirmacaoConsulta() {
+        const procedimento_id = filtro.filtro__procedimento_id;
 
-                    if (dadosPaciente.status !== 'error') {
-                        const nomeTitular = document.querySelector('[name=nome_titular]');
-                        const cpfTitular = document.querySelector('[name=cpf_titular]');
-                        const emailTitular = document.querySelector('[name=email_titular]');
-                        const generoTitular = document.querySelector('[name=genero_titular]');
-                        const telefoneTitular = document.querySelector('[name=telefone_titular]');
-                        const dataAniversario = document.querySelector('[name=data_aniversario]');
+        const infoProcedimento = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id);
 
-                        console.log(dataAniversario);
+        const nomePaciente = document.querySelector('[name=nome_titular]').value;
+        const nomeProcedimento = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id)[0].nome;
+        const data = `${document.querySelector(`.info-data`).textContent} às ${document.querySelector('[name=horario_escolhido]').value}`;
+        const nomeMedico = document.querySelector('#profissional_escolhido').textContent
+        const valorProcedimento = String(infoProcedimento[0].valor).replace(/([0-9]{2})$/g, ",$1")
 
-                        nomeTitular.value = dadosPaciente?.paciente.nome;
-                        cpfTitular.value = dadosPaciente?.paciente.documentos.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-                        telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
-                        generoTitular.value = dadosPaciente?.paciente.sexo[0];
-                        emailTitular.value = dadosPaciente?.paciente.email[0];
-                        dataAniversario.value = dadosPaciente?.paciente.nascimento.replace(/(\d+)-(\d+)-(\d+)/, "$3-$2-$1");
-                    }
-                })
-                .catch(err => console.error(err));
-            });
-        }
-        getpacienteByCpf();
-
-        function capturarDados() {
-            const nomeTitular = document.querySelector('[name=nome_titular]').value;
-            const cpfTitular = document.querySelector('[name=cpf_titular]').value.replace(/\D/g, "");
-            const emailTitular = document.querySelector('[name=email_titular]').value;
-            const generoTitular = document.querySelector('[name=genero_titular]').value;
-            const telefoneTitular = document.querySelector('[name=telefone_titular]').value.replace(/\D/g, "");
-            const horarioEscolhido = document.querySelector('[name=horario_escolhido]').value;
-            const dataAniversario = document.querySelector('[name=data_aniversario]').value;
-
-            const dados = {
-                nome_titular: nomeTitular,
-                cpf_titular: cpfTitular,
-                email_titular: emailTitular,
-                genero_titular: generoTitular,
-                telefone_titular: telefoneTitular,
-                horario_escolhido: horarioEscolhido,
-                dataAniversario: dataAniversario
-            };
-
-            if (!nomeTitular || !cpfTitular || !emailTitular || !telefoneTitular || !horarioEscolhido || !dataAniversario) {
-                return false;
-            }
-
-            return dados;
+        const dadosConfirmacaoAgendamento = {
+            "procedimento_id": procedimento_id,
+            "nomePaciente": nomePaciente,
+            "nomeMedico": nomeMedico,
+            "nomeProcedimento": nomeProcedimento,
+            "valorProcedimento": valorProcedimento,
+            "infoProcedimento": infoProcedimento,
+            "dataAgendada": data
         }
 
-        function confirmacaoConsulta() {
-            const procedimento_id = filtro.filtro__procedimento_id;
+        localStorage.setItem('@@bomdoutor:dados_confirmacao_agendamento', JSON.stringify(dadosConfirmacaoAgendamento));
 
-            const infoProcedimento = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id);
+        document.querySelector(`#dadosAgendamento`).innerHTML = `
+        <div class="row"><b class="col-sm-3">Paciente: </b><span class="col-sm-9">${nomePaciente}</span></div>
+        <div class="row"><b class="col-sm-3">Médico: </b><span class="col-sm-9">${nomeMedico}</span></div>
+        <div class="row"><b class="col-sm-3">Especialidade: </b><span class="col-sm-9">${nomeProcedimento}</span></div>
+        <div class="row"><b class="col-sm-3">Valor: </b><span class="col-sm-9">R$ ${valorProcedimento}</span></div>
+        <div class="row"><b class="col-sm-3">Local: </b><span class="col-sm-9">Av. Afonso Pena, nº 955, Loja 03 - Centro, Belo Horizonte, MG.</span></div>
+        <div class="row"><b class="col-sm-3">Data: </b><span class="col-sm-9">${data}</span></div>
+        `;
+    }
 
-            const nomePaciente = document.querySelector('[name=nome_titular]').value;
-            const nomeProcedimento = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id)[0].nome;
-            const data = `${document.querySelector(`.info-data`).textContent} às ${document.querySelector('[name=horario_escolhido]').value}`;
-            const nomeMedico = document.querySelector('#profissional_escolhido').textContent
-            const valorProcedimento = String(infoProcedimento[0].valor).replace(/([0-9]{2})$/g, ",$1")
-
-            const dadosConfirmacaoAgendamento = {
-                "procedimento_id": procedimento_id,
-                "nomePaciente": nomePaciente,
-                "nomeMedico": nomeMedico,
-                "nomeProcedimento": nomeProcedimento,
-                "valorProcedimento": valorProcedimento,
-                "infoProcedimento": infoProcedimento,
-                "dataAgendada": data
-            }
-
-            localStorage.setItem('@@bomdoutor:dados_confirmacao_agendamento', JSON.stringify(dadosConfirmacaoAgendamento));
-
-            document.querySelector(`#dadosAgendamento`).innerHTML = `
-            <div class="row"><b class="col-sm-3">Paciente: </b><span class="col-sm-9">${nomePaciente}</span></div>
-            <div class="row"><b class="col-sm-3">Médico: </b><span class="col-sm-9">${nomeMedico}</span></div>
-            <div class="row"><b class="col-sm-3">Especialidade: </b><span class="col-sm-9">${nomeProcedimento}</span></div>
-            <div class="row"><b class="col-sm-3">Valor: </b><span class="col-sm-9">R$ ${valorProcedimento}</span></div>
-            <div class="row"><b class="col-sm-3">Local: </b><span class="col-sm-9">Av. Afonso Pena, nº 955, Loja 03 - Centro, Belo Horizonte, MG.</span></div>
-            <div class="row"><b class="col-sm-3">Data: </b><span class="col-sm-9">${data}</span></div>
-            `;
-        }
-
-        function carrega_profissionais() {
+    function carrega_profissionais() {
 
 
-            const filtro = JSON.parse(localStorage.getItem(`@@bomdoutor:dados_filtro`));
+        const filtro = JSON.parse(localStorage.getItem(`@@bomdoutor:dados_filtro`));
             //const dataSelecionada = localStorage.getItem(`@@bomdoutor:filtro__data`);
             // const procedimento_id = localStorage.getItem(`@@bomdoutor:filtro__data`)
-            console.log(`todos dados`)
+        console.log(`todos dados`)
 
-            const procedimento_id = filtro.filtro__procedimento_id;
-            const infoProcedimento = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id)[0];
-            console.log(infoProcedimento)
+        const procedimento_id = filtro.filtro__procedimento_id;
+        const infoProcedimento = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id)[0];
+        console.log(infoProcedimento)
 
-            document.getElementById('filtro__data').value
+        document.getElementById('filtro__data').value
 
-            const params = {
-                "unidade": filtro.filtro__unidade_id,
-                "especialidadesArray": infoProcedimento.especialidade_id,
-                "data": filtro.filtro__data,
-                "procedimento_id": procedimento_id,
-            }
+        const params = {
+            "unidade": filtro.filtro__unidade_id,
+            "especialidadesArray": infoProcedimento.especialidade_id,
+            "data": filtro.filtro__data,
+            "procedimento_id": procedimento_id,
+        }
 
-            fetch(`<?php echo home_url() . '/wp-json/api/v1/lista-profissionais?=' ?>`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(params)
-            })
-            .then(response => response.json())
-            .then(response => {
-                const {
-                    profissionais
-                } = response
+        fetch(`<?php echo home_url() . '/wp-json/api/v1/lista-profissionais?=' ?>`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(params)
+        })
+        .then(response => response.json())
+        .then(response => {
+            const {
+                profissionais
+            } = response
 
-                console.log(response);
-
-
-                profissionaisUnicos = profissionais.reduce((acc, current) => {
-                    acc[JSON.stringify(current)] = current;
-                    return acc;
-                }, []);
+            console.log(response);
 
 
-                return Object.values(profissionaisUnicos);
-            })
+            profissionaisUnicos = profissionais.reduce((acc, current) => {
+                acc[JSON.stringify(current)] = current;
+                return acc;
+            }, []);
+
+
+            return Object.values(profissionaisUnicos);
+        })
                 /*
                 .then( profissionais =>{
                     return profissionais.filter(profissional.data)
                 })
                */
-            .then(profissionais => {
-                console.log(`profissionais`, profissionais)
+        .then(profissionais => {
+            console.log(`profissionais`, profissionais)
 
-                const novoJson = [...new Set([].concat(...profissionais.map(item => item.data)))];
-                novoJson.sort((a, b) => new Date(a) - new Date(b));
+            const novoJson = [...new Set([].concat(...profissionais.map(item => item.data)))];
+            novoJson.sort((a, b) => new Date(a) - new Date(b));
 
-                const result = {};
-                novoJson.forEach(data => {
-                    result[data] = [];
-                    profissionais.forEach(profissional => {
-                        if (profissional.data.includes(data)) {
-                            result[data].push(profissional);
-                        }
-                    });
+            const result = {};
+            novoJson.forEach(data => {
+                result[data] = [];
+                profissionais.forEach(profissional => {
+                    if (profissional.data.includes(data)) {
+                        result[data].push(profissional);
+                    }
                 });
+            });
 
-                console.log(result);
+            console.log(result);
 
-                listaProfissionais.innerHTML = Object.keys(result).map(data => {
+            listaProfissionais.innerHTML = Object.keys(result).map(data => {
 
-                    const [ano, mes, dia] = data.split('-').map(Number);
-                    const responseData = new Date(ano, mes - 1, dia);
-                    const opcoes = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                    const dataFormatada = responseData.toLocaleDateString('pt-BR', opcoes);
+                const [ano, mes, dia] = data.split('-').map(Number);
+                const responseData = new Date(ano, mes - 1, dia);
+                const opcoes = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const dataFormatada = responseData.toLocaleDateString('pt-BR', opcoes);
 
-                    return `<div class="card-data">
-                    <h3 class="info-data">${dataFormatada}</h3>
-                    ${result[data].map(profissional => {
-                        const {
-                            horarios_disponiveis
-                        } = profissional;
+                return `<div class="card-data">
+                <h3 class="info-data">${dataFormatada}</h3>
+                ${result[data].map(profissional => {
+                    const {
+                        horarios_disponiveis
+                    } = profissional;
 
-                        const dias_disponiveis = Object.values(horarios_disponiveis[data]);
-                        const horarios = Object.values(dias_disponiveis);
+                    const dias_disponiveis = Object.values(horarios_disponiveis[data]);
+                    const horarios = Object.values(dias_disponiveis);
 
-                        return `<div class="card-profissional" style="display:flex;">
-                        <div class="card-imagem">
-                        <img src="${profissional.foto === null ? `${urlPlugin}assets/image/avatar-${profissional.sexo.toLowerCase()}.png` : profissional.foto}" alt="" class="foto-especialista" width="100">
-                        </div>
-                        <div class="card-informacoes">
-                        <h3 class="nome-especialista">${profissional.tratamento === null ? `${profissional.nome}` : `${profissional.tratamento} ${profissional.nome}`} </h3>
-                        <span class="crm-especialista">${profissional.documento_conselho === `` ? `` : `conselho ${profissional.documento_conselho}`}</span>
-                        <div class="div-quadro-horarios">
-                        <h4 class="select">Selecione um horário</h4>
-                        <div class="quadro-horarios" data-id-profissional="${profissional.profissional_id}" data-nome-profissional="${profissional.nome}">
-                        ${horarios.map(horario => { 
-                            return `<button type="button" class="btn-horario" data-bs-toggle="modal" data-bs-target="#modalAgendamento">${horario.substr(0,5)}</button>` }
-                            )}
-                        </div>
-                        <hr>
-                        </div>
-                        </div>
-                        </div>`
-                    }).join('')}
+                    return `<div class="card-profissional" style="display:flex;">
+                    <div class="card-imagem">
+                    <img src="${profissional.foto === null ? `${urlPlugin}assets/image/avatar-${profissional.sexo.toLowerCase()}.png` : profissional.foto}" alt="" class="foto-especialista" width="100">
+                    </div>
+                    <div class="card-informacoes">
+                    <h3 class="nome-especialista">${profissional.tratamento === null ? `${profissional.nome}` : `${profissional.tratamento} ${profissional.nome}`} </h3>
+                    <span class="crm-especialista">${profissional.documento_conselho === `` ? `` : `${profissional.conselho} ${profissional.documento_conselho}`}</span>
+                    <div class="div-quadro-horarios">
+                    <h4 class="select">Selecione um horário</h4>
+                    <div class="quadro-horarios" data-id-profissional="${profissional.profissional_id}" data-nome-profissional="${profissional.nome}">
+                    ${horarios.map(horario => { 
+                        return `<button type="button" class="btn-horario">${horario.substr(0,5)}</button>` }
+                        )}
+                    </div>
+                    <hr>
+                    </div>
+                    </div>
                     </div>`
-                }).join('').replaceAll(`,`, ``);
+                }).join('')}
+                </div>`
+            }).join('').replaceAll(`,`, ``);
 
-                const select = document.querySelector('#filtro__especialidades');
-                document.querySelector(`#tituloEspecialidade`).innerText = infoProcedimento.nome;
+            const select = document.querySelector('#filtro__especialidades');
+            document.querySelector(`#tituloEspecialidade`).innerText = infoProcedimento.nome;
 
-                const botoes = document.querySelectorAll('.btn-horario');
-                botoes.forEach(botao => {
-                    botao.addEventListener('click', function() {
-                        const cardInfo = document.querySelector('.btn-horario').parentNode.parentNode.parentNode;
-                        cardInfo.querySelector(`.nome-especialista`).textContent;
+            const botoes = document.querySelectorAll('.btn-horario');
+            botoes.forEach(botao => {
+                botao.addEventListener('click', function() {
 
-                        document.querySelector('#horario_escolhido').value = this.innerHTML;
-                        document.querySelector('#profissional_escolhido').textContent = this.parentElement.getAttribute("data-nome-profissional");
 
-                        var professionalId = this.parentElement.getAttribute("data-id-profissional");
-                        document.querySelector('#profissional_escolhido').value = professionalId;
+                    const modalAgendamento = document.querySelector('#modalAgendamento');
+                    const modal = new bootstrap.Modal(modalAgendamento);
 
-                        confirmacaoConsulta();
-                    });
+                    document.querySelector('.info-data').textContent = this.closest('.card-profissional').parentNode.querySelector('.info-data').textContent;
+
+                    const cardInfo = document.querySelector('.btn-horario').parentNode.parentNode.parentNode;
+                    cardInfo.querySelector(`.nome-especialista`).textContent;
+                    document.querySelector('#horario_escolhido').value = this.innerHTML;
+                    document.querySelector('#profissional_escolhido').textContent = this.parentElement.getAttribute("data-nome-profissional");
+
+                    var professionalId = this.parentElement.getAttribute("data-id-profissional");
+                    document.querySelector('#profissional_escolhido').value = professionalId;
+
+                    confirmacaoConsulta();
+                    modal.show();
+                    
+
                 });
+            });
 
-            })
+        })
 .catch(err => {
     console.error(err)
     document.querySelector(`#tituloEspecialidade`).innerText = "Nenhum horário disponível";
@@ -630,7 +659,7 @@ window.onload = function() {
         } else {
             document.querySelector(`.step-2`).style.display = 'none';
             document.querySelector(`.step-3`).style.display = 'block';
-            document.querySelector(`#stepModal`).innerText = "Confirmação de Consulta";
+            document.querySelector(`#stepModal`).innerText = "Dados da consulta";
             confirmacaoConsulta();
         }
     }

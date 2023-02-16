@@ -136,7 +136,6 @@ function pesquisa_agendamento_shortcode()
             }
 
             if (unidade_id !== "") {
-                window.location.assign(`<?php echo home_url() ?>/agendar/`);
                 <?php if (is_user_logged_in()) { ?>
                     window.location.assign(`<?php echo home_url() ?>/agendar/`);
                 <?php  } else {  ?>
@@ -218,19 +217,13 @@ function pesquisa_agendamento_shortcode()
 
                 event.preventDefault();
 
-                const modalidade = document.querySelectorAll('.btn-modalidade');
-
-                modalidade.forEach((el) => {
-                    el.addEventListener('click', () => {
-                        if (el.value == 9) {
-                            document.querySelector(".btn-pesquisa").addEventListener("click", function() {
-                                let procedimento = document.querySelector('.select2-selection__rendered').title;
-                                parts = procedimento.split(" - ")
-                                window.location.href = `https://api.whatsapp.com/send/?phone=553136588135&text=Gostaria%20de%20agendar%20o%20retorno%20da%20minha%20consulta%20da%20especialidade%20${parts[0]}%20&type=phone_number&app_absent=0`;
-                            });
-                        }
-                    });
-                })
+                document.querySelector(".btn-pesquisa").addEventListener("click", function() {
+                    if (document.querySelector(`.btn-modalidade.ativo`).value == 9) {
+                        let procedimento = document.querySelector('.select2-selection__rendered').title;
+                        parts = procedimento.split(" - ");
+                        window.location.href = `https://api.whatsapp.com/send/?phone=553136588135&text=Gostaria%20de%20agendar%20o%20retorno%20da%20minha%20consulta%20da%20especialidade%20${parts[0]}%20&type=phone_number&app_absent=0`;
+                    }
+                });
 
                 if (event.target.classList.contains("btn-modalidade")) {
                     const buttons = tipoProcedimento.querySelectorAll(".btn-modalidade");

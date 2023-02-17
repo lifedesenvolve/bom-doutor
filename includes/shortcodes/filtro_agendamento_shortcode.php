@@ -46,8 +46,10 @@ function filtro_agendamento_shortcode()
 != null && procedimento.permite_agendamento_online
  == true)
                 .map((procedimento) => {
+                const valor = String(procedimento.valor).replace(/([0-9]{2})$/g, ".$1");
+
                 return `<option value="${procedimento.procedimento_id}" ${procedimento.procedimento_id == filtro.filtro__procedimento_id ? `selected`: ``}>
-                        ${procedimento.nome}
+                        ${procedimento.nome} - R$ ${valor}
                     </option>`
             }).join().replaceAll(`,`, ``);
 

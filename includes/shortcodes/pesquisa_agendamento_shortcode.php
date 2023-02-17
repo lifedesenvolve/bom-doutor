@@ -136,13 +136,7 @@ function pesquisa_agendamento_shortcode()
             }
 
             if (unidade_id !== "") {
-                <?php if (is_user_logged_in()) { ?>
-                    window.location.assign(`<?php echo home_url() ?>/agendar/`);
-                <?php  } else {  ?>
-                    elementorProFrontend.modules.popup.showPopup({
-                        id: 1376
-                    });
-                <?php  } ?>
+                window.location.assign(`<?php echo home_url() ?>/agendar/`);
             }
 
         }

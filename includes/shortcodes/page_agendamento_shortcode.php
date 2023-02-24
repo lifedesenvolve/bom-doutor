@@ -312,7 +312,8 @@ function page_agendamento_shortcode()
             const infoProcedimento = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id)[0];
             console.log(infoProcedimento)
 
-            document.getElementById('filtro__data').value
+
+            //document.getElementById('filtro__data').value
 
             const params = {
                 "unidade": filtro.filtro__unidade_id,
@@ -423,6 +424,7 @@ function page_agendamento_shortcode()
 
                         var professionalId = this.parentElement.getAttribute("data-id-profissional");
                         document.querySelector('#profissional_escolhido').value = professionalId;
+                        localStorage.setItem('@@processo_horario_atendimento', this.getAttribute('data-position'));
 
                         confirmacaoConsulta();
                         modal.show();
@@ -501,10 +503,15 @@ function page_agendamento_shortcode()
 
 function cadastrarAgendamento() {
 
+    const consultaData = localStorage.getItem('@@processo_horario_atendimento');
+    const posicaoSeparador = consultaData.indexOf("_", consultaData.indexOf("_") + 1);
+    const dataCompleta = consultaData.substring(posicaoSeparador + 1);
+    const data_consulta = dataCompleta.substring(0, 10);
+
+
     const unidade_id = filtro.filtro__unidade_id;
     const paciente_id = document.querySelector(`#id_user_feegow`).value;
     const profissional_id = document.querySelector('#profissional_escolhido').value;
-    const data_consulta = filtro.filtro__data;
     const procedimento_id = filtro.filtro__procedimento_id;
     const horario_agendado = document.querySelector('#horario_escolhido').value + ":00";
     const {

@@ -74,7 +74,7 @@ function pesquisa_agendamento_shortcode()
                     options += `<option value="${info.procedimento_id}">${info.nome}</option>`;
                 }else{
                     options += `<option value="${info.procedimento_id}">${info.nome} - R$ ${valor}</option>`;
-                }                
+                }
             });
             selectProcedimentos.innerHTML = options;
         }

@@ -53,6 +53,11 @@ function rotas_bom_doutor()
         'methods'  => 'GET',
         'callback' => 'listar_especialidades',
     ));
+
+    register_rest_route('api/v1', '/paciente-agendamentos/', array(
+        'methods'  => 'GET',
+        'callback' => 'paciente_agendamentos',
+    ));
 }
 add_action('rest_api_init', 'rotas_bom_doutor');
 
@@ -184,5 +189,17 @@ function listar_especialidades($request)
 {
     $api = new Api();
     $resultado = $api->listarEspecialidadesPorProcedimento($request['tipo_procedimento']);
+    echo json_encode($resultado);
+}
+
+function paciente_agendamentos($request)
+{
+    $paciente_id = $request['paciente_id'];
+    $data_start = $request['data_start'];
+    $date_end = new DateTime($date_start);
+    $date_end->modify("+30 days");
+
+    $api = new Api();
+    $resultado = $api->paciente_agendamentos($paciente_id, $data_start, $date_end->format("d-m-Y"));
     echo json_encode($resultado);
 }

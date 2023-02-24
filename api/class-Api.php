@@ -21,6 +21,8 @@ class Api
         $this->create_paciente = get_option('bom_doutor_api_url') . 'patient/create';
         $this->agendamento = get_option('bom_doutor_api_url') . 'appoints/new-appoint';
 
+        $this->paciente_agendamentos = get_option('bom_doutor_api_url') . 'appoints/search';
+
         $this->disponibilidade_horarios = get_option('bom_doutor_api_url') . 'appoints/available-schedule';
         $this->paciente_create = get_option('bom_doutor_api_url') . 'patient/create';
         $this->dependentes = get_option('bom_doutor_api_url') . 'patient/list-dependents';
@@ -70,13 +72,6 @@ class Api
         return json_decode($data, true);
     }
 
-    public function disponibilidade_horarios($procedimento_id, $unidade_id, $data_start, $data_end)
-    {
-        $response = $this->connectApi($this->disponibilidade_horarios . '?tipo=P&procedimento_id=' . $procedimento_id . '&unidade_id=' . $unidade_id . '&data_start=' . $data_start . '&data_end=' . $data_end);
-        if (isset($response['content']['profissional_id'])) {
-            return reset(reset(reset($response['content']['profissional_id'])));
-        }
-    }
 
     public function profissional_search($profissional_id)
     {
@@ -110,7 +105,7 @@ class Api
 
                 $data['profissionais'][] = [
                     'profissional_id' => $key,
-                    'tratamento' => '',
+                    'tratamento' => "",
                     'nome' => $profissional_info['nome'],
                     'foto' => $profissional_info['foto'],
                     'sexo' => $profissional_info['sexo'],
@@ -756,5 +751,11 @@ class Api
                 "content" => $agendamento['content']
             ];
         }
+    }
+
+
+    public function paciente_agendamentos($paciente_id, $data_start, $date_end)
+    {
+        return $this->connectApi($this->paciente_agendamentos . "?paciente_id=$paciente_id&data_start=$data_start&data_end=$date_end");
     }
 }

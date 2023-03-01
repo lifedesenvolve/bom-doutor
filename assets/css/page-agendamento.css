@@ -74,7 +74,7 @@
 .quadro-horarios {
     display: grid;
     gap: 8px;
-    grid-template-columns: repeat(auto-fit, minmax(70px, auto));
+    grid-template-columns: repeat(auto-fit, 70px);
     margin-bottom: 28px;
 }
 

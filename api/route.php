@@ -58,6 +58,11 @@ function rotas_bom_doutor()
         'methods'  => 'GET',
         'callback' => 'paciente_agendamentos',
     ));
+
+    register_rest_route('api/v1', '/js-route-get/', array(
+        'methods'  => 'POST',
+        'callback' => 'js_route_get',
+    ));
 }
 add_action('rest_api_init', 'rotas_bom_doutor');
 
@@ -82,7 +87,7 @@ function lista_profissionais($request)
     $date_start = date("d-m-Y", strtotime($request->get_param('data')));
 
     $date_end = new DateTime($date_start);
-    $date_end->modify("+7 days");
+    $date_end->modify("+15 days");
 
     $api = new Api();
     $lista_profissionais = $api->horarios($procedimento_id, $unidade, $date_start, $date_end->format("d-m-Y"));
@@ -202,4 +207,12 @@ function paciente_agendamentos($request)
     $api = new Api();
     $resultado = $api->paciente_agendamentos($paciente_id, $data_start, $date_end->format("d-m-Y"));
     echo json_encode($resultado);
+}
+
+
+function js_route_get($request)
+{
+    $api = new Api();
+    $response = $api->js_route_get($request['route'], $request['body']);
+    echo json_encode($response);
 }

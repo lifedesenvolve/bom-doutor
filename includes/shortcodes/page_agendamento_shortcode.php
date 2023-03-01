@@ -343,7 +343,6 @@ function page_agendamento_shortcode()
                     return acc;
                 }, []);
 
-
                 return Object.values(profissionaisUnicos);
             })
             .then(profissionais => {

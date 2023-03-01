@@ -4,8 +4,8 @@
  * Plugin Name: Bom Doutor
  * Plugin URI: https://github.com/lifedesenvolve/bom-doutor/
  * Description: Plugin dedicado ao site bom doutor.
- * Version: 1.1.3
- * Author: Agencia Life 
+ * Version: 1.2.1
+ * Author: Agencia Life
  * Author URI: https://github.com/lifedesenvolve/
  */
 

@@ -72,6 +72,10 @@ class Api
         return json_decode($data, true);
     }
 
+    public function js_route_get($route, $body){
+        $response = $this->connectApi(get_option('bom_doutor_api_url') . $route.$body);
+        return $response;
+    }
 
     public function profissional_search($profissional_id)
     {
@@ -81,6 +85,7 @@ class Api
 
     public function horarios($procedimento_id, $unidade_id, $data_start, $data_end)
     {
+        //$response = $this->connectApi($this->disponibilidade_horarios . '?tipo=P&procedimento_id=11&unidade_id=3&data_start=22-02-2023&data_end=28-03-2023');
         $response = $this->connectApi($this->disponibilidade_horarios . '?tipo=P&procedimento_id=' . $procedimento_id . '&unidade_id=' . $unidade_id . '&data_start=' . $data_start . '&data_end=' . $data_end);
         $data = [];
         if (isset($response['content']['profissional_id'])) {
@@ -94,13 +99,14 @@ class Api
                     $response['content']['profissional_id']
                 ];
 
-                $horarios = reset(reset($profissional));
+                $horarios  = [];
+                foreach (reset($profissional) as $key => $value) {
+                    $horarios  = array_merge($horarios , reset($profissional)[$key]);
+                }
 
-                $data_consulta = reset(reset($profissional));
-                $data_filter = [];
-
-                foreach ($data_consulta as $index => $value) {
-                    $data_filter[] = $index;
+                $data_consulta  = [];
+                foreach ($horarios as $key => $value) {
+                    $data_consulta[]  = $key;
                 }
 
                 $data['profissionais'][] = [
@@ -111,7 +117,7 @@ class Api
                     'sexo' => $profissional_info['sexo'],
                     'conselho' => $profissional_info['conselho'],
                     'documento_conselho' => $profissional_info['documento_conselho'],
-                    'data' => $data_filter,
+                    'data' => $data_consulta,
                     'horarios_disponiveis' => $horarios,
                 ];
             }

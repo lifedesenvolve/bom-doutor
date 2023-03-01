@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 function page_agendamento_shortcode()
 {
     wp_enqueue_style('page-agendamento-css');
@@ -54,6 +54,9 @@ function page_agendamento_shortcode()
     </div>
 
     <h1 class="titulo-especialidade" id="tituloEspecialidade"></h1>
+    <?php if (is_user_logged_in()) { ?>
+        <div class="logged"></div>
+    <?php  } ?>
 
     <!-- inicio do loop -->
     <h3 class="info-data" style="display:none"></h3>
@@ -304,15 +307,13 @@ function page_agendamento_shortcode()
 
 
             const filtro = JSON.parse(localStorage.getItem(`@@bomdoutor:dados_filtro`));
-            //const dataSelecionada = localStorage.getItem(`@@bomdoutor:filtro__data`);
-            // const procedimento_id = localStorage.getItem(`@@bomdoutor:filtro__data`)
             console.log(`todos dados`)
-
             const procedimento_id = filtro.filtro__procedimento_id;
             const infoProcedimento = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id)[0];
             console.log(infoProcedimento)
 
-            document.getElementById('filtro__data').value
+
+            //document.getElementById('filtro__data').value
 
             const params = {
                 "unidade": filtro.filtro__unidade_id,
@@ -345,11 +346,6 @@ function page_agendamento_shortcode()
 
                 return Object.values(profissionaisUnicos);
             })
-                /*
-                .then( profissionais =>{
-                    return profissionais.filter(profissional.data)
-                })
-               */
             .then(profissionais => {
                 console.log(`profissionais`, profissionais)
 
@@ -393,8 +389,8 @@ function page_agendamento_shortcode()
                         <div class="div-quadro-horarios">
                         <h4 class="select">Selecione um horário</h4>
                         <div class="quadro-horarios" data-id-profissional="${profissional.profissional_id}" data-nome-profissional="${profissional.nome}">
-                        ${horarios.map(horario => { 
-                            return `<button type="button" class="btn-horario">${horario.substr(0,5)}</button>` }
+                        ${horarios.map(horario => {
+                            return `<button type="button" data-position="${profissional.profissional_id}_${horario.substr(0,5)}_${data}" class="btn-horario">${horario.substr(0,5)}</button>` }
                             )}
                         </div>
                         <hr>
@@ -412,6 +408,10 @@ function page_agendamento_shortcode()
                 botoes.forEach(botao => {
                     botao.addEventListener('click', function() {
 
+                    let logged = document.querySelectorAll('.logged');
+
+                    if(logged.length > 0){
+
                         const modalAgendamento = document.querySelector('#modalAgendamento');
                         const modal = new bootstrap.Modal(modalAgendamento);
 
@@ -424,16 +424,25 @@ function page_agendamento_shortcode()
 
                         var professionalId = this.parentElement.getAttribute("data-id-profissional");
                         document.querySelector('#profissional_escolhido').value = professionalId;
+                        localStorage.setItem('@@processo_horario_atendimento', this.getAttribute('data-position'));
 
                         confirmacaoConsulta();
                         modal.show();
+
+                    }else{
+                        elementorProFrontend.modules.popup.showPopup({
+                            id: 1376
+                        });
+                        localStorage.setItem('@@processo_horario_atendimento', this.getAttribute('data-position'));
+                    }
+
                     });
                 });
 
             })
 .catch(err => {
     console.error(err);
-    document.querySelector(`#loader`).removeAttribute(`class`, `active`); 
+    document.querySelector(`#loader`).removeAttribute(`class`, `active`);
     document.querySelector(`#loader`).style.display = "none";
     document.querySelector(`#tituloEspecialidade`).innerText = "Nenhum horário disponível";
 }).finally(() => {
@@ -475,6 +484,16 @@ function page_agendamento_shortcode()
             });
         });
 
+        let logged_processo = document.querySelectorAll('.logged');
+        if(logged_processo.length > 0){
+            let proceso_horario = localStorage.getItem('@@processo_horario_atendimento');
+            if(proceso_horario != ''){
+                if(document.querySelectorAll(`button[data-position="${proceso_horario}"]`).length > 0){
+                    document.querySelector(`button[data-position="${proceso_horario}"]`).click();
+                }
+            }
+        }
+
         showPage(1, itemsPerPage, cards); document.querySelector(`#loader`).removeAttribute(`class`, `active`); document.querySelector(`#loader`).style.display = "none";
     }
 
@@ -484,10 +503,15 @@ function page_agendamento_shortcode()
 
 function cadastrarAgendamento() {
 
+    const consultaData = localStorage.getItem('@@processo_horario_atendimento');
+    const posicaoSeparador = consultaData.indexOf("_", consultaData.indexOf("_") + 1);
+    const dataCompleta = consultaData.substring(posicaoSeparador + 1);
+    const data_consulta = dataCompleta.substring(0, 10);
+
+
     const unidade_id = filtro.filtro__unidade_id;
     const paciente_id = document.querySelector(`#id_user_feegow`).value;
     const profissional_id = document.querySelector('#profissional_escolhido').value;
-    const data_consulta = filtro.filtro__data;
     const procedimento_id = filtro.filtro__procedimento_id;
     const horario_agendado = document.querySelector('#horario_escolhido').value + ":00";
     const {

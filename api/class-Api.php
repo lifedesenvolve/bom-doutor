@@ -110,7 +110,7 @@ class Api
                 }
 
                 $data['profissionais'][] = [
-                    'profissional_id' => $key,
+                    'profissional_id' => $profissional_info['profissional_id'],
                     'tratamento' => "",
                     'nome' => $profissional_info['nome'],
                     'foto' => $profissional_info['foto'],

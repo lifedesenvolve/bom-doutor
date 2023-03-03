@@ -89,8 +89,8 @@ class Api
         $response = $this->connectApi($this->disponibilidade_horarios . '?tipo=P&procedimento_id=' . $procedimento_id . '&unidade_id=' . $unidade_id . '&data_start=' . $data_start . '&data_end=' . $data_end);
         $data = [];
         if (isset($response['content']['profissional_id'])) {
-            foreach ($response['content']['profissional_id'] as $key => $profissional) {
-                $profissional_info = $this->profissional_search($key)['content']['informacoes'][0];
+            foreach ($response['content']['profissional_id'] as $profissional_id => $profissional) {
+                $profissional_info = $this->profissional_search($profissional_id)['content']['informacoes'][0];
 
                 $data['info'] = [
                     'profissionais_disponiveis' => count($response['content']['profissional_id'])
@@ -100,17 +100,17 @@ class Api
                 ];
 
                 $horarios  = [];
-                foreach (reset($profissional) as $key => $value) {
-                    $horarios  = array_merge($horarios , reset($profissional)[$key]);
+                foreach (reset($profissional) as $dias => $value) {
+                    $horarios  = array_merge($horarios , reset($profissional)[$dias]);
                 }
 
                 $data_consulta  = [];
-                foreach ($horarios as $key => $value) {
-                    $data_consulta[]  = $key;
+                foreach ($horarios as $disponibilidade => $value) {
+                    $data_consulta[]  = $disponibilidade;
                 }
 
                 $data['profissionais'][] = [
-                    'profissional_id' => $profissional_info['profissional_id'],
+                    'profissional_id' => $profissional_id,
                     'tratamento' => "",
                     'nome' => $profissional_info['nome'],
                     'foto' => $profissional_info['foto'],

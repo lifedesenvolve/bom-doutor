@@ -334,7 +334,9 @@
         stroke-dashoffset: -351.86;
     }
 }
-
+#mgsModal{
+    color: red;
+}
 @media (max-width: 500px) {
     .card-profissional {
         display: flex;

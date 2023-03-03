@@ -93,6 +93,6 @@ function bom_doutor_settings_page()
 
     $api = new Api();
     echo '<pre>';
-    print_r($api->horarios(11, 3, '31-01-2023', '31-01-2023'));
+    print_r($api->horarios(232, 3, '03-03-2023', '18-03-2023'));
     echo '</pre>';
 }

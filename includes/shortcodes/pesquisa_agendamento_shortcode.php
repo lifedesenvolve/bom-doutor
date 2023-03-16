@@ -65,12 +65,32 @@ function pesquisa_agendamento_shortcode()
             let options = '';
             let lista = dados_lista_procedimentos.filter(item => item.tipo_procedimento == tipoProcedimento && item.especialidade_id != null && item.permite_agendamento_online ==
                 true)
-
-            console.log(lista);
+            if(tipoProcedimento == -52){
+                lista = [{
+                                    "codigo" : "",
+                                    "convenio_id" : null,
+                                    "dias_retorno" : null,
+                                    "especialidade_id" : ['141'],
+                                    "grupo_procedimento" : 0,
+                                    "indicacao_clinica" : false,
+                                    "nao_necessita_agendamento" : "",
+                                    "nome" : "Psiquiatria",
+                                    "opcoes_agendamento" : 0,
+                                    "permite_agendamento_online" : true,
+                                    "permite_pagamento_online" : false,
+                                    "preparo" : "",
+                                    "procedimento_id" : 6002,
+                                    "tableId" : 0,
+                                    "telemedicina" : false,
+                                    "tempo" : "0",
+                                    "tipo_procedimento" : -52,
+                                    "valor" : 0
+                                }]
+            }
 
             lista.forEach(info => {
                 const valor = String(info.valor).replace(/([0-9]{2})$/g, ",$1");
-                if(info.tipo_procedimento === 4){
+                if(info.tipo_procedimento === 4 || info.tipo_procedimento == -52){
                     options += `<option value="${info.procedimento_id}">${info.nome}</option>`;
                 }else{
                     options += `<option value="${info.procedimento_id}">${info.nome} - R$ ${valor}</option>`;
@@ -154,6 +174,12 @@ function pesquisa_agendamento_shortcode()
             await fetch(`${base_url}/wp-json/api/v1/lista-procedimentos`, options)
                 .then(response => response.json())
                 .then(response => {
+                    return [...response, {
+                        procedimento_id: -52,
+                        procedimento_nome: "Telemedicina"
+                    }]
+                })
+                .then(response => {
 
                     let form_shortcode = document.getElementById('form-agendamento');
 
@@ -185,14 +211,9 @@ function pesquisa_agendamento_shortcode()
             await getEspecialidadeByProcedimentoId(2)
                 .then((response) => {
                     dados_lista_procedimentos.push(...response);
-
                     return response;
-                }).then((response) => {
-
-                    //document.querySelector('[data-procedimento="Consulta"]').click()
-
-                    return response;
-                }).then((response) => procedimentoAtivo(response))
+                })
+                .then((response) => procedimentoAtivo(response))
                 .then(() => {
                     document.querySelector(`#tipoProcedimento .btn-modalidade[value="2"]`).click()
                 });
@@ -216,6 +237,12 @@ function pesquisa_agendamento_shortcode()
                         let procedimento = document.querySelector('.select2-selection__rendered').title;
                         parts = procedimento.split(" - ");
                         window.location.href = `https://api.whatsapp.com/send/?phone=553136588135&text=Gostaria%20de%20agendar%20o%20retorno%20da%20minha%20consulta%20da%20especialidade%20${parts[0]}%20&type=phone_number&app_absent=0`;
+                    }
+
+                    if(document.querySelector(`.btn-modalidade.ativo`).value == -52){
+                        let procedimento = document.querySelector('.select2-selection__rendered').title;
+                        parts = procedimento.split(" - ");
+                        window.location.href = `https://api.whatsapp.com/send/?phone=553136588135&text=Gostaria%20de%20agendar%20uma%20consulta%20online%20com%20um%20especialista%20em%20${parts[0]}%20&type=phone_number&app_absent=0`;
                     }
                 });
 

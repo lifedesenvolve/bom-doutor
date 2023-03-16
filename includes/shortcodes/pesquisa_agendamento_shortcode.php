@@ -74,7 +74,7 @@ function pesquisa_agendamento_shortcode()
                                     "grupo_procedimento" : 0,
                                     "indicacao_clinica" : false,
                                     "nao_necessita_agendamento" : "",
-                                    "nome" : "Psiquiatria",
+                                    "nome" : "Psicologia",
                                     "opcoes_agendamento" : 0,
                                     "permite_agendamento_online" : true,
                                     "permite_pagamento_online" : false,
@@ -84,13 +84,13 @@ function pesquisa_agendamento_shortcode()
                                     "telemedicina" : false,
                                     "tempo" : "0",
                                     "tipo_procedimento" : -52,
-                                    "valor" : 0
+                                    "valor" : 5000
                                 }]
             }
 
             lista.forEach(info => {
                 const valor = String(info.valor).replace(/([0-9]{2})$/g, ",$1");
-                if(info.tipo_procedimento === 4 || info.tipo_procedimento == -52){
+                if(info.tipo_procedimento === 4){
                     options += `<option value="${info.procedimento_id}">${info.nome}</option>`;
                 }else{
                     options += `<option value="${info.procedimento_id}">${info.nome} - R$ ${valor}</option>`;

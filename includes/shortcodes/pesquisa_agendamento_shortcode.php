@@ -216,6 +216,18 @@ function pesquisa_agendamento_shortcode()
                 .then((response) => procedimentoAtivo(response))
                 .then(() => {
                     document.querySelector(`#tipoProcedimento .btn-modalidade[value="2"]`).click()
+                    if(location.pathname.indexOf(`especialidade`) != -1){
+                        const titleEspecialista = document.querySelector(`#title-especialista`).innerText?.toLowerCase().trim();
+                        console.log(titleEspecialista)
+
+                        document.querySelectorAll("#procedimento option").forEach(item => {
+                        const optionText = item.innerText?.toLowerCase().split(`-`)[0]?.trim();
+                        
+                            if (optionText === titleEspecialista) {
+                                $('#procedimento').val(item.value).trigger(`change`)
+                            }
+                        });
+                    }
                 });
         })();
 

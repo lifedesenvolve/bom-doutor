@@ -7,6 +7,11 @@ function rotas_bom_doutor()
         'callback' => 'getEspecialidadeByProcedimentoId',
     ));
 
+    register_rest_route('api/v1', '/validar-cpf/', array(
+        'methods'  => 'POST',
+        'callback' => 'validar_cpf',
+    ));
+
     register_rest_route('api/v1', '/lista-procedimentos/', array(
         'methods'  => 'GET',
         'callback' => 'lista_procedimentos',
@@ -65,6 +70,13 @@ function rotas_bom_doutor()
     ));
 }
 add_action('rest_api_init', 'rotas_bom_doutor');
+
+function validar_cpf($request)
+{
+    $api = new Api();
+    $resultado = $api->validar_paciente_cpf($request['cpf'], $request['user_id']);
+    return $resultado;
+}
 
 function getEspecialidadeByProcedimentoId($request)
 {

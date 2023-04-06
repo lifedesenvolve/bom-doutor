@@ -16,6 +16,8 @@ class Api
 
         /* find */
         $this->paciente = get_option('bom_doutor_api_url') . 'patient/search';
+        $this->paciente_list = get_option('bom_doutor_api_url') . 'patient/list';
+        $this->paciente_search = get_option('bom_doutor_api_url') . 'patient/search';
 
         /* create */
         $this->create_paciente = get_option('bom_doutor_api_url') . 'patient/create';
@@ -70,6 +72,34 @@ class Api
         $data = wp_remote_retrieve_body($response);
 
         return json_decode($data, true);
+    }
+
+    public function validar_paciente_id($paciente_id){
+        $paciente = $this->connectApi($this->paciente . '?paciente_id=' . $paciente_id);
+        return $paciente;
+    }
+
+    public function validar_paciente_cpf($paciente_cpf, $user_id)
+    {
+        $paciente = $this->connectApi($this->paciente_search . '?paciente_cpf=' . $paciente_cpf);
+
+        if(isset($paciente['success'])){
+
+            $user_id_feegow = get_field('user_id_feegow', 'user_' . $user_id);
+
+            if(empty($user_id_feegow) ){
+                update_field('user_id_feegow', $paciente['content']['id'], 'user_' . $user_id);
+                echo json_encode($paciente);
+            }else{
+                echo json_encode($paciente);
+            }
+
+        }else{
+            echo json_encode([
+                'success' => false
+            ]);
+        }
+
     }
 
     public function js_route_get($route, $body){

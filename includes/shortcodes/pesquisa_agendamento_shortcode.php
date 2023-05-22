@@ -222,7 +222,6 @@ function pesquisa_agendamento_shortcode()
 
                         document.querySelectorAll("#procedimento option").forEach(item => {
                         const optionText = item.innerText?.toLowerCase().split(`-`)[0]?.trim();
-                        
                             if (optionText === titleEspecialista) {
                                 $('#procedimento').val(item.value).trigger(`change`)
                             }

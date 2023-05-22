@@ -29,8 +29,8 @@ function filtro_agendamento_shortcode()
         <button class="btn-filtro" id="btn-filtro" onclick="setStorange()">Buscar</button>
     </form>
 
-    <script>      
-        function carregar_dados_filtro(){
+    <script>
+        function carregar_dados_filtro() {
 
             lista = JSON.parse(localStorage.getItem('@@bomdoutor:dados_lista_procedimentos'))
             filtro = JSON.parse(localStorage.getItem('@@bomdoutor:dados_filtro'))
@@ -42,31 +42,30 @@ function filtro_agendamento_shortcode()
 
 
 
-            document.querySelector(`select#filtro__procedimentos`).innerHTML = lista.filter((procedimento)=> procedimento.tipo_procedimento == filtro.filtro__tipo_procedimento && procedimento.especialidade_id
-!= null && procedimento.permite_agendamento_online
- == true)
+            document.querySelector(`select#filtro__procedimentos`).innerHTML = lista.filter((procedimento) => procedimento.tipo_procedimento == filtro.filtro__tipo_procedimento && procedimento.especialidade_id !=
+                    null && procedimento.permite_agendamento_online == true)
                 .map((procedimento) => {
-                const valor = String(procedimento.valor).replace(/([0-9]{2})$/g, ".$1");
+                    const valor = String(procedimento.valor).replace(/([0-9]{2})$/g, ".$1");
 
-                return `<option value="${procedimento.procedimento_id}" ${procedimento.procedimento_id == filtro.filtro__procedimento_id ? `selected`: ``}>
+                    return `<option value="${procedimento.procedimento_id}" ${procedimento.procedimento_id == filtro.filtro__procedimento_id ? `selected`: ``}>
                         ${procedimento.nome} - R$ ${valor}
                     </option>`
-            }).join().replaceAll(`,`, ``);
+                }).join().replaceAll(`,`, ``);
 
         }
         carregar_dados_filtro();
 
         function setStorange() {
             document.getElementById('form-filtro').addEventListener('submit', (event) => {
-               dados_filtro = {
-                "filtro__data": document.getElementById('filtro__data').value,
-                "filtro__procedimento_id": document.getElementById('filtro__procedimentos').value,
-                "filtro__tipo_procedimento": document.getElementById('filtro__tipo_procedimento').value,
-                "filtro__unidade_id": document.getElementById('filtro__unidade').value,
-               }
+                dados_filtro = {
+                    "filtro__data": document.getElementById('filtro__data').value,
+                    "filtro__procedimento_id": document.getElementById('filtro__procedimentos').value,
+                    "filtro__tipo_procedimento": document.getElementById('filtro__tipo_procedimento').value,
+                    "filtro__unidade_id": document.getElementById('filtro__unidade').value,
+                }
 
                 localStorage.setItem('@@bomdoutor:dados_filtro', JSON.stringify(dados_filtro))
-                
+
                 event.preventDefault();
                 window.location.reload(true);
             });

@@ -165,7 +165,8 @@ function page_agendamento_shortcode()
 
     <div class="row"><span class="col-sm-3"></span><span class="col-sm-9"></span></div>
     <script>
-        filtro = JSON.parse(localStorage.getItem('@@bomdoutor:dados_filtro'))
+        filtro = JSON.parse(localStorage.getItem('@@bomdoutor:dados_filtro'));
+
         const lt_procedimentos = JSON.parse(localStorage.getItem('@@bomdoutor:dados_lista_procedimentos'));
         const idUserFeegow = <?php echo $user_id_feegow; ?>;
         if (idUserFeegow !== -1) {
@@ -202,7 +203,7 @@ function page_agendamento_shortcode()
                         nomeTitular.value = dadosPaciente?.paciente.nome;
                         cpfTitular.value = dadosPaciente?.paciente.documentos.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
                         telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
-                        generoTitular.value = dadosPaciente?.paciente.sexo[0];
+                        generoTitular.value = dadosPaciente.paciente.sexo[0];
                         emailTitular.value = dadosPaciente?.paciente.email[0];
                         dataAniversario.value = dadosPaciente?.paciente.nascimento.replace(/(\d+)-(\d+)-(\d+)/, "$3-$2-$1");
 
@@ -225,7 +226,7 @@ function page_agendamento_shortcode()
                         let partesData = dataAniversario.value.split("-");
                         dataAniversario.setAttribute("type", "text");
                         dataAniversario.value = partesData[2] + "****";
-                        generoTitular.value = '';
+                        generoTitular.value = dadosPaciente.paciente.sexo[0];
 
                     }
                 })
@@ -274,45 +275,54 @@ function page_agendamento_shortcode()
         //getpacienteByCpf();
 
         function capturarDados() {
+    let cpfTitular = '';
+    let nomeTitular = '';
+    let generoTitular = '';
+    let telefoneTitular = '';
+    let dataAniversario = '';
 
-            let cpfTitular = '';
-            let generoTitular = '';
-            let telefoneTitular = '';
-            let dataAniversario = '';
+    if (<?php echo $user_id_feegow; ?> !== -1) {
+        cpfTitular = dataValues.cpf_titular.replace(/\D/g, "");
+        nomeTitular = dataValues.nome_titular;
+        generoTitular = dataValues.genero_titular;
+        telefoneTitular = dataValues.telefone_titular.replace(/\D/g, "");
+        dataAniversario = dataValues.data_aniversario;
+    } else {
+        cpfTitular = document.querySelector('[name=cpf_titular]').value.replace(/[^\d]/g, "");
+        nomeTitular = document.querySelector('[name=nome_titular]').value;
+        generoTitular = document.querySelector('[name=genero_titular]').value;
+        telefoneTitular = document.querySelector('[name=telefone_titular]').value;
+        dataAniversario = document.querySelector('[name=data_aniversario]').value;
+    }
 
-            if (<?php echo $user_id_feegow; ?> !== -1) {
-                cpfTitular = dataValues.cpf_titular.replace(/\D/g, "");
-                nomeTitular = dataValues.nome_titular;
-                generoTitular = dataValues.genero_titular;
-                telefoneTitular = dataValues.telefone_titular.replace(/\D/g, "");
-                dataAniversario = dataValues.data_aniversario;
-            }else{
-                cpfTitular = document.querySelector('[name=cpf_titular]').value.replace(/[^\d]/g, "");
-                nomeTitular = document.querySelector('[name=nome_titular]').value;
-                generoTitular = document.querySelector('[name=genero_titular]').value;
-                telefoneTitular = document.querySelector('[name=telefone_titular]').value;
-                dataAniversario = document.querySelector('[name=data_aniversario]').value;
-            }
+    const emailTitular = document.querySelector('[name=email_titular]').value;
+    const horarioEscolhido = document.querySelector('[name=horario_escolhido]').value;
 
-            const emailTitular = document.querySelector('[name=email_titular]').value;
-            const horarioEscolhido = document.querySelector('[name=horario_escolhido]').value;
+    const dados = {
+        nome_titular: nomeTitular,
+        cpf_titular: cpfTitular,
+        email_titular: emailTitular,
+        genero_titular: generoTitular,
+        telefone_titular: telefoneTitular,
+        horario_escolhido: horarioEscolhido,
+        dataAniversario: dataAniversario
+    };
 
-            const dados = {
-                nome_titular: nomeTitular,
-                cpf_titular: cpfTitular,
-                email_titular: emailTitular,
-                genero_titular: generoTitular,
-                telefone_titular: telefoneTitular,
-                horario_escolhido: horarioEscolhido,
-                dataAniversario: dataAniversario
-            };
-
-            if (!nomeTitular || !cpfTitular || !emailTitular || !telefoneTitular || !horarioEscolhido || !dataAniversario) {
-                return false;
-            }
-
-            return dados;
+    let camposFaltantes = [];
+    for (let campo in dados) {
+        if (!dados[campo]) {
+            camposFaltantes.push(campo);
         }
+    }
+
+    if (camposFaltantes.length) {
+        console.log("Campos faltantes: ", camposFaltantes);
+        return false;
+    }
+
+    return dados;
+}
+
 
         function confirmacaoConsulta() {
             const procedimento_id = filtro.filtro__procedimento_id;
@@ -358,6 +368,9 @@ function page_agendamento_shortcode()
 
 
             const filtro = JSON.parse(localStorage.getItem(`@@bomdoutor:dados_filtro`));
+
+            console.log(filtro);
+
             //console.log(`todos dados`)
             const procedimento_id = filtro.filtro__procedimento_id;
             const infoProcedimento = lt_procedimentos.filter((procedimento) => procedimento.procedimento_id == procedimento_id)[0];
@@ -636,7 +649,7 @@ function page_agendamento_shortcode()
             const emailTitular = document.querySelector('[name=email_titular]').value;
 
 
-            let user_id = <?php echo get_current_user_id() ?>;
+            let user_id = <?php echo $user_id_feegow ?>;
 
             const bodyCadastro = {
                 "nome_titular": nomeTitular,
@@ -756,6 +769,14 @@ function page_agendamento_shortcode()
 
         window.onload = function() {
             setStorange();
+
+            if (window.location.hash.includes('#redirect')) {
+
+                var novaHash = window.location.hash.replace('#redirect', '');
+                history.replaceState(null, null, window.location.pathname + window.location.search + novaHash);
+                document.querySelector('#btn-filtro').click();
+            }
+
             carrega_profissionais();
 
             document.querySelector(`#step1`).onclick = function() {

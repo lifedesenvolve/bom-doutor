@@ -89,10 +89,105 @@ function bom_doutor_settings_page()
         </div>
     </div>
     <hr>
-<?php
+    <div class="wrap">
+        <h1>Atualizar dados</h1>
 
-    /* $api = new Api();
-    echo '<pre>';
-    print_r($api->horarios(232, 3, '03-03-2023', '18-03-2023'));
-    echo '</pre>'; */
+        <form method="post" action="">
+            <input type="hidden" name="action" value="update_database">
+            <?php wp_nonce_field('update_database', 'update_db_nonce'); ?>
+            <p>Clique no botão abaixo para atualizar os dados:</p>
+            <p>
+                <input type="submit" class="button button-primary" name="update_db" value="Atualizar dados">
+            </p>
+        </form>
+    </div>
+
+<?php
+$api = new Api();
+echo '<pre>';
+print_r($api->listUnidades());
+echo '</pre>';
+
+
+    function update_db_tipos_procedimentos($api)
+    {
+        global $wpdb;
+        $prefix = $wpdb->prefix . 'feegow_';
+        $table_tipo_procedimento = $prefix . 'tipo_procedimento';
+
+        $api = new Api();
+        $tipos_procedimentos = $api->list('tipos_procedimentos');
+
+        $wpdb->query("ALTER TABLE $table_tipo_procedimento ADD UNIQUE KEY `id_tipo_procedimento` (`id_tipo_procedimento`)");
+
+        if ($tipos_procedimentos != '404') {
+            foreach ($tipos_procedimentos as $tipos) {
+                // Inserir ou atualizar dados
+                $wpdb->query($wpdb->prepare("INSERT INTO $table_tipo_procedimento (id_tipo_procedimento, nome) VALUES (%d, %s) ON DUPLICATE KEY UPDATE nome = VALUES(nome)", $tipos['id'], $tipos['tipo']));
+            }
+            return 'dados atualizados';
+        }else{
+            return 'Falha na api';
+        }
+    }
+
+    function update_db_procedimentos($api)
+    {
+        global $wpdb;
+        $prefix = $wpdb->prefix . 'feegow_';
+        $table_procedimento = $prefix . 'procedimento';
+
+        $api = new Api();
+        $procedimentos = $api->list('procedimentos');
+
+        $wpdb->query("ALTER TABLE $table_procedimento ADD UNIQUE KEY `id_procedimento` (`id_procedimento`)");
+
+        if ($procedimentos != '404') {
+            foreach ($procedimentos as $procedimento) {
+
+                $wpdb->query($wpdb->prepare("INSERT INTO $table_procedimento (id_procedimento, id_tipo_procedimento, nome) VALUES (%d, %d, %s) ON DUPLICATE KEY UPDATE nome = VALUES(nome)", $procedimento['procedimento_id'], $procedimento['tipo_procedimento'], $procedimento['nome']));
+            }
+            return 'dados atualizados';
+        }else{
+            return 'Falha na api';
+        }
+    }
+
+    function update_db_profissional($api)
+    {
+        global $wpdb;
+        $prefix = $wpdb->prefix . 'feegow_';
+        $table_profissional = $prefix . 'especialista';
+
+        $api = new Api();
+        $profissionais = $api->list('profissionais');
+
+        $wpdb->query("ALTER TABLE $table_profissional ADD UNIQUE KEY `id_especialista` (`id_especialista`)");
+
+        if ($profissionais != '404') {
+            foreach ($profissionais as $profissional) {
+
+                $wpdb->query($wpdb->prepare("INSERT INTO $table_profissional (id_especialista, nome) VALUES (%d, %s) ON DUPLICATE KEY UPDATE nome = VALUES(nome)", $profissional['profissional_id'], $profissional['nome']));
+            }
+            return 'dados atualizados';
+        }else{
+            return 'Falha na api';
+        }
+    }
+
+    if (isset($_POST['update_db'])) {
+        // Verifica o nonce de segurança
+        if (!isset($_POST['update_db_nonce']) || !wp_verify_nonce($_POST['update_db_nonce'], 'update_database')) {
+            wp_die('Ação não permitida.', 'Erro de segurança');
+        }
+
+        // Verifica se o botão "Atualizar dados" foi clicado
+        if (isset($_POST['update_db'])) {
+            $api = new Api();
+            echo 'Status Tipos_procedimentos: ' . update_db_tipos_procedimentos($api) . '<br>';
+            echo 'Status Procedimentos: ' . update_db_procedimentos($api) . '<br>';
+            echo 'Status Profissional: ' . update_db_profissional($api) . '<br>';
+            exit;
+        }
+    }
 }

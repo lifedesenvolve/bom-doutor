@@ -1,0 +1,30 @@
+.dados-usuario, .meus-agendamentos{
+    background: #f0f0f0
+}
+.dados-usuario, .meus-agendamentos h1,h2{
+    color: #2A2860;
+    font-family: "Open Sans", Sans-serif;
+    font-weight: 600;
+}
+
+.meus-agendamentos .container, .container-fluid, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl{
+    --bs-gutter-x: unset !important;
+}
+
+.atualiza-dados form button{
+    background:#2A2860;
+    color: #fff;
+    text-align: center;
+    border: none;
+    border-radius: 5px;
+    width: 100%;
+}
+.atualiza-dados form button:hover{
+    background:#62B5A8;
+}
+
+.form-group label{
+    font-weight: 500;
+    color:#4D4D4D;
+    margin-bottom: 5px;
+}

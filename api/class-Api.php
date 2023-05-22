@@ -16,10 +16,13 @@ class Api
 
         /* find */
         $this->paciente = get_option('bom_doutor_api_url') . 'patient/search';
+        $this->paciente_list = get_option('bom_doutor_api_url') . 'patient/list';
+        $this->paciente_search = get_option('bom_doutor_api_url') . 'patient/search';
 
         /* create */
         $this->create_paciente = get_option('bom_doutor_api_url') . 'patient/create';
         $this->agendamento = get_option('bom_doutor_api_url') . 'appoints/new-appoint';
+        $this->cancelar_agendamento_usuario = get_option('bom_doutor_api_url') . 'appoints/cancel-appoint';
 
         $this->paciente_agendamentos = get_option('bom_doutor_api_url') . 'appoints/search';
 
@@ -72,8 +75,36 @@ class Api
         return json_decode($data, true);
     }
 
-    public function js_route_get($route, $body){
-        $response = $this->connectApi(get_option('bom_doutor_api_url') . $route.$body);
+    public function validar_paciente_id($paciente_id)
+    {
+        $paciente = $this->connectApi($this->paciente . '?paciente_id=' . $paciente_id);
+        return $paciente;
+    }
+
+    public function validar_paciente_cpf($paciente_cpf, $user_id)
+    {
+        $paciente = $this->connectApi($this->paciente_search . '?paciente_cpf=' . $paciente_cpf);
+
+        if (isset($paciente['success'])) {
+
+            $user_id_feegow = get_field('user_id_feegow', 'user_' . $user_id);
+
+            if (empty($user_id_feegow)) {
+                update_field('user_id_feegow', $paciente['content']['id'], 'user_' . $user_id);
+                echo json_encode($paciente);
+            } else {
+                echo json_encode($paciente);
+            }
+        } else {
+            echo json_encode([
+                'success' => false
+            ]);
+        }
+    }
+
+    public function js_route_get($route, $body)
+    {
+        $response = $this->connectApi(get_option('bom_doutor_api_url') . $route . $body);
         return $response;
     }
 
@@ -101,7 +132,7 @@ class Api
 
                 $horarios  = [];
                 foreach (reset($profissional) as $dias => $value) {
-                    $horarios  = array_merge($horarios , reset($profissional)[$dias]);
+                    $horarios  = array_merge($horarios, reset($profissional)[$dias]);
                 }
 
                 $data_consulta  = [];
@@ -127,14 +158,20 @@ class Api
 
     public function list($list, $where = false)
     {
-        $response = [
-            'procedimentos' => $this->connectApi($this->procedimentos)['content'],
-            'atendimentos' => $this->connectApi($this->atendimentos)['content'],
-            'especialidades' => $this->connectApi($this->especialidades)['content'],
-            'profissionais' => $this->connectApi($this->profissionais)['content'],
-            'locais' => $this->connectApi($this->locais)['content'],
-            'unidades' => $this->connectApi($this->unidades)['content'],
-        ];
+        if (isset($this->connectApi($this->procedimentos)['content'])) {
+            $response = [
+                'procedimentos' => $this->connectApi($this->procedimentos)['content'],
+                'tipos_procedimentos' => $this->connectApi($this->tipos_procedimentos)['content'],
+                'atendimentos' => $this->connectApi($this->atendimentos)['content'],
+                'especialidades' => $this->connectApi($this->especialidades)['content'],
+                'profissionais' => $this->connectApi($this->profissionais)['content'],
+                'locais' => $this->connectApi($this->locais)['content'],
+                'unidades' => $this->connectApi($this->unidades)['content'],
+            ];
+        } else {
+            return '404';
+        }
+
 
         if ($where) {
             $listing = $response[$list];
@@ -260,6 +297,29 @@ class Api
                 "status" => "sucesso",
                 "mensagem" => "Agendamento realizado com sucesso",
                 "content" => $agendamento['content']
+            ];
+        }
+    }
+
+
+    public function cancelar_agendamento($agendamento_id)
+    {
+        $cancelamento = $this->connectApi($this->cancelar_agendamento_usuario, 'POST', json_encode([
+            "agendamento_id" => $agendamento_id,
+            "motivo_id" => 1,
+            'obs' => 'Cancelado pelo site.'
+        ]));
+
+        if (isset($cancelamento['error'])) {
+            return [
+                "status" => "erro",
+                "mensagem" => $cancelamento,
+            ];
+        } else {
+            return [
+                "status" => "sucesso",
+                "mensagem" => "Agendamento cancelado com sucesso",
+                "content" => $cancelamento['content']
             ];
         }
     }

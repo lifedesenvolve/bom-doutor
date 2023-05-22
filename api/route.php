@@ -7,6 +7,11 @@ function rotas_bom_doutor()
         'callback' => 'getEspecialidadeByProcedimentoId',
     ));
 
+    register_rest_route('api/v1', '/validar-cpf/', array(
+        'methods'  => 'POST',
+        'callback' => 'validar_cpf',
+    ));
+
     register_rest_route('api/v1', '/lista-procedimentos/', array(
         'methods'  => 'GET',
         'callback' => 'lista_procedimentos',
@@ -63,8 +68,42 @@ function rotas_bom_doutor()
         'methods'  => 'POST',
         'callback' => 'js_route_get',
     ));
+
+    register_rest_route('api/v1', '/cancel-appoint/', array(
+        'methods'  => 'POST',
+        'callback' => 'cancelar_agendamento',
+    ));
+
+    register_rest_route('feegow', 'table-data', array(
+        'methods' => 'GET',
+        'callback' => 'feegow_get_table_data',
+    ));
 }
 add_action('rest_api_init', 'rotas_bom_doutor');
+
+
+function feegow_get_table_data() {
+    global $wpdb;
+
+    $table_tipo_procedimento = $wpdb->prefix . 'feegow_tipo_procedimento';
+    $table_procedimento = $wpdb->prefix . 'feegow_procedimento';
+    $table_especialista = $wpdb->prefix . 'feegow_especialista';
+
+    $data = array(
+        'tipo_procedimento' => $wpdb->get_results("SELECT * FROM $table_tipo_procedimento"),
+        'procedimento' => $wpdb->get_results("SELECT * FROM $table_procedimento"),
+        'especialista' => $wpdb->get_results("SELECT * FROM $table_especialista"),
+    );
+
+    wp_send_json($data);
+}
+
+function validar_cpf($request)
+{
+    $api = new Api();
+    $resultado = $api->validar_paciente_cpf($request['cpf'], $request['user_id']);
+    return $resultado;
+}
 
 function getEspecialidadeByProcedimentoId($request)
 {
@@ -215,4 +254,13 @@ function js_route_get($request)
     $api = new Api();
     $response = $api->js_route_get($request['route'], $request['body']);
     echo json_encode($response);
+}
+
+
+function cancelar_agendamento($request)
+{
+    $api = new Api();
+    $agendamento_id = $request['agendamento_id'];
+    $resultado = $api->cancelar_agendamento($agendamento_id);
+    echo json_encode($resultado);
 }

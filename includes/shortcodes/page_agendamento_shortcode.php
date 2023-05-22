@@ -106,10 +106,10 @@ function page_agendamento_shortcode()
                                 </select>
                             </div>
                         </div>
-                        <div class="mb-3 px-5 row">
+                        <div class="mb-3 px-5 row" style="display: none;">
                             <label for="data_aniversario" class="col-sm-3 col-form-label">Data Aniversário</label>
                             <div class="col-sm-9">
-                                <input class="form-control" name="data_aniversario" type="date" id="data_aniversario">
+                                <input class="form-control" name="data_aniversario" type="text" id="data_aniversario" placeholder="10/05/1990">
                             </div>
                         </div>
                         <div class="mb-3 px-5 row">
@@ -144,13 +144,16 @@ function page_agendamento_shortcode()
                         <div class="steps mb-5"><img src="<?php echo PLUGIN_URL . "/assets/image/etapa-3.png" ?>"></div>
                         <div class="dados-agendamento px-5" id="dadosAgendamento"></div>
                         <div id="mgsModal" class="d-flex justify-content-center m-5"></div>
+                        <div class="d-flex row">
+                            <div class="d-flex px-5 justify-content-start col-md-6">
+                                <button type="button" class="btn btn-outline-primary" id="stepVoltar">voltar no inicio</button>
+                            </div>
 
-                        <div class="d-flex px-5 justify-content-end">
-                            <button type="button" class="btn btn-default cta" id="step3">confirmar agendamento</button>
+                            <div class="d-flex px-5 justify-content-end col-md-6">
+                                <button type="button" class="btn btn-default cta" id="step3">confirmar agendamento</button>
+                            </div>
                         </div>
-
                     </div>
-
                 </div>
             </div>
         </div>
@@ -198,7 +201,7 @@ function page_agendamento_shortcode()
                     telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
                     generoTitular.value = dadosPaciente?.paciente.sexo[0];
                     emailTitular.value = dadosPaciente?.paciente.email[0];
-                    dataAniversario.value = dadosPaciente?.paciente.nascimento.replace(/(\d+)-(\d+)-(\d+)/, "$3-$2-$1");
+                    //dataAniversario.value = dadosPaciente?.paciente.nascimento.replace(/(\d+)-(\d+)-(\d+)/, "$1/$2/$3");
                 }
             })
             .catch(err => console.error(err));
@@ -236,7 +239,7 @@ function page_agendamento_shortcode()
                         telefoneTitular.value = dadosPaciente?.paciente.telefones[0].replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
                         generoTitular.value = dadosPaciente?.paciente.sexo[0];
                         emailTitular.value = dadosPaciente?.paciente.email[0];
-                        dataAniversario.value = dadosPaciente?.paciente.nascimento.replace(/(\d+)-(\d+)-(\d+)/, "$3-$2-$1");
+                        //dataAniversario.value = dadosPaciente?.paciente.nascimento.replace(/(\d+)-(\d+)-(\d+)/, "$3-$2-$1");
                     }
                 })
                 .catch(err => console.error(err));
@@ -251,7 +254,7 @@ function page_agendamento_shortcode()
             const generoTitular = document.querySelector('[name=genero_titular]').value;
             const telefoneTitular = document.querySelector('[name=telefone_titular]').value.replace(/\D/g, "");
             const horarioEscolhido = document.querySelector('[name=horario_escolhido]').value;
-            const dataAniversario = document.querySelector('[name=data_aniversario]').value;
+            //const dataAniversario = document.querySelector('[name=data_aniversario]').value;
 
             const dados = {
                 nome_titular: nomeTitular,
@@ -260,10 +263,10 @@ function page_agendamento_shortcode()
                 genero_titular: generoTitular,
                 telefone_titular: telefoneTitular,
                 horario_escolhido: horarioEscolhido,
-                dataAniversario: dataAniversario
+                //dataAniversario: dataAniversario
             };
 
-            if (!nomeTitular || !cpfTitular || !emailTitular || !telefoneTitular || !horarioEscolhido || !dataAniversario) {
+            if (!nomeTitular || !cpfTitular || !emailTitular || !telefoneTitular || !horarioEscolhido) {
                 return false;
             }
 
@@ -561,7 +564,7 @@ function cadastraPaciente() {
     const cpfTitular = document.querySelector('[name=cpf_titular]').value.replace(/[^\d]/g, "");
     const emailTitular = document.querySelector('[name=email_titular]').value;
     const generoTitular = document.querySelector('[name=genero_titular]').value;
-    const telefoneTitular = document.querySelector('[name=telefone_titular]').value;
+    const telefoneTitular = document.querySelector('[name=telefone_titular]').value.replace(/[^\d]/g, "");
     const dataAniversario = document.querySelector('[name=data_aniversario]').value;
     let user_id = <?php echo get_current_user_id() ?>;
 
@@ -571,7 +574,7 @@ function cadastraPaciente() {
         "email_titular": emailTitular,
         "genero_titular": generoTitular,
         "data_nascimento": dataAniversario,
-        "telefone_titular": document.querySelector('[name=telefone_titular]').value,
+        "telefone_titular": telefoneTitular,
         "user_id": user_id
     }
     console.log(bodyCadastro)
@@ -603,6 +606,22 @@ function cadastraPaciente() {
     }
 
 }
+const input = document.querySelector('#data_aniversario');
+
+input.addEventListener('input', function(e) {
+    
+const maskDate = value => {
+  let v = value.replace(/\D/g,'').slice(0, 8);
+  if (v.length >= 5) {
+    return `${v.slice(0,2)}/${v.slice(2,4)}/${v.slice(4)}`;
+  }
+  else if (v.length == 3) {
+    return `${v.slice(0,2)}/${v.slice(2)}`;
+  }
+  return v
+}
+    input.value = maskDate(input.value)
+});
 
 function maskCPF(e) {
     let cpf = e.target.value;
@@ -645,6 +664,11 @@ window.onload = function() {
             console.log('preencha todos os campos');
         }
     }
+    document.querySelector(`#stepVoltar`).addEventListener(`click`, function(){
+        document.querySelector(`.step-2`).style.display = 'none';
+        document.querySelector(`.step-3`).style.display = 'none';
+        document.querySelector(`.step-1`).style.display = 'block';
+    })
 
     document.querySelector(`#step2`).onclick = function() {
         const msg = document.querySelector(`#msgPagamento`)
